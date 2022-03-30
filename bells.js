@@ -53,6 +53,15 @@ class Period {
   }
 }
 
+function start(event) {
+  if (event.target.readyState === "complete") {
+    extra_periods = loadConfiguration();
+    setupConfigPanel();
+    update();
+    setInterval(update, 1000);
+  }
+}
+
 function first_period(t) {
   return extra_periods[t.getDay()].zero ? 0 : 1;
 }
@@ -115,15 +124,6 @@ function startOfNextDay(t) {
   return toDate(schedule(t)[first_period(day)].start, day);
 }
 
-function start(event) {
-  if (event.target.readyState === "complete") {
-    extra_periods = loadConfiguration();
-    setupConfigPanel();
-    update();
-    setInterval(update, 1000);
-  }
-}
-
 function loadConfiguration() {
   let ep = JSON.parse(localStorage.getItem("extra_periods"));
   if (ep === null) {
@@ -138,7 +138,7 @@ function saveConfiguration() {
 }
 
 function setupConfigPanel() {
-  let gear = document.querySelector("#gear img");
+  let gear = document.querySelector("#gear");
   gear.onclick = toggleConfig;
 
   let rows = document.querySelectorAll("#configuration table tbody tr");
