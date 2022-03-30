@@ -1,0 +1,19 @@
+html {
+    font-family: 'Gill Sans', sans-serif;
+}
+
+h1 { text-align: center; }
+
+#period {
+    background: green;
+}
+#left {
+    background: green;
+}
+
+#period, #left {
+    text-align: center;
+    padding: 10px;
+    width: 200px;
+    margin: 5px auto;
+}
