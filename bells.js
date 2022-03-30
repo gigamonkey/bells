@@ -38,14 +38,13 @@ const SCHEDULES = {
 };
 
 class Period {
-  constructor(name, start, end, isPassing) {
+  constructor(name, start, end) {
     this.name = name;
     this.start = start;
     this.end = end;
-    this.isPassing = isPassing;
   }
 
-  within(t) {
+  contains(t) {
     return this.start <= t && t <= this.end;
   }
 }
@@ -55,45 +54,33 @@ function currentPeriod(t) {
   // between the end of school and the start tomorrow or from the end
   // of school yesterday and the start of school today.
 
-  let regularPeriods = schedule(t).map((item, i) => regularPeriod(i, item));
+  let sched = schedule(t);
 
-  let periods = [];
+  for (let i = 0; i < sched.length; i++) {
+    let s = sched[i];
+    let start = toDate(s.start, t);
+    let end = toDate(s.end, t);
+    let p = new Period(PERIODS[i], start, end);
 
-  for (let i = 0; i < regularPeriods.length; i++) {
-    if (i === 0) {
-      periods.push(
-        new Period(
-          "Before school",
-          endOfPreviousDay(t),
-          regularPeriods[i].start,
-          true
-        )
-      );
-    }
-
-    periods.push(regularPeriods[i]);
-
-    if (i === regularPeriods.length - 1) {
-      periods.push(
-        new Period(
-          "After school",
-          regularPeriods[i].end,
-          startOfNextDay(t),
-          true
-        )
-      );
+    if (p.contains(t)) {
+      return p;
+    } else if (i === 0 && t < p.start) {
+      return new Period("Before school", endOfPreviousDay(t), p.start);
+    } else if (i === sched.length - 1) {
+      return new Period("After school", p.end, startOfNextDay(t));
     } else {
-      periods.push(
-        new Period(
-          "Passing period",
-          regularPeriods[i].end,
-          regularPeriods[i + 1].start,
-          true
-        )
-      );
+      let nextStart = toDate(sched[i + 1].start, t);
+      if (t <= nextStart) {
+        return new Period("Passing period", p.end, nextStart);
+      }
     }
   }
-  return periods.find((p) => p.within(t));
+}
+
+function endOfToday() {
+  let day = new Date();
+  let sched = schedule(day);
+  return toDate(sched[sched.length - 1].end, day);
 }
 
 function endOfPreviousDay(t) {
@@ -109,10 +96,6 @@ function startOfNextDay(t) {
   return toDate(schedule(t)[0].start, day);
 }
 
-function regularPeriod(i, item) {
-  return new Period(PERIODS[i], toDate(item.start), toDate(item.end), false);
-}
-
 function start(event) {
   if (event.target.readyState === "complete") {
     update();
@@ -120,10 +103,16 @@ function start(event) {
   }
 }
 function update() {
+  console.log("updating");
   let now = new Date();
   let p = currentPeriod(now);
   document.getElementById("period").innerHTML = p.name;
   document.getElementById("left").innerHTML = hhmmss(p.end - now);
+  if (endOfToday() > now) {
+    document.getElementById("today").innerHTML = hhmmss(endOfToday() - now);
+  } else {
+    document.getElementById("today").innerHTML = "-";
+  }
 }
 
 function timestring(t) {
@@ -131,14 +120,13 @@ function timestring(t) {
 }
 
 function hhmmss(millis) {
-  let seconds = Math.floor(millis/1000);
+  let seconds = Math.floor(millis / 1000);
   let minutes = Math.floor(seconds / 60);
   let ss = seconds % 60;
   let mm = minutes % 60;
   let hh = Math.floor(minutes / 60);
   return xx(hh) + ":" + xx(mm) + ":" + xx(ss);
 }
-
 
 function xx(n) {
   return (n < 10 ? "0" : "") + n;
