@@ -1,6 +1,9 @@
 const PREVIOUS_DAY = [-2, -3, -1, -1, -1, -1, -1];
 const NEXT_DAY = [1, 1, 1, 1, 1, 3, 2, 1];
 
+const first = 1;
+const last = 7;
+
 const PERIODS = [
   "Period 0",
   "Period 1",
@@ -56,7 +59,7 @@ function currentPeriod(t) {
 
   let sched = schedule(t);
 
-  for (let i = 0; i < sched.length; i++) {
+  for (let i = first; i <= last; i++) {
     let s = sched[i];
     let start = toDate(s.start, t);
     let end = toDate(s.end, t);
@@ -64,9 +67,9 @@ function currentPeriod(t) {
 
     if (p.contains(t)) {
       return p;
-    } else if (i === 0 && t < p.start) {
+    } else if (i === first && t < p.start) {
       return new Period("Before school", endOfPreviousDay(t), p.start);
-    } else if (i === sched.length - 1) {
+    } else if (i === last) {
       return new Period("After school", p.end, startOfNextDay(t));
     } else {
       let nextStart = toDate(sched[i + 1].start, t);
@@ -80,14 +83,14 @@ function currentPeriod(t) {
 function endOfToday() {
   let day = new Date();
   let sched = schedule(day);
-  return toDate(sched[sched.length - 1].end, day);
+  return toDate(sched[last].end, day);
 }
 
 function endOfPreviousDay(t) {
   let day = new Date(t);
   day.setDate(day.getDate() + PREVIOUS_DAY[day.getDay()]);
   let sched = schedule(day);
-  return toDate(sched[sched.length - 1].end, day);
+  return toDate(sched[last].end, day);
 }
 
 function startOfNextDay(t) {
