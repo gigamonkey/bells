@@ -1,8 +1,15 @@
 const PREVIOUS_DAY = [-2, -3, -1, -1, -1, -1, -1];
 const NEXT_DAY = [1, 1, 1, 1, 1, 3, 2, 1];
 
-const first = 1;
-const last = 7;
+const extra_periods = [
+  { zero: false, seventh: false },
+  { zero: false, seventh: false },
+  { zero: false, seventh: false },
+  { zero: false, seventh: true },
+  { zero: false, seventh: false },
+  { zero: false, seventh: false },
+  { zero: false, seventh: false },
+];
 
 const PERIODS = [
   "Period 0",
@@ -52,12 +59,27 @@ class Period {
   }
 }
 
+function first_period(t) {
+  return extra_periods[t.getDay()].zero ? 0 : 1;
+}
+
+function last_period(t) {
+  return extra_periods[t.getDay()].seventh ? 8 : 7;
+}
+
 function currentPeriod(t) {
   // Figure out what period, if any, we are in. May be the long period
   // between the end of school and the start tomorrow or from the end
   // of school yesterday and the start of school today.
 
+  if ([0, 6].includes(t.getDay())) {
+    return new Period("Weekend!", endOfPreviousDay(t), startOfNextDay(t));
+  }
+
   let sched = schedule(t);
+
+  let first = first_period(t);
+  let last = last_period(t);
 
   for (let i = first; i <= last; i++) {
     let s = sched[i];
@@ -83,20 +105,20 @@ function currentPeriod(t) {
 function endOfToday() {
   let day = new Date();
   let sched = schedule(day);
-  return toDate(sched[last].end, day);
+  return toDate(sched[last_period(day)].end, day);
 }
 
 function endOfPreviousDay(t) {
   let day = new Date(t);
   day.setDate(day.getDate() + PREVIOUS_DAY[day.getDay()]);
   let sched = schedule(day);
-  return toDate(sched[last].end, day);
+  return toDate(sched[last_period(day)].end, day);
 }
 
 function startOfNextDay(t) {
   let day = new Date(t);
   day.setDate(day.getDate() + NEXT_DAY[day.getDay()]);
-  return toDate(schedule(t)[0].start, day);
+  return toDate(schedule(t)[first_period(day)].start, day);
 }
 
 function start(event) {
@@ -106,7 +128,6 @@ function start(event) {
   }
 }
 function update() {
-  console.log("updating");
   let now = new Date();
   let p = currentPeriod(now);
   document.getElementById("period").innerHTML = p.name;
