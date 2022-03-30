@@ -138,6 +138,9 @@ function saveConfiguration() {
 }
 
 function setupConfigPanel() {
+  let gear = document.querySelector("#gear img");
+  gear.onclick = toggleConfig;
+
   let rows = document.querySelectorAll("#configuration table tbody tr");
   let day = 1;
 
@@ -162,6 +165,11 @@ function setupConfigPanel() {
 
     day++;
   }
+}
+
+function toggleConfig(e) {
+  let table = document.querySelector("#configuration table");
+  table.style.display = table.style.display === "table" ? "none" : "table";
 }
 
 function update() {

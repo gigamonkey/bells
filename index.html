@@ -7,15 +7,15 @@
   <meta name="viewport" content="width=device-width">
   <title>BHS bell schedule</title>
   <link href="style.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel=
+  "stylesheet">
   <script defer src="bells.js"></script>
 </head>
 <body>
   <h1>BHS bell schedule</h1>
-  <div id="period"></div>
-  <div id="left"></div>
-  <div id="today"></div>
   <div id="configuration">
-    <table>
+    <div id="gear"><img src="settings_black_24dp.svg" alt="gear"></div>
+    <table style="display: none">
       <thead>
         <tr>
           <th>Day</th>
@@ -52,5 +52,8 @@
       </tbody>
     </table>
   </div>
+  <div id="period"></div>
+  <div id="left"></div>
+  <div id="today"></div>
 </body>
 </html>
