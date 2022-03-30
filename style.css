@@ -4,10 +4,14 @@ html {
 
 h1 { text-align: center; }
 
-#period, #left, #today {
+#period, #left, #today, #configuration {
     text-align: center;
     padding: 10px;
     width: 200px;
     margin: 5px auto;
     background: rgba(64, 0, 2550, 0.25);
+}
+
+#configuration table {
+    width: 100%;
 }

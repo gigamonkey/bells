@@ -1,15 +1,7 @@
 const PREVIOUS_DAY = [-2, -3, -1, -1, -1, -1, -1];
 const NEXT_DAY = [1, 1, 1, 1, 1, 3, 2, 1];
 
-const extra_periods = [
-  { zero: false, seventh: false },
-  { zero: false, seventh: false },
-  { zero: false, seventh: false },
-  { zero: false, seventh: true },
-  { zero: false, seventh: false },
-  { zero: false, seventh: false },
-  { zero: false, seventh: false },
-];
+const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
 const PERIODS = [
   "Period 0",
@@ -46,6 +38,8 @@ const SCHEDULES = {
     { start: "15:36", end: "16:19" },
   ],
 };
+
+let extra_periods = null;
 
 class Period {
   constructor(name, start, end) {
@@ -123,10 +117,53 @@ function startOfNextDay(t) {
 
 function start(event) {
   if (event.target.readyState === "complete") {
+    extra_periods = loadConfiguration();
+    setupConfigPanel();
     update();
     setInterval(update, 1000);
   }
 }
+
+function loadConfiguration() {
+  let ep = JSON.parse(localStorage.getItem("extra_periods"));
+  if (ep === null) {
+    ep = DEFAULT_EXTRA_PERIODS;
+    localStorage.setItem("extra_periods", JSON.stringify(ep));
+  }
+  return ep;
+}
+
+function saveConfiguration() {
+  localStorage.setItem("extra_periods", JSON.stringify(extra_periods));
+}
+
+function setupConfigPanel() {
+  let rows = document.querySelectorAll("#configuration table tbody tr");
+  let day = 1;
+
+  for (let node of rows) {
+    let cells = node.querySelectorAll("td");
+    let zero = cells[1].querySelector("input");
+    let seventh = cells[2].querySelector("input");
+    let ep = extra_periods[day];
+
+    zero.checked = ep.zero;
+    seventh.checked = ep.seventh;
+
+    zero.onchange = (e) => {
+      ep.zero = zero.checked;
+      saveConfiguration();
+    };
+
+    seventh.onchange = (e) => {
+      ep.seventh = seventh.checked;
+      saveConfiguration();
+    };
+
+    day++;
+  }
+}
+
 function update() {
   let now = new Date();
   let p = currentPeriod(now);
