@@ -6,3 +6,7 @@ pretty:
 
 lint:
 	npx eslint *.js
+
+
+publish:
+	cp index.html style.css bells.js settings_black_24dp.svg ~/web/www.gigamonkeys.com/misc/bhs
