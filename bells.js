@@ -1,5 +1,4 @@
-const PREVIOUS_DAY = [-2, -3, -1, -1, -1, -1, -1];
-const NEXT_DAY = [1, 1, 1, 1, 1, 3, 2, 1];
+const NEXT_DAY = [1, 1, 1, 1, 1, 3, 2];
 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
@@ -112,16 +111,16 @@ function endOfToday() {
 }
 
 function endOfPreviousDay(t) {
-  let day = new Date(t);
-  day.setDate(day.getDate() + PREVIOUS_DAY[day.getDay()]);
-  let sched = schedule(day);
-  return toDate(sched[last_period(day)].end, day);
+  let d = new Date(t);
+  d.setDate(d.getDate() - NEXT_DAY[NEXT_DAY.length - 1 - d.getDay()]);
+  let sched = schedule(d);
+  return toDate(sched[last_period(d)].end, d);
 }
 
 function startOfNextDay(t) {
-  let day = new Date(t);
-  day.setDate(day.getDate() + NEXT_DAY[day.getDay()]);
-  return toDate(schedule(t)[first_period(day)].start, day);
+  let d = new Date(t);
+  d.setDate(d.getDate() + NEXT_DAY[d.getDay()]);
+  return toDate(schedule(t)[first_period(d)].start, d);
 }
 
 function loadConfiguration() {
@@ -153,12 +152,12 @@ function setupConfigPanel() {
     zero.checked = ep.zero;
     seventh.checked = ep.seventh;
 
-    zero.onchange = (e) => {
+    zero.onchange = () => {
       ep.zero = zero.checked;
       saveConfiguration();
     };
 
-    seventh.onchange = (e) => {
+    seventh.onchange = () => {
       ep.seventh = seventh.checked;
       saveConfiguration();
     };
@@ -167,7 +166,7 @@ function setupConfigPanel() {
   }
 }
 
-function toggleConfig(e) {
+function toggleConfig() {
   let table = document.querySelector("#configuration table");
   table.style.display = table.style.display === "table" ? "none" : "table";
 }
@@ -175,13 +174,26 @@ function toggleConfig(e) {
 function update() {
   let now = new Date();
   let p = currentPeriod(now);
-  document.getElementById("period").innerHTML = p.name;
+  let pdiv = document.getElementById("period");
+  pdiv.replaceChildren(periodName(p), periodTimes(p));
   document.getElementById("left").innerHTML = hhmmss(p.end - now);
   if (endOfToday() > now) {
     document.getElementById("today").innerHTML = hhmmss(endOfToday() - now);
   } else {
     document.getElementById("today").innerHTML = "-";
   }
+}
+
+function periodName(p) {
+  let d = document.createElement("p");
+  d.innerHTML = p.name;
+  return d;
+}
+
+function periodTimes(p) {
+  let d = document.createElement("p");
+  d.innerHTML = timestring(p.start) + "–" + timestring(p.end);
+  return d;
 }
 
 function timestring(t) {
