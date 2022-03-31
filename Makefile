@@ -9,4 +9,4 @@ lint:
 
 
 publish:
-	cp index.html style.css bells.js settings_black_24dp.svg ~/web/www.gigamonkeys.com/misc/bhs
+	cp index.html style.css bells.js ~/web/www.gigamonkeys.com/misc/bhs

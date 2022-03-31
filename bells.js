@@ -41,10 +41,11 @@ const SCHEDULES = {
 let extra_periods = null;
 
 class Period {
-  constructor(name, start, end) {
+  constructor(name, start, end, actualPeriod) {
     this.name = name;
     this.start = start;
     this.end = end;
+    this.actualPeriod = actualPeriod;
   }
 
   contains(t) {
@@ -87,7 +88,7 @@ function currentPeriod(t) {
     let s = sched[i];
     let start = toDate(s.start, t);
     let end = toDate(s.end, t);
-    let p = new Period(PERIODS[i], start, end);
+    let p = new Period(PERIODS[i], start, end, true);
 
     if (p.contains(t)) {
       return p;
@@ -174,6 +175,11 @@ function toggleConfig() {
 function update() {
   let now = new Date();
   let p = currentPeriod(now);
+
+  let color = p.actualPeriod ? "rgba(64, 0, 255, 0.25)" : "rgba(64, 0, 64, 0.25)";
+
+  document.getElementById("container").style.background = color;
+
   let pdiv = document.getElementById("period");
   pdiv.replaceChildren(periodName(p), periodTimes(p));
   document.getElementById("left").innerHTML = hhmmss(p.end - now);
