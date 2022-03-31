@@ -197,7 +197,7 @@ function periodTimes(p) {
 }
 
 function timestring(t) {
-  return xx(t.getHours()) + ":" + xx(t.getMinutes());
+  return t.getHours() + ":" + xx(t.getMinutes());
 }
 
 function hhmmss(millis) {
