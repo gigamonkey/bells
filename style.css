@@ -20,7 +20,7 @@ h1 { text-align: center; }
 }
 
 
-#main > div {
+.display {
     padding: 12px 0;
 }
 
@@ -50,10 +50,30 @@ h1 { text-align: center; }
 }
 
 #configuration table {
-    font-size: 16px;
-    border: 1px solid grey;
+    font-size: 16px;;
+    border: 1px solid black;
     padding: 2px;
     margin: 5px auto;
     display: none;
     width: 95%;
+}
+
+
+.bar {
+    height: 20px;
+    padding: 0
+    margin: 0;
+    font-size: 20px;
+}
+
+.bar span {
+    display: inline-block;
+}
+
+span.done {
+    background-color: #00f;
+}
+
+span.togo {
+    background-color: rgba(64, 64, 64, 0.2);
 }

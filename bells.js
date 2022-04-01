@@ -57,6 +57,8 @@ function start(event) {
   if (event.target.readyState === "complete") {
     extra_periods = loadConfiguration();
     setupConfigPanel();
+    setupProgressBar("leftbar");
+    setupProgressBar("todaybar");
     update();
     setInterval(update, 1000);
   }
@@ -103,6 +105,11 @@ function currentPeriod(t) {
       }
     }
   }
+}
+
+function startOfToday() {
+  let d = new Date();
+  return toDate(schedule(d)[first_period(d)].start, d);
 }
 
 function endOfToday() {
@@ -167,6 +174,19 @@ function setupConfigPanel() {
   }
 }
 
+function setupProgressBar(id) {
+  let bar = document.getElementById(id);
+  bar.appendChild(barSpan(40, "done"));
+  bar.appendChild(barSpan(60, "togo"));
+}
+
+function barSpan(width, color) {
+  let s = document.createElement("span");
+  s.style.height = "100%";
+  s.classList.add(color);
+  return s;
+}
+
 function toggleConfig() {
   let table = document.querySelector("#configuration table");
   table.style.display = table.style.display === "table" ? "none" : "table";
@@ -188,6 +208,26 @@ function update() {
   } else {
     document.getElementById("today").innerHTML = "-";
   }
+  updatePeriodBar(p, now);
+  updateDayBar(now);
+}
+
+function updatePeriodBar(p, now) {
+  let total = p.end - p.start;
+  let bar = document.getElementById("leftbar");
+  let done = Math.round((100 * (now - p.start)) / total);
+  bar.childNodes[0].style.width = done + "%";
+  bar.childNodes[1].style.width = 100 - done + "%";
+}
+
+function updateDayBar(now) {
+  let start = startOfToday();
+  let end = endOfToday();
+  let total = end - start;
+  let bar = document.getElementById("todaybar");
+  let done = Math.round((100 * (now - start)) / total);
+  bar.childNodes[0].style.width = done + "%";
+  bar.childNodes[1].style.width = 100 - done + "%";
 }
 
 function periodName(p) {
