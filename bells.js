@@ -247,7 +247,8 @@ function timestring(t) {
 }
 
 function hours(h) {
-  return h % 12 == 0 ? 12 : h % 12;
+  // Javascript % is really rem. Blech.
+  return ((((h - 1) % 12) + 12) % 12) + 1;
 }
 
 function hhmmss(millis) {
