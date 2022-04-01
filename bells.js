@@ -247,7 +247,7 @@ function timestring(t) {
 }
 
 function hours(h) {
-  return h % 12 == 0 ? 12 : h;
+  return h % 12 == 0 ? 12 : h % 12;
 }
 
 function hhmmss(millis) {
