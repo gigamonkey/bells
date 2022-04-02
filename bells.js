@@ -205,11 +205,11 @@ function update() {
   document.getElementById("left").innerHTML = hhmmss(p.end - now);
   if (endOfToday() > now) {
     document.getElementById("today").innerHTML = hhmmss(endOfToday() - now);
+    updateDayBar(now);
   } else {
-    document.getElementById("today").innerHTML = "-";
+    document.getElementById("today").replaceChildren();
   }
   updatePeriodBar(p, now);
-  updateDayBar(now);
 }
 
 function updatePeriodBar(p, now) {
