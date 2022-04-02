@@ -77,7 +77,7 @@ function currentPeriod(t) {
   // between the end of school and the start tomorrow or from the end
   // of school yesterday and the start of school today.
 
-  if ([0, 6].includes(t.getDay())) {
+  if ([0, 6].includes(t.getDay()) || (t.getDay() === 5 && t > endOfToday(t))) {
     return new Period("Weekend!", endOfPreviousDay(t), startOfNextDay(t));
   }
 
