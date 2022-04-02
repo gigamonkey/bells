@@ -1,4 +1,4 @@
-const NEXT_DAY = [1, 1, 1, 1, 1, 3, 2];
+const TO_NEXT_SCHOOL_DAY = [1, 1, 1, 1, 1, 3, 2];
 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
@@ -27,6 +27,7 @@ const SCHEDULES = {
     { start: "15:36", end: "16:34" },
   ],
   LATE_START: [
+    { start: "08:00", end: "09:30" }, // Staff meeting, no zero period on Monday.
     { start: "09:57", end: "10:40" },
     { start: "10:46", end: "11:34" },
     { start: "11:40", end: "12:23" },
@@ -38,123 +39,120 @@ const SCHEDULES = {
   ],
 };
 
-let extra_periods = null;
+// Kept in local storage
+let extraPeriods = null;
 
 class Period {
-  constructor(name, start, end, actualPeriod, weekend) {
+  constructor(name, start, end, duringSchool = true, passingPeriod = false) {
     this.name = name;
     this.start = start;
     this.end = end;
-    this.actualPeriod = actualPeriod;
-    this.weekend = weekend;
-  }
-
-  contains(t) {
-    return this.start <= t && t <= this.end;
+    this.duringSchool = duringSchool;
+    this.passingPeriod = passingPeriod;
   }
 }
 
-function start(event) {
+function onLoad(event) {
   if (event.target.readyState === "complete") {
-    extra_periods = loadConfiguration();
+    loadConfiguration();
     setupConfigPanel();
-    setupProgressBar("leftbar");
-    setupProgressBar("todaybar");
+    progressBars();
     update();
     setInterval(update, 1000);
   }
 }
 
-function first_period(t) {
-  return extra_periods[t.getDay()].zero ? 0 : 1;
-}
+function currentPeriod(now) {
+  // Figure out what period, if any, we are in. May be the weekend or
+  // the long period between the end of school today and the start of
+  // school tomorrow or from the end of school yesterday and the start
+  // of school today.
 
-function last_period(t) {
-  return extra_periods[t.getDay()].seventh ? 8 : 7;
-}
-
-function currentPeriod(t) {
-  // Figure out what period, if any, we are in. May be the long period
-  // between the end of school and the start tomorrow or from the end
-  // of school yesterday and the start of school today.
-
-  let weekend = maybeWeekend(t);
+  let weekend = maybeWeekend(now);
 
   if (weekend !== null) {
     return weekend;
   } else {
-    let sched = schedule(t);
+    let sched = schedule(now);
 
-    let first = first_period(t);
-    let last = last_period(t);
+    let first = firstPeriod(now);
+    let last = lastPeriod(now);
 
     for (let i = first; i <= last; i++) {
-      let s = sched[i];
-      let start = toDate(s.start, t);
-      let end = toDate(s.end, t);
-      let p = new Period(PERIODS[i], start, end, true);
+      let start = toDate(sched[i].start, now);
+      let end = toDate(sched[i].end, now);
 
-      if (p.contains(t)) {
-        return p;
-      } else if (i === first && t < p.start) {
-        return new Period("Before school", endOfPreviousDay(t), p.start);
+      if (i === first && now < start) {
+        return new Period("Before school", endOfDay(previousDay(now)), start, false);
+      } else if (start <= now && now <= end) {
+        new Period(PERIODS[i], start, end);
       } else if (i === last) {
-        return new Period("After school", p.end, startOfNextDay(t));
+        return new Period("After school", end, startOfDay(nextDay(now)), false);
       } else {
-        let nextStart = toDate(sched[i + 1].start, t);
-        if (t <= nextStart) {
-          return new Period("Passing period", p.end, nextStart);
+        let nextStart = toDate(sched[i + 1].start, now);
+        if (now <= nextStart) {
+          return new Period("Passing period", end, nextStart, true, true);
         }
       }
     }
   }
 }
 
-function maybeWeekend(t) {
-  if ([0, 6].includes(t.getDay())) {
-    return new Period("Weekend!", endOfPreviousDay(t), startOfNextDay(t), false, true);
-  } else if (t.getDay() === 5 && t > endOfToday(t)) {
-    return new Period("Weekend!", endOfToday(t), startOfNextDay(t), false, true);
-  } else {
-    return null;
+function maybeWeekend(now) {
+  let day = now.getDay();
+  let isWeekend = false;
+  let start;
+
+  if (day === 5 && now >= endOfDay(now)) {
+    isWeekend = true;
+    start = endOfDay(now);
+  } else if ([0, 6].includes(day)) {
+    isWeekend = true;
+    start = endOfDay(previousDay(now));
   }
+
+  return isWeekend ? new Period("Weekend!", start, startOfDay(nextDay(now)), false, isWeekend) : null;
 }
 
-function startOfToday() {
-  let d = new Date();
-  return toDate(schedule(d)[first_period(d)].start, d);
+function startOfDay(d) {
+  return toDate(schedule(d)[firstPeriod(d)].start, d);
 }
 
-function endOfToday() {
-  let day = new Date();
-  let sched = schedule(day);
-  return toDate(sched[last_period(day)].end, day);
+function endOfDay(d) {
+  return toDate(schedule(d)[lastPeriod(d)].end, d);
 }
 
-function endOfPreviousDay(t) {
+function firstPeriod(d) {
+  return extraPeriods[d.getDay()].zero ? 0 : 1;
+}
+
+function lastPeriod(d) {
+  return extraPeriods[d.getDay()].seventh ? 8 : 7;
+}
+
+function nextDay(t) {
   let d = new Date(t);
-  d.setDate(d.getDate() - NEXT_DAY[NEXT_DAY.length - 1 - d.getDay()]);
-  let sched = schedule(d);
-  return toDate(sched[last_period(d)].end, d);
+  d.setDate(d.getDate() + TO_NEXT_SCHOOL_DAY[d.getDay()]);
+  return d;
 }
 
-function startOfNextDay(t) {
+function previousDay(t) {
   let d = new Date(t);
-  d.setDate(d.getDate() + NEXT_DAY[d.getDay()]);
-  return toDate(schedule(t)[first_period(d)].start, d);
+  let rindex = TO_NEXT_SCHOOL_DAY.length - 1 - d.getDay();
+  d.setDate(d.getDate() - TO_NEXT_SCHOOL_DAY[rindex]);
+  return d;
 }
 
 function loadConfiguration() {
-  let ep = JSON.parse(localStorage.getItem("extra_periods"));
-  if (ep === null) {
-    ep = DEFAULT_EXTRA_PERIODS;
-    localStorage.setItem("extra_periods", JSON.stringify(ep));
+  extraPeriods = JSON.parse(localStorage.getItem("extraPeriods"));
+  if (extraPeriods === null) {
+    extraPeriods = DEFAULT_EXTRA_PERIODS;
+    saveConfiguration();
   }
-  return ep;
 }
 
 function saveConfiguration() {
-  localStorage.setItem("extra_periods", JSON.stringify(extra_periods));
+  localStorage.setItem("extraPeriods", JSON.stringify(extraPeriods));
 }
 
 function setupConfigPanel() {
@@ -168,7 +166,7 @@ function setupConfigPanel() {
     let cells = node.querySelectorAll("td");
     let zero = cells[1].querySelector("input");
     let seventh = cells[2].querySelector("input");
-    let ep = extra_periods[day];
+    let ep = extraPeriods[day];
 
     zero.checked = ep.zero;
     seventh.checked = ep.seventh;
@@ -187,15 +185,15 @@ function setupConfigPanel() {
   }
 }
 
-function setupProgressBar(id) {
-  let bar = document.getElementById(id);
-  bar.appendChild(barSpan(40, "done"));
-  bar.appendChild(barSpan(60, "togo"));
+function progressBars() {
+  for (let bar of document.querySelectorAll(".bar")) {
+    bar.appendChild(barSpan(0, "done"));
+    bar.appendChild(barSpan(0, "togo"));
+  }
 }
 
 function barSpan(width, color) {
   let s = document.createElement("span");
-  s.style.height = "100%";
   s.classList.add(color);
   return s;
 }
@@ -209,35 +207,26 @@ function update() {
   let now = new Date();
   let p = currentPeriod(now);
 
-  let color = p.actualPeriod ? "rgba(64, 0, 255, 0.25)" : "rgba(64, 0, 64, 0.25)";
+  let color = p.passingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
 
   document.getElementById("container").style.background = color;
 
-  let pdiv = document.getElementById("period");
-  pdiv.replaceChildren(periodName(p), periodTimes(p));
+  document.getElementById("period").replaceChildren(periodName(p), periodTimes(p));
   document.getElementById("left").innerHTML = hhmmss(p.end - now);
-  if (endOfToday() > now && !p.weekend) {
-    document.getElementById("today").innerHTML = hhmmss(endOfToday() - now);
-    updateDayBar(now);
+
+  if (p.duringSchool) {
+    document.getElementById("today").innerHTML = hhmmss(endOfDay(now) - now);
+    updateProgressBar("todaybar", startOfDay(now), endOfDay(now), now);
   } else {
     document.getElementById("today").replaceChildren();
   }
-  updatePeriodBar(p, now);
+
+  updateProgressBar("periodbar", p.start, p.end, now);
 }
 
-function updatePeriodBar(p, now) {
-  let total = p.end - p.start;
-  let bar = document.getElementById("leftbar");
-  let done = Math.round((100 * (now - p.start)) / total);
-  bar.childNodes[0].style.width = done + "%";
-  bar.childNodes[1].style.width = 100 - done + "%";
-}
-
-function updateDayBar(now) {
-  let start = startOfToday();
-  let end = endOfToday();
+function updateProgressBar(id, start, end, now) {
+  let bar = document.getElementById(id);
   let total = end - start;
-  let bar = document.getElementById("todaybar");
   let done = Math.round((100 * (now - start)) / total);
   bar.childNodes[0].style.width = done + "%";
   bar.childNodes[1].style.width = 100 - done + "%";
@@ -259,11 +248,6 @@ function timestring(t) {
   return hours(t.getHours()) + ":" + xx(t.getMinutes());
 }
 
-function hours(h) {
-  // Javascript % is really rem. Blech.
-  return ((((h - 1) % 12) + 12) % 12) + 1;
-}
-
 function hhmmss(millis) {
   let seconds = Math.floor(millis / 1000);
   let minutes = Math.floor(seconds / 60);
@@ -271,6 +255,11 @@ function hhmmss(millis) {
   let mm = minutes % 60;
   let hh = Math.floor(minutes / 60);
   return xx(hh) + ":" + xx(mm) + ":" + xx(ss);
+}
+
+function hours(h) {
+  // Render 12 as 12, not 0 as a simple h % 12 would.
+  return ((h + 11) % 12) + 1;
 }
 
 function xx(n) {
@@ -281,17 +270,13 @@ function schedule(t) {
   return t.getDay() === 1 ? SCHEDULES.LATE_START : SCHEDULES.NORMAL;
 }
 
-function hhmm(x) {
-  return x.split(":").map((s) => parseInt(s));
-}
-
 function toDate(x, date) {
-  let [h, m] = hhmm(x);
-  let d = date !== undefined ? new Date(date) : new Date();
+  let [h, m] = x.split(":").map((s) => parseInt(s));
+  let d = new Date(date || new Date());
   d.setHours(h);
   d.setMinutes(m);
   d.setSeconds(0);
   return d;
 }
 
-document.addEventListener("readystatechange", start);
+document.addEventListener("readystatechange", onLoad);
