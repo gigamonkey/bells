@@ -41,11 +41,12 @@ const SCHEDULES = {
 let extra_periods = null;
 
 class Period {
-  constructor(name, start, end, actualPeriod) {
+  constructor(name, start, end, actualPeriod, weekend) {
     this.name = name;
     this.start = start;
     this.end = end;
     this.actualPeriod = actualPeriod;
+    this.weekend = weekend;
   }
 
   contains(t) {
@@ -111,9 +112,9 @@ function currentPeriod(t) {
 
 function maybeWeekend(t) {
   if ([0, 6].includes(t.getDay())) {
-    return new Period("Weekend!", endOfPreviousDay(t), startOfNextDay(t));
+    return new Period("Weekend!", endOfPreviousDay(t), startOfNextDay(t), false, true);
   } else if (t.getDay() === 5 && t > endOfToday(t)) {
-    return new Period("Weekend!", endOfToday(t), startOfNextDay(t));
+    return new Period("Weekend!", endOfToday(t), startOfNextDay(t), false, true);
   } else {
     return null;
   }
@@ -215,7 +216,7 @@ function update() {
   let pdiv = document.getElementById("period");
   pdiv.replaceChildren(periodName(p), periodTimes(p));
   document.getElementById("left").innerHTML = hhmmss(p.end - now);
-  if (endOfToday() > now) {
+  if (endOfToday() > now && !p.weekend) {
     document.getElementById("today").innerHTML = hhmmss(endOfToday() - now);
     updateDayBar(now);
   } else {
