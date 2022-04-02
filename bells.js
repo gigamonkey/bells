@@ -77,33 +77,45 @@ function currentPeriod(t) {
   // between the end of school and the start tomorrow or from the end
   // of school yesterday and the start of school today.
 
-  if ([0, 6].includes(t.getDay()) || (t.getDay() === 5 && t > endOfToday(t))) {
-    return new Period("Weekend!", endOfPreviousDay(t), startOfNextDay(t));
-  }
+  let weekend = maybeWeekend(t);
 
-  let sched = schedule(t);
+  if (weekend !== null) {
+    return weekend;
+  } else {
+    let sched = schedule(t);
 
-  let first = first_period(t);
-  let last = last_period(t);
+    let first = first_period(t);
+    let last = last_period(t);
 
-  for (let i = first; i <= last; i++) {
-    let s = sched[i];
-    let start = toDate(s.start, t);
-    let end = toDate(s.end, t);
-    let p = new Period(PERIODS[i], start, end, true);
+    for (let i = first; i <= last; i++) {
+      let s = sched[i];
+      let start = toDate(s.start, t);
+      let end = toDate(s.end, t);
+      let p = new Period(PERIODS[i], start, end, true);
 
-    if (p.contains(t)) {
-      return p;
-    } else if (i === first && t < p.start) {
-      return new Period("Before school", endOfPreviousDay(t), p.start);
-    } else if (i === last) {
-      return new Period("After school", p.end, startOfNextDay(t));
-    } else {
-      let nextStart = toDate(sched[i + 1].start, t);
-      if (t <= nextStart) {
-        return new Period("Passing period", p.end, nextStart);
+      if (p.contains(t)) {
+        return p;
+      } else if (i === first && t < p.start) {
+        return new Period("Before school", endOfPreviousDay(t), p.start);
+      } else if (i === last) {
+        return new Period("After school", p.end, startOfNextDay(t));
+      } else {
+        let nextStart = toDate(sched[i + 1].start, t);
+        if (t <= nextStart) {
+          return new Period("Passing period", p.end, nextStart);
+        }
       }
     }
+  }
+}
+
+function maybeWeekend(t) {
+  if ([0, 6].includes(t.getDay())) {
+    return new Period("Weekend!", endOfPreviousDay(t), startOfNextDay(t));
+  } else if (t.getDay() === 5 && t > endOfToday(t)) {
+    return new Period("Weekend!", endOfToday(t), startOfNextDay(t));
+  } else {
+    return null;
   }
 }
 
