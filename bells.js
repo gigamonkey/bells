@@ -82,7 +82,6 @@ function currentPeriod(now) {
       let start = toDate(sched[i].start, now);
       let end = toDate(sched[i].end, now);
 
-
       if (i === first && now < start) {
         return new Period("Before school", endOfDay(previousDay(now)), start, false);
       } else if (start <= now && now <= end) {
