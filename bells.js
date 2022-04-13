@@ -217,8 +217,8 @@ function togglePeriods() {
     for (let i = first; i <= last; i++) {
       let tr = document.createElement("tr");
       tr.append(td(PERIODS[i]));
-      tr.append(td(sched[i].start));
-      tr.append(td(sched[i].end));
+      tr.append(td(timestring(toDate(sched[i].start, now))));
+      tr.append(td(timestring(toDate(sched[i].end, now))));
       table.append(tr);
     }
     table.style.display = "table";
