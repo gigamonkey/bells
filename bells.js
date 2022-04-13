@@ -74,7 +74,6 @@ function currentPeriod(now) {
     return weekend;
   } else {
     let sched = schedule(now);
-
     let first = firstPeriod(now);
     let last = lastPeriod(now);
 
@@ -156,8 +155,8 @@ function saveConfiguration() {
 }
 
 function setupConfigPanel() {
-  let gear = document.querySelector("#gear");
-  gear.onclick = toggleConfig;
+  document.querySelector("#gear").onclick = toggleConfig;
+  document.querySelector("#sched").onclick = togglePeriods;
 
   let rows = document.querySelectorAll("#configuration table tbody tr");
   let day = 1;
@@ -199,8 +198,37 @@ function barSpan(width, color) {
 }
 
 function toggleConfig() {
-  let table = document.querySelector("#configuration table");
+  let table = document.querySelector("#periods_config");
   table.style.display = table.style.display === "table" ? "none" : "table";
+}
+
+function togglePeriods() {
+  let table = document.querySelector("#periods");
+  if (table.style.display === "table") {
+    table.style.display = "none";
+  } else {
+    table.replaceChildren();
+
+    let now = new Date();
+    let sched = schedule(now);
+    let first = firstPeriod(now);
+    let last = lastPeriod(now);
+
+    for (let i = first; i <= last; i++) {
+      let tr = document.createElement("tr");
+      tr.append(td(PERIODS[i]));
+      tr.append(td(sched[i].start));
+      tr.append(td(sched[i].end));
+      table.append(tr);
+    }
+    table.style.display = "table";
+  }
+}
+
+function td(text) {
+  let td = document.createElement("td");
+  td.innerText = text;
+  return td;
 }
 
 function update() {
@@ -213,6 +241,7 @@ function update() {
 
   document.getElementById("period").replaceChildren(periodName(p), periodTimes(p));
   document.getElementById("left").innerHTML = hhmmss(p.end - now);
+  updateProgressBar("periodbar", p.start, p.end, now);
 
   if (p.duringSchool) {
     document.getElementById("today").innerHTML = hhmmss(endOfDay(now) - now);
@@ -220,8 +249,6 @@ function update() {
   } else {
     document.getElementById("today").replaceChildren();
   }
-
-  updateProgressBar("periodbar", p.start, p.end, now);
 }
 
 function updateProgressBar(id, start, end, now) {
