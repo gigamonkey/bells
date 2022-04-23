@@ -110,7 +110,7 @@ function maybeWeekend(now) {
     start = endOfDay(previousDay(now));
   }
 
-  return isWeekend ? new Period("Weekend!", start, startOfDay(nextDay(now)), false, isWeekend) : null;
+  return isWeekend ? new Period("Weekend!", start, startOfDay(nextDay(now)), false, true) : null;
 }
 
 function startOfDay(d) {
@@ -140,6 +140,16 @@ function previousDay(t) {
   let rindex = TO_NEXT_SCHOOL_DAY.length - 1 - d.getDay();
   d.setDate(d.getDate() - TO_NEXT_SCHOOL_DAY[rindex]);
   return d;
+}
+
+function currentOrNextDay() {
+  // Current if it's a school day and the day is not over, next otherwise
+  let now = new Date();
+  if ([0, 6].includes(now.getDay())) {
+    return nextDay(now);
+  } else {
+    return now < endOfDay(now) ? now : nextDay(now);
+  }
 }
 
 function loadConfiguration() {
@@ -209,16 +219,16 @@ function togglePeriods() {
   } else {
     table.replaceChildren();
 
-    let now = new Date();
-    let sched = schedule(now);
-    let first = firstPeriod(now);
-    let last = lastPeriod(now);
+    let t = currentOrNextDay();
+    let sched = schedule(t);
+    let first = firstPeriod(t);
+    let last = lastPeriod(t);
 
     for (let i = first; i <= last; i++) {
       let tr = document.createElement("tr");
       tr.append(td(PERIODS[i]));
-      tr.append(td(timestring(toDate(sched[i].start, now))));
-      tr.append(td(timestring(toDate(sched[i].end, now))));
+      tr.append(td(timestring(toDate(sched[i].start, t))));
+      tr.append(td(timestring(toDate(sched[i].end, t))));
       table.append(tr);
     }
     table.style.display = "table";
