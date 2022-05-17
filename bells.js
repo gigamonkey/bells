@@ -42,6 +42,8 @@ const SCHEDULES = {
 // Kept in local storage
 let extraPeriods = null;
 
+let togo = true;
+
 class Period {
   constructor(name, start, end, duringSchool = true, passingPeriod = false) {
     this.name = name;
@@ -56,6 +58,7 @@ function onLoad(event) {
   if (event.target.readyState === "complete") {
     loadConfiguration();
     setupConfigPanel();
+    document.getElementById("left").onclick = (e) => (togo = !togo);
     progressBars();
     update();
     setInterval(update, 1000);
@@ -250,11 +253,13 @@ function update() {
   document.getElementById("container").style.background = color;
 
   document.getElementById("period").replaceChildren(periodName(p), periodTimes(p));
-  document.getElementById("left").innerHTML = hhmmss(p.end - now);
+  document.getElementById("left").innerHTML =
+    hhmmss(togo ? p.end - now : now - p.start) + " " + (togo ? "to go" : "done");
   updateProgressBar("periodbar", p.start, p.end, now);
 
   if (p.duringSchool) {
-    document.getElementById("today").innerHTML = hhmmss(endOfDay(now) - now);
+    document.getElementById("today").innerHTML =
+      hhmmss(togo ? endOfDay(now) - now : now - startOfDay(now)) + " " + (togo ? "to go" : "done");
     updateProgressBar("todaybar", startOfDay(now), endOfDay(now), now);
   } else {
     document.getElementById("today").replaceChildren();
