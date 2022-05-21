@@ -14,7 +14,7 @@ const PERIODS = [
   "Period 7",
 ];
 
-const SCHEDULES = {
+const SCHEDULES_2021_2022 = {
   NORMAL: [
     { start: "07:23", end: "08:21" },
     { start: "08:27", end: "09:25" },
@@ -38,6 +38,33 @@ const SCHEDULES = {
     { start: "15:36", end: "16:19" },
   ],
 };
+
+const SCHEDULES_2022_2023 = {
+  NORMAL: [
+    { start: "7:26", end: "8:24" },
+    { start: "8:30", end: "9:28" },
+    { start: "9:34", end: "10:37" },
+    { start: "10:43", end: "11:41" },
+    { start: "11:41", end: "12:21" },
+    { start: "12:27", end: "13:25" },
+    { start: "13:31", end: "14:29" },
+    { start: "14:35", end: "15:33" },
+    { start: "15:39", end: "16:37" },
+  ],
+  LATE_START: [
+    { start: "8:03", end: "9:33" }, // Staff meeting, no zero period on Monday.
+    { start: "10:00", end: "10:43" },
+    { start: "10:49", end: "11:37" },
+    { start: "11:43", end: "12:26" },
+    { start: "12:26", end: "13:06" },
+    { start: "13:12", end: "13:55" },
+    { start: "14:01", end: "14:44" },
+    { start: "14:50", end: "15:33" },
+    { start: "15:39", end: "16:22" },
+  ],
+};
+
+const SCHEDULES = new Date() > new Date(2022, 5, 4) ? SCHEDULES_2022_2023 : SCHEDULES_2021_2022;
 
 // Kept in local storage
 let extraPeriods = null;
