@@ -58,6 +58,9 @@ h1 { text-align: center; }
     width: 95%;
 }
 
+#countdown {
+    font-size: 20px;
+}
 
 .bar {
     height: 20px;

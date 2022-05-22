@@ -14,6 +14,9 @@ const PERIODS = [
   "Period 7",
 ];
 
+const LAST_DAY_2021_22 = new Date(2022, 5, 3);
+const FIRST_DAY_2022_23 = new Date(2022, 7, 15);
+
 const SCHEDULES_2021_2022 = {
   NORMAL: [
     { start: "07:23", end: "08:21" },
@@ -64,7 +67,7 @@ const SCHEDULES_2022_2023 = {
   ],
 };
 
-const SCHEDULES = new Date() > new Date(2022, 5, 4) ? SCHEDULES_2022_2023 : SCHEDULES_2021_2022;
+const SCHEDULES = new Date() > LAST_DAY_2021_22 ? SCHEDULES_2022_2023 : SCHEDULES_2021_2022;
 
 // Kept in local storage
 let extraPeriods = null;
@@ -273,24 +276,55 @@ function td(text) {
 
 function update() {
   let now = new Date();
-  let p = currentPeriod(now);
 
-  let color = p.passingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
-
-  document.getElementById("container").style.background = color;
-
-  document.getElementById("period").replaceChildren(periodName(p), periodTimes(p));
-  document.getElementById("left").innerHTML =
-    hhmmss(togo ? p.end - now : now - p.start) + " " + (togo ? "to go" : "done");
-  updateProgressBar("periodbar", p.start, p.end, now);
-
-  if (p.duringSchool) {
-    document.getElementById("today").innerHTML =
-      hhmmss(togo ? endOfDay(now) - now : now - startOfDay(now)) + " " + (togo ? "to go" : "done");
-    updateProgressBar("todaybar", startOfDay(now), endOfDay(now), now);
+  if (LAST_DAY_2021_22 < now && now < FIRST_DAY_2022_23) {
+    document.getElementById("container").style.background = "rgba(64, 0, 255, 0.25)";
+    summerCountdown(now);
   } else {
-    document.getElementById("today").replaceChildren();
+    let p = currentPeriod(now);
+    let color = p.passingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
+    document.getElementById("container").style.background = color;
+    document.getElementById("period").replaceChildren(periodName(p), periodTimes(p));
+    document.getElementById("left").innerHTML =
+      hhmmss(togo ? p.end - now : now - p.start) + " " + (togo ? "to go" : "done");
+    updateProgressBar("periodbar", p.start, p.end, now);
+
+    if (p.duringSchool) {
+      document.getElementById("today").innerHTML =
+        hhmmss(togo ? endOfDay(now) - now : now - startOfDay(now)) + " " + (togo ? "to go" : "done");
+      updateProgressBar("todaybar", startOfDay(now), endOfDay(now), now);
+    } else {
+      document.getElementById("today").replaceChildren();
+    }
+    updateCountdown(now);
   }
+}
+
+function summerCountdown(now) {
+  const days = daysBetween(now, FIRST_DAY_2022_23);
+  const s = days == 1 ? "" : "s";
+  document.getElementById("period").innerHTML = "Summer vacation!";
+  document.getElementById("left").innerHTML = `${days} day${s} until start of school.`;
+}
+
+function updateCountdown(now) {
+  const days = daysBetween(now, LAST_DAY_2021_22);
+  if (days == 0) {
+    document.getElementById("countdown").innerHTML = "Last day of school!";
+  } else {
+    const s = days == 1 ? "" : "s";
+    document.getElementById("countdown").innerHTML = `${days} day${s} until end of school.`;
+  }
+}
+
+// Adapted from https://stackoverflow.com/a/17727953
+function daysBetween(start, end) {
+  // A day in UTC always lasts 24 hours (unlike in other time formats)
+  const s = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+  const e = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+
+  // so it's safe to divide by 24 hours
+  return (s - e) / (1000 * 60 * 60 * 24);
 }
 
 function updateProgressBar(id, start, end, now) {
