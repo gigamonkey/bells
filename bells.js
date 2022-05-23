@@ -243,6 +243,9 @@ function lastPeriod(d) {
 function nextDay(t) {
   let d = new Date(t);
   d.setDate(d.getDate() + TO_NEXT_SCHOOL_DAY[d.getDay()]);
+  while (!isSchoolDay(d)) {
+    d.setDate(d.getDate() + 1);
+  }
   return d;
 }
 
