@@ -14,8 +14,86 @@ const PERIODS = [
   "Period 7",
 ];
 
-const LAST_DAY_2021_22 = new Date(2022, 5, 3);
-const FIRST_DAY_2022_23 = new Date(2022, 7, 15);
+const CALENDAR_2021_2022 = {
+  year: "2021-2022",
+  firstDay: "2022-08-16",
+  lastDay: "2022-06-03",
+  holidays: [
+    "2021-09-06",
+    "2021-10-11",
+    "2021-10-29",
+    "2021-11-22",
+    "2021-11-23",
+    "2021-11-24",
+    "2021-11-25",
+    "2021-11-26",
+    "2021-12-20",
+    "2021-12-21",
+    "2021-12-22",
+    "2021-12-23",
+    "2021-12-24",
+    "2021-12-25",
+    "2021-12-26",
+    "2021-12-27",
+    "2021-12-28",
+    "2021-12-29",
+    "2021-12-30",
+    "2021-12-31",
+    "2022-01-17",
+    "2022-01-31",
+    "2022-02-18",
+    "2022-02-21",
+    "2022-04-04",
+    "2022-04-05",
+    "2022-04-06",
+    "2022-04-07",
+    "2022-04-08",
+    "2022-05-16",
+    "2022-05-30",
+  ],
+};
+
+const CALENDAR_2022_2023 = {
+  year: "2022-2023",
+  firstDay: "2022-08-15",
+  lastDay: "2023-06-02",
+  holidays: [
+    "2022-09-05",
+    "2022-10-10",
+    "2022-10-28",
+    "2022-11-21",
+    "2022-11-22",
+    "2022-11-23",
+    "2022-11-24",
+    "2022-11-25",
+    "2022-12-19",
+    "2022-12-20",
+    "2022-12-21",
+    "2022-12-22",
+    "2022-12-23",
+    "2022-12-24",
+    "2022-12-25",
+    "2022-12-26",
+    "2022-12-27",
+    "2022-12-28",
+    "2022-12-29",
+    "2022-12-30",
+    "2023-01-02",
+    "2023-01-16",
+    "2023-02-17",
+    "2023-02-20",
+    "2023-04-03",
+    "2023-04-04",
+    "2023-04-05",
+    "2023-04-06",
+    "2023-04-07",
+    "2023-05-15",
+    "2023-05-29",
+  ],
+};
+
+const LAST_DAY_2021_22 = toDay(CALENDAR_2021_2022.lastDay);
+const FIRST_DAY_2022_23 = toDay(CALENDAR_2022_2023.firstDay);
 
 const SCHEDULES_2021_2022 = {
   NORMAL: [
@@ -308,7 +386,7 @@ function summerCountdown(now) {
 }
 
 function updateCountdown(now) {
-  const days = daysBetween(now, LAST_DAY_2021_22);
+  const days = schoolDaysLeft(CALENDAR_2021_2022);
   if (days == 0) {
     document.getElementById("countdown").innerHTML = "Last day of school!";
   } else {
@@ -351,6 +429,10 @@ function timestring(t) {
   return hours(t.getHours()) + ":" + xx(t.getMinutes());
 }
 
+function datestring(t) {
+  return t.getYear() + "-" + xx(t.getMonth()) + "-" + xx(t.getDate());
+}
+
 function hhmmss(millis) {
   let seconds = Math.floor(millis / 1000);
   let minutes = Math.floor(seconds / 60);
@@ -380,6 +462,35 @@ function toDate(x, date) {
   d.setMinutes(m);
   d.setSeconds(0);
   return d;
+}
+
+function toDay(x) {
+  let [y, m, d] = x.split("-").map((s) => parseInt(s));
+  let date = new Date();
+  date.setYear(y);
+  date.setMonth(m - 1);
+  date.setDate(d);
+  date.setHours(12);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  return date;
+}
+
+function schoolDaysLeft(calendar) {
+  let d = new Date();
+  let end = toDay(calendar.lastDay);
+  let c = 0;
+  while (d <= end) {
+    if (isSchoolDay(d, calendar)) {
+      c++;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return c;
+}
+
+function isSchoolDay(d, calendar) {
+  return d.getDay() !== 0 && d.getDay() !== 6 && calendar.holidays.indexOf(datestring(d)) == -1;
 }
 
 document.addEventListener("readystatechange", onLoad);
