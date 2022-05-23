@@ -243,7 +243,7 @@ function lastPeriod(d) {
 function nextDay(t) {
   let d = new Date(t);
   d.setDate(d.getDate() + TO_NEXT_SCHOOL_DAY[d.getDay()]);
-  while (!isSchoolDay(d)) {
+  while (!isSchoolDay(d, CALENDAR_2021_2022)) {
     d.setDate(d.getDate() + 1);
   }
   return d;
@@ -433,7 +433,7 @@ function timestring(t) {
 }
 
 function datestring(t) {
-  return t.getYear() + "-" + xx(t.getMonth()) + "-" + xx(t.getDate());
+  return t.getFullYear() + "-" + xx(t.getMonth() + 1) + "-" + xx(t.getDate());
 }
 
 function hhmmss(millis) {
@@ -470,7 +470,7 @@ function toDate(x, date) {
 function toDay(x) {
   let [y, m, d] = x.split("-").map((s) => parseInt(s));
   let date = new Date();
-  date.setYear(y);
+  date.setFullYear(y);
   date.setMonth(m - 1);
   date.setDate(d);
   date.setHours(12);
