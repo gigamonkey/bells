@@ -480,7 +480,7 @@ function toDay(x) {
 }
 
 function schoolDaysLeft(calendar) {
-  let d = new Date();
+  let d = toDay(datestring(new Date()));
   let end = toDay(calendar.lastDay);
   let c = 0;
   while (d <= end) {
