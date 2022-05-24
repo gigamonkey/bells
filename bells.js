@@ -162,6 +162,15 @@ class Period {
   }
 }
 
+function noon(date) {
+  let d = new Date(date);
+  d.setHours(12);
+  d.setMinutes(0);
+  d.setSeconds(0);
+  d.setMilliseconds(0);
+  return d;
+}
+
 function onLoad(event) {
   if (event.target.readyState === "complete") {
     loadConfiguration();
@@ -377,7 +386,7 @@ function update() {
     } else {
       document.getElementById("today").replaceChildren();
     }
-    updateCountdown(now);
+    updateCountdown(p);
   }
 }
 
@@ -388,13 +397,13 @@ function summerCountdown(now) {
   document.getElementById("left").innerHTML = `${days} day${s} until start of school.`;
 }
 
-function updateCountdown(now) {
-  const days = schoolDaysLeft(CALENDAR_2021_2022);
+function updateCountdown(period) {
+  let days = schoolDaysLeft(period, CALENDAR_2021_2022);
   if (days == 0) {
     document.getElementById("countdown").innerHTML = "Last day of school!";
   } else {
     const s = days == 1 ? "" : "s";
-    document.getElementById("countdown").innerHTML = `${days} day${s} until end of school.`;
+    document.getElementById("countdown").innerHTML = `${days} school day${s} left in the year.`;
   }
 }
 
@@ -464,23 +473,17 @@ function toDate(x, date) {
   d.setHours(h);
   d.setMinutes(m);
   d.setSeconds(0);
+  d.setMilliseconds(0);
   return d;
 }
 
 function toDay(x) {
-  let [y, m, d] = x.split("-").map((s) => parseInt(s));
-  let date = new Date();
-  date.setFullYear(y);
-  date.setMonth(m - 1);
-  date.setDate(d);
-  date.setHours(12);
-  date.setMinutes(0);
-  date.setSeconds(0);
-  return date;
+  let [year, month, date] = x.split("-").map((s) => parseInt(s));
+  return new Date(year, month - 1, date, 12, 0, 0, 0);
 }
 
-function schoolDaysLeft(calendar) {
-  let d = toDay(datestring(new Date()));
+function schoolDaysLeft(period, calendar) {
+  let d = noon(period.end);
   let end = toDay(calendar.lastDay);
   let c = 0;
   while (d <= end) {
