@@ -120,6 +120,20 @@ const SCHEDULES_2021_2022 = {
   ],
 };
 
+const CARNIVAL_2022 = {
+  NORMAL: [
+    { start: "7:23", end: "8:21" },
+    { start: "8:27", end: "9:07" },
+    { start: "9:13", end: "9:53" },
+    { start: "9:59", end: "10:39" },
+    { start: "10:45", end: "11:25" },
+    { start: "11:25", end: "12:05" },
+    { start: "12:11", end: "12:51" },
+    { start: "12:57", end: "13:37" },
+    { start: "15:36", end: "16:34" },
+  ],
+};
+
 const SCHEDULES_2022_2023 = {
   NORMAL: [
     { start: "7:26", end: "8:24" },
@@ -144,8 +158,6 @@ const SCHEDULES_2022_2023 = {
     { start: "15:39", end: "16:22" },
   ],
 };
-
-const SCHEDULES = new Date() > LAST_DAY_2021_22 ? SCHEDULES_2022_2023 : SCHEDULES_2021_2022;
 
 // Kept in local storage
 let extraPeriods = null;
@@ -401,7 +413,7 @@ function updateCountdown(period) {
   let days = schoolDaysLeft(period, CALENDAR_2021_2022);
   if (days == 0) {
     document.getElementById("countdown").innerHTML = "Last day of school!";
-  } else {
+  } else if (days <= 30) {
     const s = days == 1 ? "" : "s";
     document.getElementById("countdown").innerHTML = `${days} school day${s} left in the year.`;
   }
@@ -464,7 +476,14 @@ function xx(n) {
 }
 
 function schedule(t) {
-  return t.getDay() === 1 ? SCHEDULES.LATE_START : SCHEDULES.NORMAL;
+  let s =
+    noon(t).getTime() == toDay("2022-05-25").getTime()
+      ? CARNIVAL_2022
+      : now > LAST_DAY_2021_22
+      ? SCHEDULES_2022_2023
+      : SCHEDULES_2021_2022;
+
+  return t.getDay() === 1 ? s.LATE_START : s.NORMAL;
 }
 
 function toDate(x, date) {
