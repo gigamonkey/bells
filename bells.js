@@ -14,6 +14,20 @@ const PERIODS = [
   "Period 7",
 ];
 
+// NOT INCORPORATED YET. Probably should mark finals on the calendar so we can
+// handle them differentl: options pane should let you pick which periods you
+// have finals and the schedule needs to be shown differently.
+/*
+  const finals = {
+  NORMAL: [
+    { start: "8:30", end: "10:30" },
+    { start: "10:40", end: "12:40" },
+    { start: "12:40", end: "13:20" }, // LUNCH
+    { start: "13:26", end: "14:32" },
+  ],
+};
+*/
+
 const calendars = [
   {
     year: "2021-2022",
@@ -189,7 +203,10 @@ function onLoad(event) {
   if (event.target.readyState === "complete") {
     loadConfiguration();
     setupConfigPanel();
-    document.getElementById("left").onclick = (e) => (togo = !togo);
+    document.getElementById("left").onclick = () => {
+      togo = !togo;
+      update();
+    };
     progressBars();
     update();
     setInterval(update, 1000);
@@ -254,8 +271,6 @@ function startOfDay(d) {
 function endOfDay(d) {
   return toDate(schedule(d)[lastPeriod(d)].end, d);
 }
-
-function endOfYear(d) {}
 
 function firstPeriod(d) {
   return extraPeriods[d.getDay()].zero ? 0 : 1;
