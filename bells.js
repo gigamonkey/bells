@@ -16,8 +16,49 @@ const PERIODS = [
 
 const CALENDAR_2021_2022 = {
   year: "2021-2022",
-  firstDay: "2022-08-16",
+  firstDay: "2021-08-16",
   lastDay: "2022-06-03",
+
+  schedules: {
+    default: {
+      NORMAL: [
+        { start: "07:23", end: "08:21" },
+        { start: "08:27", end: "09:25" },
+        { start: "09:31", end: "10:34" },
+        { start: "10:40", end: "11:38" },
+        { start: "11:38", end: "12:18" },
+        { start: "12:24", end: "13:22" },
+        { start: "13:28", end: "14:26" },
+        { start: "14:32", end: "15:30" },
+        { start: "15:36", end: "16:34" },
+      ],
+      LATE_START: [
+        { start: "08:00", end: "09:30" }, // Staff meeting, no zero period on Monday.
+        { start: "09:57", end: "10:40" },
+        { start: "10:46", end: "11:34" },
+        { start: "11:40", end: "12:23" },
+        { start: "12:23", end: "13:03" },
+        { start: "13:09", end: "13:52" },
+        { start: "13:58", end: "14:41" },
+        { start: "14:47", end: "15:30" },
+        { start: "15:36", end: "16:19" },
+      ],
+    },
+    "2022-05-25": {
+      NORMAL: [
+        { start: "7:23", end: "8:21" },
+        { start: "8:27", end: "9:07" },
+        { start: "9:13", end: "9:53" },
+        { start: "9:59", end: "10:39" },
+        { start: "10:45", end: "11:25" },
+        { start: "11:25", end: "12:05" },
+        { start: "12:11", end: "12:51" },
+        { start: "12:57", end: "13:37" },
+        { start: "15:36", end: "16:34" },
+      ],
+    },
+  },
+
   holidays: [
     "2021-09-06",
     "2021-10-11",
@@ -57,6 +98,32 @@ const CALENDAR_2022_2023 = {
   year: "2022-2023",
   firstDay: "2022-08-15",
   lastDay: "2023-06-02",
+  schedules: {
+    default: {
+      NORMAL: [
+        { start: "7:26", end: "8:24" },
+        { start: "8:30", end: "9:28" },
+        { start: "9:34", end: "10:37" },
+        { start: "10:43", end: "11:41" },
+        { start: "11:41", end: "12:21" },
+        { start: "12:27", end: "13:25" },
+        { start: "13:31", end: "14:29" },
+        { start: "14:35", end: "15:33" },
+        { start: "15:39", end: "16:37" },
+      ],
+      LATE_START: [
+        { start: "8:03", end: "9:33" }, // Staff meeting, no zero period on Monday.
+        { start: "10:00", end: "10:43" },
+        { start: "10:49", end: "11:37" },
+        { start: "11:43", end: "12:26" },
+        { start: "12:26", end: "13:06" },
+        { start: "13:12", end: "13:55" },
+        { start: "14:01", end: "14:44" },
+        { start: "14:50", end: "15:33" },
+        { start: "15:39", end: "16:22" },
+      ],
+    },
+  },
   holidays: [
     "2022-09-05",
     "2022-10-10",
@@ -89,73 +156,6 @@ const CALENDAR_2022_2023 = {
     "2023-04-07",
     "2023-05-15",
     "2023-05-29",
-  ],
-};
-
-const LAST_DAY_2021_22 = toDay(CALENDAR_2021_2022.lastDay);
-const FIRST_DAY_2022_23 = toDay(CALENDAR_2022_2023.firstDay);
-
-const SCHEDULES_2021_2022 = {
-  NORMAL: [
-    { start: "07:23", end: "08:21" },
-    { start: "08:27", end: "09:25" },
-    { start: "09:31", end: "10:34" },
-    { start: "10:40", end: "11:38" },
-    { start: "11:38", end: "12:18" },
-    { start: "12:24", end: "13:22" },
-    { start: "13:28", end: "14:26" },
-    { start: "14:32", end: "15:30" },
-    { start: "15:36", end: "16:34" },
-  ],
-  LATE_START: [
-    { start: "08:00", end: "09:30" }, // Staff meeting, no zero period on Monday.
-    { start: "09:57", end: "10:40" },
-    { start: "10:46", end: "11:34" },
-    { start: "11:40", end: "12:23" },
-    { start: "12:23", end: "13:03" },
-    { start: "13:09", end: "13:52" },
-    { start: "13:58", end: "14:41" },
-    { start: "14:47", end: "15:30" },
-    { start: "15:36", end: "16:19" },
-  ],
-};
-
-const CARNIVAL_2022 = {
-  NORMAL: [
-    { start: "7:23", end: "8:21" },
-    { start: "8:27", end: "9:07" },
-    { start: "9:13", end: "9:53" },
-    { start: "9:59", end: "10:39" },
-    { start: "10:45", end: "11:25" },
-    { start: "11:25", end: "12:05" },
-    { start: "12:11", end: "12:51" },
-    { start: "12:57", end: "13:37" },
-    { start: "15:36", end: "16:34" },
-  ],
-};
-
-const SCHEDULES_2022_2023 = {
-  NORMAL: [
-    { start: "7:26", end: "8:24" },
-    { start: "8:30", end: "9:28" },
-    { start: "9:34", end: "10:37" },
-    { start: "10:43", end: "11:41" },
-    { start: "11:41", end: "12:21" },
-    { start: "12:27", end: "13:25" },
-    { start: "13:31", end: "14:29" },
-    { start: "14:35", end: "15:33" },
-    { start: "15:39", end: "16:37" },
-  ],
-  LATE_START: [
-    { start: "8:03", end: "9:33" }, // Staff meeting, no zero period on Monday.
-    { start: "10:00", end: "10:43" },
-    { start: "10:49", end: "11:37" },
-    { start: "11:43", end: "12:26" },
-    { start: "12:26", end: "13:06" },
-    { start: "13:12", end: "13:55" },
-    { start: "14:01", end: "14:44" },
-    { start: "14:50", end: "15:33" },
-    { start: "15:39", end: "16:22" },
   ],
 };
 
@@ -253,6 +253,8 @@ function endOfDay(d) {
   return toDate(schedule(d)[lastPeriod(d)].end, d);
 }
 
+function endOfYear(d) {}
+
 function firstPeriod(d) {
   return extraPeriods[d.getDay()].zero ? 0 : 1;
 }
@@ -264,7 +266,7 @@ function lastPeriod(d) {
 function nextDay(t) {
   let d = new Date(t);
   d.setDate(d.getDate() + TO_NEXT_SCHOOL_DAY[d.getDay()]);
-  while (!isSchoolDay(d, CALENDAR_2021_2022)) {
+  while (!isSchoolDay(d, calendar(t))) {
     d.setDate(d.getDate() + 1);
   }
   return d;
@@ -378,8 +380,9 @@ function td(text) {
 
 function update() {
   let now = new Date();
+  let cal = calendar(now);
 
-  if (LAST_DAY_2021_22 < now && now < FIRST_DAY_2022_23) {
+  if (!cal) {
     document.getElementById("container").style.background = "rgba(64, 0, 255, 0.25)";
     summerCountdown(now);
   } else {
@@ -398,19 +401,19 @@ function update() {
     } else {
       document.getElementById("today").replaceChildren();
     }
-    updateCountdown(p);
+    updateCountdown(p, cal);
   }
 }
 
 function summerCountdown(now) {
-  const days = daysBetween(now, FIRST_DAY_2022_23);
+  const days = daysBetween(now, startOfYear(nextCalendar(now)));
   const s = days == 1 ? "" : "s";
   document.getElementById("period").innerHTML = "Summer vacation!";
   document.getElementById("left").innerHTML = `${days} day${s} until start of school.`;
 }
 
-function updateCountdown(period) {
-  let days = schoolDaysLeft(period, CALENDAR_2021_2022);
+function updateCountdown(period, cal) {
+  let days = schoolDaysLeft(period, cal);
   if (days == 0) {
     document.getElementById("countdown").innerHTML = "Last day of school!";
   } else if (days <= 30) {
@@ -475,15 +478,53 @@ function xx(n) {
   return (n < 10 ? "0" : "") + n;
 }
 
+/**
+ * Get schedule for the given time. Undefined during the summer.
+ */
 function schedule(t) {
-  let s =
-    noon(t).getTime() == toDay("2022-05-25").getTime()
-      ? CARNIVAL_2022
-      : now > LAST_DAY_2021_22
-      ? SCHEDULES_2022_2023
-      : SCHEDULES_2021_2022;
+  const c = calendar(t);
+  const d = datestring(t);
+  if (c) {
+    const s = c.schedules[d in c.schedules ? d : "default"];
+    return t.getDay() === 1 ? s.LATE_START : s.NORMAL;
+  }
+}
 
-  return t.getDay() === 1 ? s.LATE_START : s.NORMAL;
+/**
+ * Get the calendar for the given time. Undefined during the summer.
+ */
+function calendar(t) {
+  return [CALENDAR_2021_2022, CALENDAR_2022_2023].find((c) => isInCalendar(t, c));
+}
+
+function nextCalendar(t) {
+  return [CALENDAR_2021_2022, CALENDAR_2022_2023].find((c) => t < startOfYear(c));
+}
+
+function startOfYear(c) {
+  const d = c.firstDay;
+  const s = c.schedules[d in c.schedules ? d : "default"];
+  const t = toDay(d);
+  const sched = t.getDate() === 1 ? s.LATE_START : s.NORMAL;
+  const x = toDate(sched[firstPeriod(t)].start);
+  t.setHours(x.getHours());
+  t.setMinutes(x.getMinutes());
+  return t;
+}
+
+function endOfYear(c) {
+  const d = c.lastDay;
+  const s = c.schedules[d in c.schedules ? d : "default"];
+  const t = toDay(d);
+  const sched = t.getDate() === 1 ? s.LATE_START : s.NORMAL;
+  const x = toDate(sched[lastPeriod(t)].end);
+  t.setHours(x.getHours());
+  t.setMinutes(x.getMinutes());
+  return t;
+}
+
+function isInCalendar(t, cal) {
+  return startOfYear(cal) <= t && t <= endOfYear(cal);
 }
 
 function toDate(x, date) {
