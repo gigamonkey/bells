@@ -1,32 +1,17 @@
-const TO_NEXT_SCHOOL_DAY = [1, 1, 1, 1, 1, 3, 2];
-
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
-const PERIODS = [
-  "Period 0",
-  "Period 1",
-  "Period 2",
-  "Period 3",
-  "Lunch",
-  "Period 4",
-  "Period 5",
-  "Period 6",
-  "Period 7",
-];
+//const offset = new Date(2022,5,3,10,31,55).getTime() - new Date().getTime();
+const offset = 0;
 
-// NOT INCORPORATED YET. Probably should mark finals on the calendar so we can
-// handle them differentl: options pane should let you pick which periods you
-// have finals and the schedule needs to be shown differently.
-/*
-  const finals = {
-  NORMAL: [
-    { start: "8:30", end: "10:30" },
-    { start: "10:40", end: "12:40" },
-    { start: "12:40", end: "13:20" }, // LUNCH
-    { start: "13:26", end: "14:32" },
-  ],
+// Always use this to get the "current" time to ease testing.
+const now = () => {
+  // const minutes = (m) => m * 1000 * 60;
+  // const hours = (h) => h * minutes(60);
+  // const days = (d) => d * hours(24);
+  let t = new Date();
+  t.setTime(t.getTime() + offset);
+  return t;
 };
-*/
 
 const calendars = [
   {
@@ -37,41 +22,58 @@ const calendars = [
     schedules: {
       default: {
         NORMAL: [
-          { start: "07:23", end: "08:21" },
-          { start: "08:27", end: "09:25" },
-          { start: "09:31", end: "10:34" },
-          { start: "10:40", end: "11:38" },
-          { start: "11:38", end: "12:18" },
-          { start: "12:24", end: "13:22" },
-          { start: "13:28", end: "14:26" },
-          { start: "14:32", end: "15:30" },
-          { start: "15:36", end: "16:34" },
+          { period: "Period 0", start: "07:23", end: "08:21" },
+          { period: "Period 1", start: "08:27", end: "09:25" },
+          { period: "Period 2", start: "09:31", end: "10:34" },
+          { period: "Period 3", start: "10:40", end: "11:38" },
+          { period: "Lunch", start: "11:38", end: "12:18" },
+          { period: "Period 4", start: "12:24", end: "13:22" },
+          { period: "Period 5", start: "13:28", end: "14:26" },
+          { period: "Period 6", start: "14:32", end: "15:30" },
+          { period: "Period 7", start: "15:36", end: "16:34" },
         ],
         LATE_START: [
-          { start: "08:00", end: "09:30" }, // Staff meeting, no zero period on Monday.
-          { start: "09:57", end: "10:40" },
-          { start: "10:46", end: "11:34" },
-          { start: "11:40", end: "12:23" },
-          { start: "12:23", end: "13:03" },
-          { start: "13:09", end: "13:52" },
-          { start: "13:58", end: "14:41" },
-          { start: "14:47", end: "15:30" },
-          { start: "15:36", end: "16:19" },
+          { period: "Staff meeting", start: "08:00", end: "09:30" },
+          { period: "Period 1", start: "09:57", end: "10:40" },
+          { period: "Period 2", start: "10:46", end: "11:34" },
+          { period: "Period 3", start: "11:40", end: "12:23" },
+          { period: "Lunch", start: "12:23", end: "13:03" },
+          { period: "Period 4", start: "13:09", end: "13:52" },
+          { period: "Period 5", start: "13:58", end: "14:41" },
+          { period: "Period 6", start: "14:47", end: "15:30" },
+          { period: "Period 7", start: "15:36", end: "16:19" },
         ],
       },
-      "2022-05-25": {
-        NORMAL: [
-          { start: "7:23", end: "8:21" },
-          { start: "8:27", end: "9:07" },
-          { start: "9:13", end: "9:53" },
-          { start: "9:59", end: "10:39" },
-          { start: "10:45", end: "11:25" },
-          { start: "11:25", end: "12:05" },
-          { start: "12:11", end: "12:51" },
-          { start: "12:57", end: "13:37" },
-          { start: "15:36", end: "16:34" },
-        ],
-      },
+      "2022-05-25": [
+        { period: "Period 0", start: "7:23", end: "8:21" },
+        { period: "Period 1", start: "8:27", end: "9:07" },
+        { period: "Period 2", start: "9:13", end: "9:53" },
+        { period: "Period 3", start: "9:59", end: "10:39" },
+        { period: "Period 4", start: "10:45", end: "11:25" },
+        { period: "Lunch", start: "11:25", end: "12:05" },
+        { period: "Period 5", start: "12:11", end: "12:51" },
+        { period: "Period 6", start: "12:57", end: "13:37" },
+        { period: "Period 7", start: "15:36", end: "16:34" },
+      ],
+      "2022-05-31": [
+        { period: "Period 1 Exam", start: "8:30", end: "10:30" },
+        { period: "Period 2 Exam", start: "10:40", end: "12:40" },
+        { period: "Lunch", start: "12:40", end: "13:20" },
+        { period: "Make Up", start: "13:26", end: "14:32" },
+      ],
+      "2022-06-01": [
+        { period: "Period 3 Exam", start: "8:30", end: "10:30" },
+        { period: "Period 4 Exam", start: "10:40", end: "12:40" },
+        { period: "Lunch", start: "12:40", end: "13:20" },
+        { period: "Make Up", start: "13:26", end: "14:32" },
+      ],
+      "2022-06-02": [
+        { period: "Period 5 Exam", start: "8:30", end: "10:30" },
+        { period: "Period 6 Exam", start: "10:40", end: "12:40" },
+        { period: "Lunch", start: "12:40", end: "13:20" },
+        { period: "Make Up", start: "13:26", end: "14:32" },
+      ],
+      "2022-06-03": [{ period: "Make Up", start: "8:40", end: "12:40" }],
     },
 
     holidays: [
@@ -116,26 +118,26 @@ const calendars = [
     schedules: {
       default: {
         NORMAL: [
-          { start: "7:26", end: "8:24" },
-          { start: "8:30", end: "9:28" },
-          { start: "9:34", end: "10:37" },
-          { start: "10:43", end: "11:41" },
-          { start: "11:41", end: "12:21" },
-          { start: "12:27", end: "13:25" },
-          { start: "13:31", end: "14:29" },
-          { start: "14:35", end: "15:33" },
-          { start: "15:39", end: "16:37" },
+          { period: "Period 0", start: "7:26", end: "8:24" },
+          { period: "Period 1", start: "8:30", end: "9:28" },
+          { period: "Period 2", start: "9:34", end: "10:37" },
+          { period: "Period 3", start: "10:43", end: "11:41" },
+          { period: "Lunch", start: "11:41", end: "12:21" },
+          { period: "Period 4", start: "12:27", end: "13:25" },
+          { period: "Period 5", start: "13:31", end: "14:29" },
+          { period: "Period 6", start: "14:35", end: "15:33" },
+          { period: "Period 7", start: "15:39", end: "16:37" },
         ],
         LATE_START: [
-          { start: "8:03", end: "9:33" }, // Staff meeting, no zero period on Monday.
-          { start: "10:00", end: "10:43" },
-          { start: "10:49", end: "11:37" },
-          { start: "11:43", end: "12:26" },
-          { start: "12:26", end: "13:06" },
-          { start: "13:12", end: "13:55" },
-          { start: "14:01", end: "14:44" },
-          { start: "14:50", end: "15:33" },
-          { start: "15:39", end: "16:22" },
+          { period: "Staff meeting", start: "8:03", end: "9:33" },
+          { period: "Period 1", start: "10:00", end: "10:43" },
+          { period: "Period 2", start: "10:49", end: "11:37" },
+          { period: "Period 3", start: "11:43", end: "12:26" },
+          { period: "Lunch", start: "12:26", end: "13:06" },
+          { period: "Period 4", start: "13:12", end: "13:55" },
+          { period: "Period 5", start: "14:01", end: "14:44" },
+          { period: "Period 6", start: "14:50", end: "15:33" },
+          { period: "Period 7", start: "15:39", end: "16:22" },
         ],
       },
     },
@@ -175,6 +177,92 @@ const calendars = [
   },
 ];
 
+class Schedule {
+  periods;
+
+  constructor(periods) {
+    this.periods = periods;
+  }
+
+  period(i) {
+    return this.periods[i];
+  }
+
+  firstPeriod(d) {
+    return this.periods[this.firstPeriodIndex(d)];
+  }
+
+  lastPeriod(d) {
+    return this.periods[this.lastPeriodIndex(d)];
+  }
+
+  firstPeriodIndex(d) {
+    return this.periods.length == 9 ? (extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
+  }
+
+  lastPeriodIndex(d) {
+    return this.periods.length == 9 ? (extraPeriods[d.getDay()].seventh ? 8 : 7) : this.periods.length - 1;
+  }
+
+  startOfDay(d) {
+    return toDate(this.firstPeriod(d).start, d);
+  }
+
+  endOfDay(d) {
+    return toDate(this.lastPeriod(d).end, d);
+  }
+
+  currentPeriod(t) {
+    // Figure out what period, if any, we are in. May be the weekend or
+    // the long period between the end of school today and the start of
+    // school tomorrow or from the end of school yesterday and the start
+    // of school today.
+
+    let weekend = this.maybeWeekend(t);
+
+    if (weekend !== null) {
+      return weekend;
+    } else {
+      let first = this.firstPeriodIndex(t);
+      let last = this.lastPeriodIndex(t);
+
+      for (let i = first; i <= last; i++) {
+        let start = toDate(this.period(i).start, t);
+        let end = toDate(this.period(i).end, t);
+
+        if (i === first && t < start) {
+          return new Period("Before school", this.endOfDay(previousDay(t)), start, false);
+        } else if (start <= t && t <= end) {
+          return new Period(this.period(i).period, start, end);
+        } else if (i === last) {
+          return new Period("After school", end, this.startOfDay(nextDay(t)), false);
+        } else {
+          let nextStart = toDate(this.period(i + 1).start, t);
+          if (t <= nextStart) {
+            return new Period("Passing period", end, nextStart, true, true);
+          }
+        }
+      }
+    }
+  }
+
+  maybeWeekend(t) {
+    let day = t.getDay();
+    let isWeekend = false;
+    let start;
+
+    if (day === 5 && this.endOfDay(t) < t) {
+      isWeekend = true;
+      start = this.endOfDay(t);
+    } else if ([0, 6].includes(day)) {
+      isWeekend = true;
+      start = this.endOfDay(previousDay(t));
+    }
+
+    return isWeekend ? new Period("Weekend!", start, this.startOfDay(nextDay(t)), false, true) : null;
+  }
+}
+
 // Kept in local storage
 let extraPeriods = null;
 
@@ -213,96 +301,32 @@ function onLoad(event) {
   }
 }
 
-function currentPeriod(now) {
-  // Figure out what period, if any, we are in. May be the weekend or
-  // the long period between the end of school today and the start of
-  // school tomorrow or from the end of school yesterday and the start
-  // of school today.
-
-  let weekend = maybeWeekend(now);
-
-  if (weekend !== null) {
-    return weekend;
-  } else {
-    let sched = schedule(now);
-    let first = firstPeriod(now);
-    let last = lastPeriod(now);
-
-    for (let i = first; i <= last; i++) {
-      let start = toDate(sched[i].start, now);
-      let end = toDate(sched[i].end, now);
-
-      if (i === first && now < start) {
-        return new Period("Before school", endOfDay(previousDay(now)), start, false);
-      } else if (start <= now && now <= end) {
-        return new Period(PERIODS[i], start, end);
-      } else if (i === last) {
-        return new Period("After school", end, startOfDay(nextDay(now)), false);
-      } else {
-        let nextStart = toDate(sched[i + 1].start, now);
-        if (now <= nextStart) {
-          return new Period("Passing period", end, nextStart, true, true);
-        }
-      }
-    }
-  }
-}
-
-function maybeWeekend(now) {
-  let day = now.getDay();
-  let isWeekend = false;
-  let start;
-
-  if (day === 5 && now >= endOfDay(now)) {
-    isWeekend = true;
-    start = endOfDay(now);
-  } else if ([0, 6].includes(day)) {
-    isWeekend = true;
-    start = endOfDay(previousDay(now));
-  }
-
-  return isWeekend ? new Period("Weekend!", start, startOfDay(nextDay(now)), false, true) : null;
-}
-
-function startOfDay(d) {
-  return toDate(schedule(d)[firstPeriod(d)].start, d);
-}
-
-function endOfDay(d) {
-  return toDate(schedule(d)[lastPeriod(d)].end, d);
-}
-
-function firstPeriod(d) {
-  return extraPeriods[d.getDay()].zero ? 0 : 1;
-}
-
-function lastPeriod(d) {
-  return extraPeriods[d.getDay()].seventh ? 8 : 7;
-}
-
 function nextDay(t) {
+  let c = calendar(t);
   let d = new Date(t);
-  d.setDate(d.getDate() + TO_NEXT_SCHOOL_DAY[d.getDay()]);
-  while (!isSchoolDay(d, calendar(t))) {
+  do {
     d.setDate(d.getDate() + 1);
-  }
+  } while (!isSchoolDay(d, c));
   return d;
 }
 
 function previousDay(t) {
+  let c = calendar(t);
   let d = new Date(t);
-  let rindex = TO_NEXT_SCHOOL_DAY.length - 1 - d.getDay();
-  d.setDate(d.getDate() - TO_NEXT_SCHOOL_DAY[rindex]);
+  do {
+    d.setDate(d.getDate() - 1);
+  } while (!isSchoolDay(d, c));
   return d;
 }
 
 function currentOrNextDay() {
   // Current if it's a school day and the day is not over, next otherwise
-  let now = new Date();
-  if ([0, 6].includes(now.getDay())) {
-    return nextDay(now);
+  let t = now();
+  let s = schedule(t);
+  if ([0, 6].includes(t.getDay())) {
+    return nextDay(t);
   } else {
-    return now < endOfDay(now) ? now : nextDay(now);
+    return t < s.endOfDay(t) ? t : nextDay(t);
   }
 }
 
@@ -374,15 +398,17 @@ function togglePeriods() {
     table.replaceChildren();
 
     let t = currentOrNextDay();
-    let sched = schedule(t);
-    let first = firstPeriod(t);
-    let last = lastPeriod(t);
+    let s = schedule(t);
+    console.log(JSON.stringify(s.periods));
+    let first = s.firstPeriodIndex(t);
+    let last = s.lastPeriodIndex(t);
 
     for (let i = first; i <= last; i++) {
       let tr = document.createElement("tr");
-      tr.append(td(PERIODS[i]));
-      tr.append(td(timestring(toDate(sched[i].start, t))));
-      tr.append(td(timestring(toDate(sched[i].end, t))));
+      let p = s.period(i);
+      tr.append(td(p.period));
+      tr.append(td(timestring(toDate(p.start, t))));
+      tr.append(td(timestring(toDate(p.end, t))));
       table.append(tr);
     }
     table.style.display = "table";
@@ -396,42 +422,45 @@ function td(text) {
 }
 
 function update() {
-  let now = new Date();
-  let cal = calendar(now);
+  let t = now();
+
+  let cal = calendar(t);
 
   if (!cal) {
     document.getElementById("container").style.background = "rgba(64, 0, 255, 0.25)";
-    summerCountdown(now);
+    summerCountdown(t);
   } else {
-    let p = currentPeriod(now);
+    let s = schedule(t);
+    let p = s.currentPeriod(t);
     let color = p.passingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
     document.getElementById("container").style.background = color;
     document.getElementById("period").replaceChildren(periodName(p), periodTimes(p));
     document.getElementById("left").innerHTML =
-      hhmmss(togo ? p.end - now : now - p.start) + " " + (togo ? "to go" : "done");
-    updateProgressBar("periodbar", p.start, p.end, now);
+      hhmmss(togo ? p.end - t : t - p.start) + " " + (togo ? "to go" : "done");
+    updateProgressBar("periodbar", p.start, p.end, t);
 
     if (p.duringSchool) {
       document.getElementById("today").innerHTML =
-        hhmmss(togo ? endOfDay(now) - now : now - startOfDay(now)) + " " + (togo ? "to go" : "done");
-      updateProgressBar("todaybar", startOfDay(now), endOfDay(now), now);
+        hhmmss(togo ? s.endOfDay(t) - t : t - s.startOfDay(t)) + " " + (togo ? "to go" : "done");
+      updateProgressBar("todaybar", s.startOfDay(t), s.endOfDay(t), t);
     } else {
       document.getElementById("today").replaceChildren();
     }
-    updateCountdown(p, cal);
+    updateCountdown(t, cal, s);
   }
 }
 
-function summerCountdown(now) {
-  const days = daysBetween(now, startOfYear(nextCalendar(now)));
+function summerCountdown(t) {
+  const days = daysBetween(t, startOfYear(nextCalendar(t)));
   const s = days == 1 ? "" : "s";
   document.getElementById("period").innerHTML = "Summer vacation!";
   document.getElementById("left").innerHTML = `${days} day${s} until start of school.`;
 }
 
-function updateCountdown(period, cal) {
-  let days = schoolDaysLeft(period, cal);
-  if (days == 0) {
+function updateCountdown(t, cal, s) {
+  let days = schoolDaysLeft(t, cal, s);
+  console.log(days);
+  if (days == 1) {
     document.getElementById("countdown").innerHTML = "Last day of school!";
   } else if (days <= 30) {
     const s = days == 1 ? "" : "s";
@@ -449,10 +478,10 @@ function daysBetween(start, end) {
   return (s - e) / (1000 * 60 * 60 * 24);
 }
 
-function updateProgressBar(id, start, end, now) {
+function updateProgressBar(id, start, end, t) {
   let bar = document.getElementById(id);
   let total = end - start;
-  let done = Math.round((100 * (now - start)) / total);
+  let done = Math.round((100 * (t - start)) / total);
   bar.childNodes[0].style.width = done + "%";
   bar.childNodes[1].style.width = 100 - done + "%";
 }
@@ -502,8 +531,12 @@ function schedule(t) {
   const c = calendar(t);
   const d = datestring(t);
   if (c) {
-    const s = c.schedules[d in c.schedules ? d : "default"];
-    return t.getDay() === 1 ? s.LATE_START : s.NORMAL;
+    if (d in c.schedules) {
+      return new Schedule(c.schedules[d]);
+    } else {
+      const s = c.schedules["default"];
+      return new Schedule(t.getDay() === 1 ? s.LATE_START : s.NORMAL);
+    }
   }
 }
 
@@ -519,25 +552,32 @@ function nextCalendar(t) {
 }
 
 function startOfYear(c) {
-  const d = c.firstDay;
-  const s = c.schedules[d in c.schedules ? d : "default"];
-  const t = toDay(d);
-  const sched = t.getDate() === 1 ? s.LATE_START : s.NORMAL;
-  const x = toDate(sched[firstPeriod(t)].start);
+  const sched = scheduleForDay(c.firstDay, c);
+  const t = toDay(c.firstDay);
+  const x = toDate(sched.firstPeriod(t).start);
   t.setHours(x.getHours());
   t.setMinutes(x.getMinutes());
   return t;
 }
 
 function endOfYear(c) {
-  const d = c.lastDay;
-  const s = c.schedules[d in c.schedules ? d : "default"];
-  const t = toDay(d);
-  const sched = t.getDate() === 1 ? s.LATE_START : s.NORMAL;
-  const x = toDate(sched[lastPeriod(t)].end);
+  const sched = scheduleForDay(c.lastDay, c);
+  const t = toDay(c.lastDay);
+  const x = toDate(sched.lastPeriod(t).end);
   t.setHours(x.getHours());
   t.setMinutes(x.getMinutes());
   return t;
+}
+
+function scheduleForDay(d, c) {
+  const t = toDay(d);
+  return new Schedule(
+    d in c.schedules
+      ? c.schedules[d]
+      : t.getDate() === 1
+      ? c.schedules["default"].LATE_START
+      : c.schedules["default"].NORMAL
+  );
 }
 
 function isInCalendar(t, cal) {
@@ -546,7 +586,7 @@ function isInCalendar(t, cal) {
 
 function toDate(x, date) {
   let [h, m] = x.split(":").map((s) => parseInt(s));
-  let d = new Date(date || new Date());
+  let d = new Date(date || now());
   d.setHours(h);
   d.setMinutes(m);
   d.setSeconds(0);
@@ -559,16 +599,21 @@ function toDay(x) {
   return new Date(year, month - 1, date, 12, 0, 0, 0);
 }
 
-function schoolDaysLeft(period, calendar) {
-  let d = noon(period.end);
-  let end = toDay(calendar.lastDay);
+function schoolDaysLeft(t, calendar, s) {
+  let end = endOfYear(calendar);
   let c = 0;
-  while (d <= end) {
+
+  // Current day, if not over.
+  if (isSchoolDay(t, calendar) && t < s.endOfDay(t)) {
+    c++;
+  }
+  let d = new Date(t);
+  do {
+    d.setDate(d.getDate() + 1);
     if (isSchoolDay(d, calendar)) {
       c++;
     }
-    d.setDate(d.getDate() + 1);
-  }
+  } while (noon(d) <= noon(end));
   return c;
 }
 
