@@ -1,6 +1,6 @@
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
-//const offset = new Date(2022,5,3,10,31,55).getTime() - new Date().getTime();
+//const offset = new Date(2022,5,3,13,31,55).getTime() - new Date().getTime();
 const offset = 0;
 
 // Always use this to get the "current" time to ease testing.
@@ -12,6 +12,8 @@ const now = () => {
   t.setTime(t.getTime() + offset);
   return t;
 };
+
+const $ = (id) => document.getElementById(id);
 
 const calendars = [
   {
@@ -177,6 +179,90 @@ const calendars = [
   },
 ];
 
+class Calendar {
+  firstDay;
+  lastDay;
+  schedules;
+  holidays;
+
+  constructor(data) {
+    this.firstDay = data.firstDay;
+    this.lastDay = data.lastDay;
+    this.schedules = data.schedules;
+    this.holidays = data.holidays;
+  }
+
+  isInCalendar(t) {
+    return this.startOfYear() <= t && t <= this.endOfYear();
+  }
+
+  startOfYear() {
+    const sched = this.schedule(parseDate(this.firstDay));
+    const d = parseDate(this.firstDay);
+    return parseTime(sched.firstPeriod(d).start, d);
+  }
+
+  endOfYear() {
+    const sched = this.schedule(parseDate(this.lastDay));
+    const d = parseDate(this.lastDay);
+    return parseTime(sched.lastPeriod(d).end, d);
+  }
+
+  schedule(t) {
+    const d = datestring(t);
+    return new Schedule(
+      d in this.schedules
+        ? this.schedules[d]
+        : t.getDate() === 1
+        ? this.schedules["default"].LATE_START
+        : this.schedules["default"].NORMAL
+    );
+  }
+
+  isSchoolDay(t) {
+    return t.getDay() !== 0 && t.getDay() !== 6 && this.holidays.indexOf(datestring(t)) == -1;
+  }
+
+  nextDay(t) {
+    let d = new Date(t);
+    do {
+      d.setDate(d.getDate() + 1);
+    } while (!this.isSchoolDay(d));
+    return d;
+  }
+
+  previousDay(t) {
+    let d = new Date(t);
+    do {
+      d.setDate(d.getDate() - 1);
+    } while (!this.isSchoolDay(d));
+    return d;
+  }
+
+  currentOrNextDay() {
+    let t = now();
+    return this.isSchoolDay(t) && t < this.schedule(t).endOfDay(t) ? t : this.nextDay(t);
+  }
+
+  schoolDaysLeft(t, s) {
+    let end = this.endOfYear();
+    let c = 0;
+
+    // Current day, if not over.
+    if (this.isSchoolDay(t) && t < s.endOfDay(t)) {
+      c++;
+    }
+    let d = new Date(t);
+    do {
+      d.setDate(d.getDate() + 1);
+      if (this.isSchoolDay(d)) {
+        c++;
+      }
+    } while (noon(d) <= noon(end));
+    return c;
+  }
+}
+
 class Schedule {
   periods;
 
@@ -205,11 +291,11 @@ class Schedule {
   }
 
   startOfDay(d) {
-    return toDate(this.firstPeriod(d).start, d);
+    return parseTime(this.firstPeriod(d).start, d);
   }
 
   endOfDay(d) {
-    return toDate(this.lastPeriod(d).end, d);
+    return parseTime(this.lastPeriod(d).end, d);
   }
 
   currentPeriod(t) {
@@ -217,8 +303,9 @@ class Schedule {
     // the long period between the end of school today and the start of
     // school tomorrow or from the end of school yesterday and the start
     // of school today.
+    let c = calendar(t);
 
-    let weekend = this.maybeWeekend(t);
+    let weekend = this.maybeWeekend(t, c);
 
     if (weekend !== null) {
       return weekend;
@@ -227,17 +314,17 @@ class Schedule {
       let last = this.lastPeriodIndex(t);
 
       for (let i = first; i <= last; i++) {
-        let start = toDate(this.period(i).start, t);
-        let end = toDate(this.period(i).end, t);
+        let start = parseTime(this.period(i).start, t);
+        let end = parseTime(this.period(i).end, t);
 
         if (i === first && t < start) {
-          return new Period("Before school", this.endOfDay(previousDay(t)), start, false);
+          return new Period("Before school", this.endOfDay(c.previousDay(t)), start, false);
         } else if (start <= t && t <= end) {
           return new Period(this.period(i).period, start, end);
         } else if (i === last) {
-          return new Period("After school", end, this.startOfDay(nextDay(t)), false);
+          return new Period("After school", end, this.startOfDay(c.nextDay(t)), false);
         } else {
-          let nextStart = toDate(this.period(i + 1).start, t);
+          let nextStart = parseTime(this.period(i + 1).start, t);
           if (t <= nextStart) {
             return new Period("Passing period", end, nextStart, true, true);
           }
@@ -246,7 +333,7 @@ class Schedule {
     }
   }
 
-  maybeWeekend(t) {
+  maybeWeekend(t, c) {
     let day = t.getDay();
     let isWeekend = false;
     let start;
@@ -256,17 +343,12 @@ class Schedule {
       start = this.endOfDay(t);
     } else if ([0, 6].includes(day)) {
       isWeekend = true;
-      start = this.endOfDay(previousDay(t));
+      start = this.endOfDay(c.previousDay(t));
     }
 
-    return isWeekend ? new Period("Weekend!", start, this.startOfDay(nextDay(t)), false, true) : null;
+    return isWeekend ? new Period("Weekend!", start, this.startOfDay(c.nextDay(t)), false, true) : null;
   }
 }
-
-// Kept in local storage
-let extraPeriods = null;
-
-let togo = true;
 
 class Period {
   constructor(name, start, end, duringSchool = true, passingPeriod = false) {
@@ -277,6 +359,11 @@ class Period {
     this.passingPeriod = passingPeriod;
   }
 }
+
+// Kept in local storage
+let extraPeriods = null;
+
+let togo = true;
 
 function noon(date) {
   let d = new Date(date);
@@ -291,42 +378,13 @@ function onLoad(event) {
   if (event.target.readyState === "complete") {
     loadConfiguration();
     setupConfigPanel();
-    document.getElementById("left").onclick = () => {
+    $("left").onclick = () => {
       togo = !togo;
       update();
     };
     progressBars();
     update();
     setInterval(update, 1000);
-  }
-}
-
-function nextDay(t) {
-  let c = calendar(t);
-  let d = new Date(t);
-  do {
-    d.setDate(d.getDate() + 1);
-  } while (!isSchoolDay(d, c));
-  return d;
-}
-
-function previousDay(t) {
-  let c = calendar(t);
-  let d = new Date(t);
-  do {
-    d.setDate(d.getDate() - 1);
-  } while (!isSchoolDay(d, c));
-  return d;
-}
-
-function currentOrNextDay() {
-  // Current if it's a school day and the day is not over, next otherwise
-  let t = now();
-  let s = schedule(t);
-  if ([0, 6].includes(t.getDay())) {
-    return nextDay(t);
-  } else {
-    return t < s.endOfDay(t) ? t : nextDay(t);
   }
 }
 
@@ -397,9 +455,9 @@ function togglePeriods() {
   } else {
     table.replaceChildren();
 
-    let t = currentOrNextDay();
-    let s = schedule(t);
-    console.log(JSON.stringify(s.periods));
+    let c = calendar(now());
+    let t = c.currentOrNextDay();
+    let s = c.schedule(t);
     let first = s.firstPeriodIndex(t);
     let last = s.lastPeriodIndex(t);
 
@@ -407,64 +465,59 @@ function togglePeriods() {
       let tr = document.createElement("tr");
       let p = s.period(i);
       tr.append(td(p.period));
-      tr.append(td(timestring(toDate(p.start, t))));
-      tr.append(td(timestring(toDate(p.end, t))));
+      tr.append(td(timestring(parseTime(p.start, t))));
+      tr.append(td(timestring(parseTime(p.end, t))));
       table.append(tr);
     }
     table.style.display = "table";
   }
 }
 
-function td(text) {
-  let td = document.createElement("td");
-  td.innerText = text;
-  return td;
-}
-
 function update() {
   let t = now();
+  let c = calendar(t);
 
-  let cal = calendar(t);
-
-  if (!cal) {
-    document.getElementById("container").style.background = "rgba(64, 0, 255, 0.25)";
+  if (!c) {
+    $("container").style.background = "rgba(255, 0, 128, 0.25)";
     summerCountdown(t);
   } else {
-    let s = schedule(t);
-    let p = s.currentPeriod(t);
-    let color = p.passingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
-    document.getElementById("container").style.background = color;
-    document.getElementById("period").replaceChildren(periodName(p), periodTimes(p));
-    document.getElementById("left").innerHTML =
-      hhmmss(togo ? p.end - t : t - p.start) + " " + (togo ? "to go" : "done");
-    updateProgressBar("periodbar", p.start, p.end, t);
-
-    if (p.duringSchool) {
-      document.getElementById("today").innerHTML =
-        hhmmss(togo ? s.endOfDay(t) - t : t - s.startOfDay(t)) + " " + (togo ? "to go" : "done");
-      updateProgressBar("todaybar", s.startOfDay(t), s.endOfDay(t), t);
-    } else {
-      document.getElementById("today").replaceChildren();
-    }
-    updateCountdown(t, cal, s);
+    let s = c.schedule(t);
+    updateProgress(t, c, s);
+    updateCountdown(t, c, s);
   }
 }
 
 function summerCountdown(t) {
-  const days = daysBetween(t, startOfYear(nextCalendar(t)));
+  const days = daysBetween(t, nextCalendar(t).startOfYear());
   const s = days == 1 ? "" : "s";
-  document.getElementById("period").innerHTML = "Summer vacation!";
-  document.getElementById("left").innerHTML = `${days} day${s} until start of school.`;
+  $("period").innerHTML = "Summer vacation!";
+  $("left").innerHTML = `${days} day${s} until start of school.`;
+}
+
+function updateProgress(t, c, s) {
+  let p = s.currentPeriod(t);
+  let color = p.passingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
+  $("container").style.background = color;
+  $("period").replaceChildren(periodName(p), periodTimes(p));
+  $("left").innerHTML = hhmmss(togo ? p.end - t : t - p.start) + " " + (togo ? "to go" : "done");
+  updateProgressBar("periodbar", p.start, p.end, t);
+
+  if (p.duringSchool) {
+    $("today").innerHTML = hhmmss(togo ? s.endOfDay(t) - t : t - s.startOfDay(t)) + " " + (togo ? "to go" : "done");
+    updateProgressBar("todaybar", s.startOfDay(t), s.endOfDay(t), t);
+  } else {
+    $("today").replaceChildren();
+    $("todaybar").replaceChildren();
+  }
 }
 
 function updateCountdown(t, cal, s) {
-  let days = schoolDaysLeft(t, cal, s);
-  console.log(days);
+  let days = cal.schoolDaysLeft(t, s);
   if (days == 1) {
-    document.getElementById("countdown").innerHTML = "Last day of school!";
+    $("countdown").innerHTML = "Last day of school!";
   } else if (days <= 30) {
     const s = days == 1 ? "" : "s";
-    document.getElementById("countdown").innerHTML = `${days} school day${s} left in the year.`;
+    $("countdown").innerHTML = `${days} school day${s} left in the year.`;
   }
 }
 
@@ -479,11 +532,17 @@ function daysBetween(start, end) {
 }
 
 function updateProgressBar(id, start, end, t) {
-  let bar = document.getElementById(id);
+  let bar = $(id);
   let total = end - start;
   let done = Math.round((100 * (t - start)) / total);
   bar.childNodes[0].style.width = done + "%";
   bar.childNodes[1].style.width = 100 - done + "%";
+}
+
+function td(text) {
+  let td = document.createElement("td");
+  td.innerText = text;
+  return td;
 }
 
 function periodName(p) {
@@ -525,68 +584,22 @@ function xx(n) {
 }
 
 /**
- * Get schedule for the given time. Undefined during the summer.
- */
-function schedule(t) {
-  const c = calendar(t);
-  const d = datestring(t);
-  if (c) {
-    if (d in c.schedules) {
-      return new Schedule(c.schedules[d]);
-    } else {
-      const s = c.schedules["default"];
-      return new Schedule(t.getDay() === 1 ? s.LATE_START : s.NORMAL);
-    }
-  }
-}
-
-/**
  * Get the calendar for the given time. Undefined during the summer.
  */
 function calendar(t) {
-  return calendars.find((c) => isInCalendar(t, c));
+  return calendars.map((d) => new Calendar(d)).find((c) => c.isInCalendar(t));
 }
 
+/**
+ * Get the calendar for the next year, if we have it.
+ */
 function nextCalendar(t) {
-  return calendars.find((c) => t < startOfYear(c));
+  return calendars.map((d) => new Calendar(d)).find((c) => t < c.startOfYear());
 }
 
-function startOfYear(c) {
-  const sched = scheduleForDay(c.firstDay, c);
-  const t = toDay(c.firstDay);
-  const x = toDate(sched.firstPeriod(t).start);
-  t.setHours(x.getHours());
-  t.setMinutes(x.getMinutes());
-  return t;
-}
-
-function endOfYear(c) {
-  const sched = scheduleForDay(c.lastDay, c);
-  const t = toDay(c.lastDay);
-  const x = toDate(sched.lastPeriod(t).end);
-  t.setHours(x.getHours());
-  t.setMinutes(x.getMinutes());
-  return t;
-}
-
-function scheduleForDay(d, c) {
-  const t = toDay(d);
-  return new Schedule(
-    d in c.schedules
-      ? c.schedules[d]
-      : t.getDate() === 1
-      ? c.schedules["default"].LATE_START
-      : c.schedules["default"].NORMAL
-  );
-}
-
-function isInCalendar(t, cal) {
-  return startOfYear(cal) <= t && t <= endOfYear(cal);
-}
-
-function toDate(x, date) {
+function parseTime(x, date) {
   let [h, m] = x.split(":").map((s) => parseInt(s));
-  let d = new Date(date || now());
+  let d = new Date(date);
   d.setHours(h);
   d.setMinutes(m);
   d.setSeconds(0);
@@ -594,31 +607,9 @@ function toDate(x, date) {
   return d;
 }
 
-function toDay(x) {
+function parseDate(x) {
   let [year, month, date] = x.split("-").map((s) => parseInt(s));
   return new Date(year, month - 1, date, 12, 0, 0, 0);
-}
-
-function schoolDaysLeft(t, calendar, s) {
-  let end = endOfYear(calendar);
-  let c = 0;
-
-  // Current day, if not over.
-  if (isSchoolDay(t, calendar) && t < s.endOfDay(t)) {
-    c++;
-  }
-  let d = new Date(t);
-  do {
-    d.setDate(d.getDate() + 1);
-    if (isSchoolDay(d, calendar)) {
-      c++;
-    }
-  } while (noon(d) <= noon(end));
-  return c;
-}
-
-function isSchoolDay(d, calendar) {
-  return d.getDay() !== 0 && d.getDay() !== 6 && calendar.holidays.indexOf(datestring(d)) == -1;
 }
 
 document.addEventListener("readystatechange", onLoad);
