@@ -24,58 +24,58 @@ const calendars = [
     schedules: {
       default: {
         NORMAL: [
-          { period: "Period 0", start: "07:23", end: "08:21" },
-          { period: "Period 1", start: "08:27", end: "09:25" },
-          { period: "Period 2", start: "09:31", end: "10:34" },
-          { period: "Period 3", start: "10:40", end: "11:38" },
-          { period: "Lunch", start: "11:38", end: "12:18" },
-          { period: "Period 4", start: "12:24", end: "13:22" },
-          { period: "Period 5", start: "13:28", end: "14:26" },
-          { period: "Period 6", start: "14:32", end: "15:30" },
-          { period: "Period 7", start: "15:36", end: "16:34" },
+          { name: "Period 0", start: "07:23", end: "08:21" },
+          { name: "Period 1", start: "08:27", end: "09:25" },
+          { name: "Period 2", start: "09:31", end: "10:34" },
+          { name: "Period 3", start: "10:40", end: "11:38" },
+          { name: "Lunch", start: "11:38", end: "12:18" },
+          { name: "Period 4", start: "12:24", end: "13:22" },
+          { name: "Period 5", start: "13:28", end: "14:26" },
+          { name: "Period 6", start: "14:32", end: "15:30" },
+          { name: "Period 7", start: "15:36", end: "16:34" },
         ],
         LATE_START: [
-          { period: "Staff meeting", start: "08:00", end: "09:30" },
-          { period: "Period 1", start: "09:57", end: "10:40" },
-          { period: "Period 2", start: "10:46", end: "11:34" },
-          { period: "Period 3", start: "11:40", end: "12:23" },
-          { period: "Lunch", start: "12:23", end: "13:03" },
-          { period: "Period 4", start: "13:09", end: "13:52" },
-          { period: "Period 5", start: "13:58", end: "14:41" },
-          { period: "Period 6", start: "14:47", end: "15:30" },
-          { period: "Period 7", start: "15:36", end: "16:19" },
+          { name: "Staff meeting", start: "08:00", end: "09:30" },
+          { name: "Period 1", start: "09:57", end: "10:40" },
+          { name: "Period 2", start: "10:46", end: "11:34" },
+          { name: "Period 3", start: "11:40", end: "12:23" },
+          { name: "Lunch", start: "12:23", end: "13:03" },
+          { name: "Period 4", start: "13:09", end: "13:52" },
+          { name: "Period 5", start: "13:58", end: "14:41" },
+          { name: "Period 6", start: "14:47", end: "15:30" },
+          { name: "Period 7", start: "15:36", end: "16:19" },
         ],
       },
       "2022-05-25": [
-        { period: "Period 0", start: "7:23", end: "8:21" },
-        { period: "Period 1", start: "8:27", end: "9:07" },
-        { period: "Period 2", start: "9:13", end: "9:53" },
-        { period: "Period 3", start: "9:59", end: "10:39" },
-        { period: "Period 4", start: "10:45", end: "11:25" },
-        { period: "Lunch", start: "11:25", end: "12:05" },
-        { period: "Period 5", start: "12:11", end: "12:51" },
-        { period: "Period 6", start: "12:57", end: "13:37" },
-        { period: "Period 7", start: "15:36", end: "16:34" },
+        { name: "Period 0", start: "7:23", end: "8:21" },
+        { name: "Period 1", start: "8:27", end: "9:07" },
+        { name: "Period 2", start: "9:13", end: "9:53" },
+        { name: "Period 3", start: "9:59", end: "10:39" },
+        { name: "Period 4", start: "10:45", end: "11:25" },
+        { name: "Lunch", start: "11:25", end: "12:05" },
+        { name: "Period 5", start: "12:11", end: "12:51" },
+        { name: "Period 6", start: "12:57", end: "13:37" },
+        { name: "Period 7", start: "15:36", end: "16:34" },
       ],
       "2022-05-31": [
-        { period: "Period 1 Exam", start: "8:30", end: "10:30" },
-        { period: "Period 2 Exam", start: "10:40", end: "12:40" },
-        { period: "Lunch", start: "12:40", end: "13:20" },
-        { period: "Make Up", start: "13:26", end: "14:32" },
+        { name: "Period 1 Exam", start: "8:30", end: "10:30" },
+        { name: "Period 2 Exam", start: "10:40", end: "12:40" },
+        //{ name: "Lunch", start: "12:40", end: "13:20" },
+        //{ name: "Make Up", start: "13:26", end: "14:32" },
       ],
       "2022-06-01": [
-        { period: "Period 3 Exam", start: "8:30", end: "10:30" },
-        { period: "Period 4 Exam", start: "10:40", end: "12:40" },
-        { period: "Lunch", start: "12:40", end: "13:20" },
-        { period: "Make Up", start: "13:26", end: "14:32" },
+        { name: "Period 3 Exam", start: "8:30", end: "10:30" },
+        { name: "Period 4 Exam", start: "10:40", end: "12:40" },
+        //{ name: "Lunch", start: "12:40", end: "13:20" },
+        //{ name: "Make Up", start: "13:26", end: "14:32" },
       ],
       "2022-06-02": [
-        { period: "Period 5 Exam", start: "8:30", end: "10:30" },
-        { period: "Period 6 Exam", start: "10:40", end: "12:40" },
-        { period: "Lunch", start: "12:40", end: "13:20" },
-        { period: "Make Up", start: "13:26", end: "14:32" },
+        { name: "Period 5 Exam", start: "8:30", end: "10:30" },
+        { name: "Period 6 Exam", start: "10:40", end: "12:40" },
+        //{ name: "Lunch", start: "12:40", end: "13:20" },
+        //{ name: "Make Up", start: "13:26", end: "14:32" },
       ],
-      "2022-06-03": [{ period: "Make Up", start: "8:40", end: "12:40" }],
+      //"2022-06-03": [{ name: "Make Up", start: "8:40", end: "12:40" }],
     },
 
     holidays: [
@@ -120,26 +120,26 @@ const calendars = [
     schedules: {
       default: {
         NORMAL: [
-          { period: "Period 0", start: "7:26", end: "8:24" },
-          { period: "Period 1", start: "8:30", end: "9:28" },
-          { period: "Period 2", start: "9:34", end: "10:37" },
-          { period: "Period 3", start: "10:43", end: "11:41" },
-          { period: "Lunch", start: "11:41", end: "12:21" },
-          { period: "Period 4", start: "12:27", end: "13:25" },
-          { period: "Period 5", start: "13:31", end: "14:29" },
-          { period: "Period 6", start: "14:35", end: "15:33" },
-          { period: "Period 7", start: "15:39", end: "16:37" },
+          { name: "Period 0", start: "7:26", end: "8:24" },
+          { name: "Period 1", start: "8:30", end: "9:28" },
+          { name: "Period 2", start: "9:34", end: "10:37" },
+          { name: "Period 3", start: "10:43", end: "11:41" },
+          { name: "Lunch", start: "11:41", end: "12:21" },
+          { name: "Period 4", start: "12:27", end: "13:25" },
+          { name: "Period 5", start: "13:31", end: "14:29" },
+          { name: "Period 6", start: "14:35", end: "15:33" },
+          { name: "Period 7", start: "15:39", end: "16:37" },
         ],
         LATE_START: [
-          { period: "Staff meeting", start: "8:03", end: "9:33" },
-          { period: "Period 1", start: "10:00", end: "10:43" },
-          { period: "Period 2", start: "10:49", end: "11:37" },
-          { period: "Period 3", start: "11:43", end: "12:26" },
-          { period: "Lunch", start: "12:26", end: "13:06" },
-          { period: "Period 4", start: "13:12", end: "13:55" },
-          { period: "Period 5", start: "14:01", end: "14:44" },
-          { period: "Period 6", start: "14:50", end: "15:33" },
-          { period: "Period 7", start: "15:39", end: "16:22" },
+          { name: "Staff meeting", start: "8:03", end: "9:33" },
+          { name: "Period 1", start: "10:00", end: "10:43" },
+          { name: "Period 2", start: "10:49", end: "11:37" },
+          { name: "Period 3", start: "11:43", end: "12:26" },
+          { name: "Lunch", start: "12:26", end: "13:06" },
+          { name: "Period 4", start: "13:12", end: "13:55" },
+          { name: "Period 5", start: "14:01", end: "14:44" },
+          { name: "Period 6", start: "14:50", end: "15:33" },
+          { name: "Period 7", start: "15:39", end: "16:22" },
         ],
       },
     },
@@ -267,7 +267,7 @@ class Schedule {
   periods;
 
   constructor(periods) {
-    this.periods = periods;
+    this.periods = periods.map((x) => new Period(x.name, x.start, x.end));
   }
 
   period(i) {
@@ -291,11 +291,11 @@ class Schedule {
   }
 
   startOfDay(d) {
-    return parseTime(this.firstPeriod(d).start, d);
+    return this.firstPeriod(d).startTime(d);
   }
 
   endOfDay(d) {
-    return parseTime(this.lastPeriod(d).end, d);
+    return this.lastPeriod(d).endTime(d);
   }
 
   currentPeriod(t) {
@@ -314,19 +314,20 @@ class Schedule {
       let last = this.lastPeriodIndex(t);
 
       for (let i = first; i <= last; i++) {
-        let start = parseTime(this.period(i).start, t);
-        let end = parseTime(this.period(i).end, t);
+        let p = this.period(i);
+        let start = p.startTime(t);
+        let end = p.endTime(t);
 
         if (i === first && t < start) {
-          return new Period("Before school", this.endOfDay(c.previousDay(t)), start, false);
+          return new Interval("Before school", this.endOfDay(c.previousDay(t)), start, false);
         } else if (start <= t && t <= end) {
-          return new Period(this.period(i).period, start, end);
+          return p.toInterval(t);
         } else if (i === last) {
-          return new Period("After school", end, this.startOfDay(c.nextDay(t)), false);
+          return new Interval("After school", end, this.startOfDay(c.nextDay(t)), false);
         } else {
-          let nextStart = parseTime(this.period(i + 1).start, t);
+          let nextStart = this.period(i + 1).startTime(t);
           if (t <= nextStart) {
-            return new Period("Passing period", end, nextStart, true, true);
+            return new Interval("Passing period", end, nextStart, true);
           }
         }
       }
@@ -346,17 +347,39 @@ class Schedule {
       start = this.endOfDay(c.previousDay(t));
     }
 
-    return isWeekend ? new Period("Weekend!", start, this.startOfDay(c.nextDay(t)), false, true) : null;
+    return isWeekend ? new Interval("Weekend!", start, this.startOfDay(c.nextDay(t)), false, true) : null;
   }
 }
 
+// Actual periods on the schedle.
 class Period {
-  constructor(name, start, end, duringSchool = true, passingPeriod = false) {
+  constructor(name, start, end) {
+    this.name = name;
+    this.start = start;
+    this.end = end;
+  }
+
+  startTime(t) {
+    return parseTime(this.start, t);
+  }
+
+  endTime(t) {
+    return parseTime(this.end, t);
+  }
+
+  toInterval(t) {
+    return new Interval(this.name, this.startTime(t), this.endTime(t), true, false);
+  }
+}
+
+// An actual concrete named interval of time.
+class Interval {
+  constructor(name, start, end, duringSchool, isPassingPeriod) {
     this.name = name;
     this.start = start;
     this.end = end;
     this.duringSchool = duringSchool;
-    this.passingPeriod = passingPeriod;
+    this.isPassingPeriod = isPassingPeriod;
   }
 }
 
@@ -496,7 +519,7 @@ function summerCountdown(t) {
 
 function updateProgress(t, c, s) {
   let p = s.currentPeriod(t);
-  let color = p.passingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
+  let color = p.isPassingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
   $("container").style.background = color;
   $("period").replaceChildren(periodName(p), periodTimes(p));
   $("left").innerHTML = hhmmss(togo ? p.end - t : t - p.start) + " " + (togo ? "to go" : "done");
@@ -518,6 +541,7 @@ function updateCountdown(t, cal, s) {
   } else if (days <= 30) {
     const s = days == 1 ? "" : "s";
     $("countdown").innerHTML = `${days} school day${s} left in the year.`;
+    //$("countdown").innerHTML = countdownText(millis);
   }
 }
 
@@ -572,6 +596,17 @@ function hhmmss(millis) {
   let mm = minutes % 60;
   let hh = Math.floor(minutes / 60);
   return xx(hh) + ":" + xx(mm) + ":" + xx(ss);
+}
+
+function countdownText(millis) {
+  let seconds = Math.floor(millis / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let ss = seconds % 60;
+  let mm = minutes % 60;
+  let hours = Math.floor(minutes / 60);
+  let hh = hours % 24;
+  let dd = Math.floor(hours / 24);
+  return `${dd} days, ${hh} hours, ${mm} minutes, ${ss} seconds of school left.`;
 }
 
 function hours(h) {
