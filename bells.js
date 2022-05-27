@@ -487,7 +487,7 @@ function togglePeriods() {
     for (let i = first; i <= last; i++) {
       let tr = document.createElement("tr");
       let p = s.period(i);
-      tr.append(td(p.period));
+      tr.append(td(p.name));
       tr.append(td(timestring(parseTime(p.start, t))));
       tr.append(td(timestring(parseTime(p.end, t))));
       table.append(tr);
