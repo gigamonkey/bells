@@ -1,16 +1,16 @@
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
-//const offset = new Date(2022,5,3,13,31,55).getTime() - new Date().getTime();
-const offset = 0;
+// This variable and the next function can be used in testing but aren't
+// otherwise used.
+let offset = 0;
+
+const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
+  offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
+};
 
 // Always use this to get the "current" time to ease testing.
 const now = () => {
-  // const minutes = (m) => m * 1000 * 60;
-  // const hours = (h) => h * minutes(60);
-  // const days = (d) => d * hours(24);
-  let t = new Date();
-  t.setTime(t.getTime() + offset);
-  return t;
+  return new Date(new Date().getTime() + offset);
 };
 
 const $ = (id) => document.getElementById(id);
@@ -58,24 +58,26 @@ const calendars = [
         { name: "Period 7", start: "15:36", end: "16:34" },
       ],
       "2022-05-31": [
-        { name: "Period 1 Exam", start: "8:30", end: "10:30" },
-        { name: "Period 2 Exam", start: "10:40", end: "12:40" },
-        //{ name: "Lunch", start: "12:40", end: "13:20" },
-        //{ name: "Make Up", start: "13:26", end: "14:32" },
+        //{ name: "Period 1 Exam", start: "8:30", end: "10:30" },
+        //{ name: "Period 2 Exam", start: "10:40", end: "12:40" },
+        { name: "Period 1 Exam", start: "8:30", end: "10:50" },
+        { name: "Period 2 Exam", start: "11:00", end: "13:00" },
+        { name: "Lunch", start: "12:40", end: "13:20" },
+        { name: "Make Up", start: "13:26", end: "14:32" },
       ],
       "2022-06-01": [
         { name: "Period 3 Exam", start: "8:30", end: "10:30" },
         { name: "Period 4 Exam", start: "10:40", end: "12:40" },
-        //{ name: "Lunch", start: "12:40", end: "13:20" },
-        //{ name: "Make Up", start: "13:26", end: "14:32" },
+        { name: "Lunch", start: "12:40", end: "13:20" },
+        { name: "Make Up", start: "13:26", end: "14:32" },
       ],
       "2022-06-02": [
         { name: "Period 5 Exam", start: "8:30", end: "10:30" },
         { name: "Period 6 Exam", start: "10:40", end: "12:40" },
-        //{ name: "Lunch", start: "12:40", end: "13:20" },
-        //{ name: "Make Up", start: "13:26", end: "14:32" },
+        { name: "Lunch", start: "12:40", end: "13:20" },
+        { name: "Make Up", start: "13:26", end: "14:32" },
       ],
-      //"2022-06-03": [{ name: "Make Up", start: "8:40", end: "12:40" }],
+      "2022-06-03": [{ name: "Make Up", start: "8:40", end: "12:40" }],
     },
 
     holidays: [
@@ -334,6 +336,23 @@ class Schedule {
     }
   }
 
+  minutesLeftToday(t) {
+    let minutes = 0;
+    let first = this.firstPeriodIndex(t);
+    let last = this.lastPeriodIndex(t);
+
+    for (let i = first; i <= last; i++) {
+      let p = this.period(i);
+      let interval = p.toInterval(t);
+      if (interval.contains(t)) {
+        minutes += interval.minutesLeft(t);
+      } else if (t <= interval.start) {
+        minutes += interval.minutes();
+      }
+    }
+    return minutes;
+  }
+
   maybeWeekend(t, c) {
     let day = t.getDay();
     let isWeekend = false;
@@ -380,6 +399,18 @@ class Interval {
     this.end = end;
     this.duringSchool = duringSchool;
     this.isPassingPeriod = isPassingPeriod;
+  }
+
+  contains(t) {
+    return this.start <= t && t <= this.end;
+  }
+
+  minutesLeft(t) {
+    return Math.floor((this.end - t) / (1000 * 60));
+  }
+
+  minutes() {
+    return (this.end - this.start) / (1000 * 60);
   }
 }
 
@@ -513,8 +544,9 @@ function update() {
 function summerCountdown(t) {
   const days = daysBetween(t, nextCalendar(t).startOfYear());
   const s = days == 1 ? "" : "s";
-  $("period").innerHTML = "Summer vacation!";
-  $("left").innerHTML = `${days} day${s} until start of school.`;
+  const label = div("display", "Summer vacation!");
+  const left = div("display", `${days} day${s} until start of school.`);
+  $("main").replaceChildren(label, left);
 }
 
 function updateProgress(t, c, s) {
@@ -536,13 +568,21 @@ function updateProgress(t, c, s) {
 
 function updateCountdown(t, cal, s) {
   let days = cal.schoolDaysLeft(t, s);
-  if (days == 1) {
+  if (days === 1) {
     $("countdown").innerHTML = "Last day of school!";
   } else if (days <= 30) {
     const s = days == 1 ? "" : "s";
     $("countdown").innerHTML = `${days} school day${s} left in the year.`;
-    //$("countdown").innerHTML = countdownText(millis);
+  } else {
+    $("countdown").replaceChildren();
   }
+}
+
+function div(className, contents) {
+  const d = document.createElement("div");
+  d.classList.add(className);
+  d.innerHTML = contents;
+  return d;
 }
 
 // Adapted from https://stackoverflow.com/a/17727953
