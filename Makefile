@@ -9,4 +9,4 @@ lint:
 
 
 publish:
-	cp index.html style.css bells.js ~/web/www.gigamonkeys.com/misc/bhs
+	./publish.sh index.html style.css bells.js
