@@ -9,9 +9,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
 };
 
 // Always use this to get the "current" time to ease testing.
-const now = () => {
-  return new Date(new Date().getTime() + offset);
-};
+const now = () => new Date(new Date().getTime() + offset);
 
 const $ = (id) => document.getElementById(id);
 
@@ -194,7 +192,9 @@ class Calendar {
   }
 
   isInCalendar(t) {
-    return this.startOfYear() <= t && t <= this.endOfYear();
+    // We treat the calendar as active for the whole first day but only up until
+    // the final bell of the last day.
+    return this.firstDay <= datestring(t) && t <= this.endOfYear();
   }
 
   startOfYear() {
@@ -214,7 +214,7 @@ class Calendar {
     return new Schedule(
       d in this.schedules
         ? this.schedules[d]
-        : t.getDate() === 1
+        : t.getDay() === 1
         ? this.schedules["default"].LATE_START
         : this.schedules["default"].NORMAL
     );
