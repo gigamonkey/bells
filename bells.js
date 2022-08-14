@@ -192,9 +192,7 @@ class Calendar {
   }
 
   isInCalendar(t) {
-    // We treat the calendar as active for the whole first day but only up until
-    // the final bell of the last day.
-    return this.firstDay <= datestring(t) && t <= this.endOfYear();
+    return this.startOfYear() <= t && t <= this.endOfYear();
   }
 
   startOfYear() {
@@ -541,10 +539,12 @@ function update() {
 }
 
 function summerCountdown(t) {
-  const days = daysBetween(t, nextCalendar(t).startOfYear());
-  const s = days == 1 ? "" : "s";
+  const start = nextCalendar(t).startOfYear();
+  const days = daysBetween(t, start);
   const label = div("display", "Summer vacation!");
-  const left = div("display", `${days} day${s} until start of school.`);
+  const left = days < 2
+        ? div("display", `${hhmmss(start - t)} until start of school.`)
+        : div("display", `${days} day${days === 1 ? '' : 's'} until start of school.`);
   $("main").replaceChildren(label, left);
 }
 
