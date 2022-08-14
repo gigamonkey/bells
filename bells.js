@@ -541,10 +541,10 @@ function update() {
 function summerCountdown(t) {
   const start = nextCalendar(t).startOfYear();
   const days = daysBetween(t, start);
+  const hours = hoursBetween(t, start);
+  const time = hours <= 24 ? hhmmss(start - t) : `${days} day${days === 1 ? '' : 's'}`;
   const label = div("display", "Summer vacation!");
-  const left = days < 2
-        ? div("display", `${hhmmss(start - t)} until start of school.`)
-        : div("display", `${days} day${days === 1 ? '' : 's'} until start of school.`);
+  const left = div("display", `${time} until start of school.`)
   $("main").replaceChildren(label, left);
 }
 
@@ -592,6 +592,10 @@ function daysBetween(start, end) {
 
   // so it's safe to divide by 24 hours
   return (s - e) / (1000 * 60 * 60 * 24);
+}
+
+function hoursBetween(start, end) {
+  return Math.abs((end - start) / (1000 * 60 * 60));
 }
 
 function updateProgressBar(id, start, end, t) {
