@@ -124,6 +124,10 @@ class Calendar {
     return t.getDay() !== 0 && t.getDay() !== 6 && this.holidays.indexOf(datestring(t)) == -1;
   }
 
+  isHoliday(t) {
+    return this.holidays.indexOf(datestring(t)) !== -1;
+  }
+
   nextDay(t) {
     let d = new Date(t);
     do {
@@ -207,9 +211,12 @@ class Schedule {
     let c = calendar(t);
 
     let weekend = this.maybeWeekend(t, c);
+    let holiday = this.maybeHoliday(t, c);
 
     if (weekend !== null) {
       return weekend;
+    } else if (holiday !== null) {
+      return holiday;
     } else {
       let first = this.firstPeriodIndex(t);
       let last = this.lastPeriodIndex(t);
@@ -264,10 +271,32 @@ class Schedule {
       start = this.endOfDay(t);
     } else if ([0, 6].includes(day)) {
       isWeekend = true;
-      start = this.endOfDay(c.previousDay(t));
+      const prev = c.previousDay(t);
+      start = c.schedule(prev).endOfDay(prev);
     }
 
-    return isWeekend ? new Interval("Weekend!", start, this.startOfDay(c.nextDay(t)), false, true) : null;
+
+
+    if (isWeekend) {
+      const next = c.nextDay(t);
+      const end = c.schedule(next).startOfDay(next);
+      const label = start.getDay() < 5 || end.getDay() > 1 ? "Long weekend!" : "Weekend!";
+      return new Interval(label, start, end, false, true);
+    } else {
+      return null;
+    }
+  }
+
+  maybeHoliday(t, c) {
+    if (c.isHoliday(t)) {
+      const prev = c.previousDay(t);
+      const next = c.nextDay(t);
+      const start = c.schedule(prev).endOfDay(prev);
+      const end = c.schedule(next).startOfDay(next);
+      return new Interval("Holiday!", start, end, false, true);
+    } else {
+      return null;
+    }
   }
 }
 
