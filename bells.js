@@ -443,16 +443,27 @@ function update() {
 }
 
 function summerCountdown(t) {
-  const start = nextCalendar(t).startOfYear();
-  const days = daysBetween(t, start);
-  const hours = hoursBetween(t, start);
-  const time = hours <= 24 ? hhmmss(start - t) : `${days} day${days === 1 ? '' : 's'}`;
-  const label = div("display", "Summer vacation!");
-  const left = div("display", `${time} until start of school.`)
-  $("main").replaceChildren(label, left);
+  const nextCal = nextCalendar(t);
+  if (nextCal) {
+    const start = nextCalendar(t).startOfYear();
+    const days = daysBetween(t, start);
+    const hours = hoursBetween(t, start);
+    const time = hours <= 24 ? hhmmss(start - t) : `${days} day${days === 1 ? '' : 's'}`;
+    $("untilSchool").replaceChildren(document.createTextNode(`${time} until start of school.`));
+    $("summer").style.display = "block";
+    $("main").style.display = "none";
+    $("noCalendar").style.display = "none";
+  } else {
+    $("noCalendar").style.display = "block";
+    $("main").style.display = "none";
+    $("summer").style.display = "none";
+  }
 }
 
 function updateProgress(t, c, s) {
+  $("noCalendar").style.display = "none";
+  $("summer").style.display = "none";
+  $("main").style.display = "block";
   let p = s.currentPeriod(t);
   let color = p.isPassingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
   $("container").style.background = color;
