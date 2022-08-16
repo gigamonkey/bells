@@ -14,104 +14,6 @@ const now = () => new Date(new Date().getTime() + offset);
 const $ = (id) => document.getElementById(id);
 
 const calendars = [
-  {
-    year: "2021-2022",
-    firstDay: "2021-08-16",
-    lastDay: "2022-06-03",
-
-    schedules: {
-      default: {
-        NORMAL: [
-          { name: "Period 0", start: "07:23", end: "08:21" },
-          { name: "Period 1", start: "08:27", end: "09:25" },
-          { name: "Period 2", start: "09:31", end: "10:34" },
-          { name: "Period 3", start: "10:40", end: "11:38" },
-          { name: "Lunch", start: "11:38", end: "12:18" },
-          { name: "Period 4", start: "12:24", end: "13:22" },
-          { name: "Period 5", start: "13:28", end: "14:26" },
-          { name: "Period 6", start: "14:32", end: "15:30" },
-          { name: "Period 7", start: "15:36", end: "16:34" },
-        ],
-        LATE_START: [
-          { name: "Staff meeting", start: "08:00", end: "09:30" },
-          { name: "Period 1", start: "09:57", end: "10:40" },
-          { name: "Period 2", start: "10:46", end: "11:34" },
-          { name: "Period 3", start: "11:40", end: "12:23" },
-          { name: "Lunch", start: "12:23", end: "13:03" },
-          { name: "Period 4", start: "13:09", end: "13:52" },
-          { name: "Period 5", start: "13:58", end: "14:41" },
-          { name: "Period 6", start: "14:47", end: "15:30" },
-          { name: "Period 7", start: "15:36", end: "16:19" },
-        ],
-      },
-      "2022-05-25": [
-        { name: "Period 0", start: "7:23", end: "8:21" },
-        { name: "Period 1", start: "8:27", end: "9:07" },
-        { name: "Period 2", start: "9:13", end: "9:53" },
-        { name: "Period 3", start: "9:59", end: "10:39" },
-        { name: "Period 4", start: "10:45", end: "11:25" },
-        { name: "Lunch", start: "11:25", end: "12:05" },
-        { name: "Period 5", start: "12:11", end: "12:51" },
-        { name: "Period 6", start: "12:57", end: "13:37" },
-        { name: "Period 7", start: "15:36", end: "16:34" },
-      ],
-      "2022-05-31": [
-        //{ name: "Period 1 Exam", start: "8:30", end: "10:30" },
-        //{ name: "Period 2 Exam", start: "10:40", end: "12:40" },
-        { name: "Period 1 Exam", start: "8:30", end: "10:50" },
-        { name: "Period 2 Exam", start: "11:00", end: "13:00" },
-        { name: "Lunch", start: "12:40", end: "13:20" },
-        { name: "Make Up", start: "13:26", end: "14:32" },
-      ],
-      "2022-06-01": [
-        { name: "Period 3 Exam", start: "8:30", end: "10:30" },
-        { name: "Period 4 Exam", start: "10:40", end: "12:40" },
-        { name: "Lunch", start: "12:40", end: "13:20" },
-        { name: "Make Up", start: "13:26", end: "14:32" },
-      ],
-      "2022-06-02": [
-        { name: "Period 5 Exam", start: "8:30", end: "10:30" },
-        { name: "Period 6 Exam", start: "10:40", end: "12:40" },
-        { name: "Lunch", start: "12:40", end: "13:20" },
-        { name: "Make Up", start: "13:26", end: "14:32" },
-      ],
-      "2022-06-03": [{ name: "Make Up", start: "8:40", end: "12:40" }],
-    },
-
-    holidays: [
-      "2021-09-06",
-      "2021-10-11",
-      "2021-10-29",
-      "2021-11-22",
-      "2021-11-23",
-      "2021-11-24",
-      "2021-11-25",
-      "2021-11-26",
-      "2021-12-20",
-      "2021-12-21",
-      "2021-12-22",
-      "2021-12-23",
-      "2021-12-24",
-      "2021-12-25",
-      "2021-12-26",
-      "2021-12-27",
-      "2021-12-28",
-      "2021-12-29",
-      "2021-12-30",
-      "2021-12-31",
-      "2022-01-17",
-      "2022-01-31",
-      "2022-02-18",
-      "2022-02-21",
-      "2022-04-04",
-      "2022-04-05",
-      "2022-04-06",
-      "2022-04-07",
-      "2022-04-08",
-      "2022-05-16",
-      "2022-05-30",
-    ],
-  },
 
   {
     year: "2022-2023",
@@ -282,11 +184,11 @@ class Schedule {
   }
 
   firstPeriodIndex(d) {
-    return this.periods.length == 9 ? (extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
+    return this.periods.length === 9 ? (extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
   }
 
   lastPeriodIndex(d) {
-    return this.periods.length == 9 ? (extraPeriods[d.getDay()].seventh ? 8 : 7) : this.periods.length - 1;
+    return this.periods.length === 9 ? (extraPeriods[d.getDay()].seventh ? 8 : 7) : this.periods.length - 1;
   }
 
   startOfDay(d) {
@@ -318,11 +220,13 @@ class Schedule {
         let end = p.endTime(t);
 
         if (i === first && t < start) {
-          return new Interval("Before school", this.endOfDay(c.previousDay(t)), start, false);
+          const prevDay = c.previousDay(t);
+          return new Interval("Before school", c.schedule(prevDay).endOfDay(prevDay), start, false);
         } else if (start <= t && t <= end) {
           return p.toInterval(t);
         } else if (i === last) {
-          return new Interval("After school", end, this.startOfDay(c.nextDay(t)), false);
+          const nextDay = c.nextDay(t);
+          return new Interval("After school", end, c.schedule(nextDay).startOfDay(nextDay), false);
         } else {
           let nextStart = this.period(i + 1).startTime(t);
           if (t <= nextStart) {
