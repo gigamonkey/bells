@@ -491,7 +491,22 @@ function updateProgress(t, c, s) {
   $("summer").style.display = "none";
   $("main").style.display = "block";
   let p = s.currentPeriod(t);
-  let color = p.isPassingPeriod ? "rgba(64, 0, 64, 0.25)" : "rgba(64, 0, 255, 0.25)";
+
+  // Default to passing period.
+  let color = "rgba(64, 0, 64, 0.25)";
+
+  const tenMinutes = (10 * 60 * 1000);
+  const inFirstTen = (t - p.start) < tenMinutes;
+  const inLastTen = (p.end - t) < tenMinutes;
+
+  if (!p.isPassingPeriod) {
+    if (inFirstTen || inLastTen) {
+      color = "rgba(255, 0, 0, 0.5)";
+    } else {
+      "rgba(64, 0, 255, 0.25)";
+    }
+  }
+
   $("container").style.background = color;
   $("period").replaceChildren(periodName(p), periodTimes(p));
   $("left").innerHTML = hhmmss(togo ? p.end - t : t - p.start) + " " + (togo ? "to go" : "done");
