@@ -92,3 +92,9 @@ span.togo {
     bottom: 24px;
     right: 24px;
 }
+
+#countdown-link img {
+  height: 12px;
+  width 12px;
+  vertical-align: middle;
+}
