@@ -14,7 +14,6 @@ const now = () => new Date(new Date().getTime() + offset);
 const $ = (id) => document.getElementById(id);
 
 const calendars = [
-
   {
     year: "2022-2023",
     firstDay: "2022-08-15",
@@ -275,8 +274,6 @@ class Schedule {
       start = c.schedule(prev).endOfDay(prev);
     }
 
-
-
     if (isWeekend) {
       const next = c.nextDay(t);
       const end = c.schedule(next).startOfDay(next);
@@ -477,7 +474,7 @@ function summerCountdown(t) {
     const start = nextCalendar(t).startOfYear();
     const days = daysBetween(t, start);
     const hours = hoursBetween(t, start);
-    const time = hours <= 24 ? hhmmss(start - t) : `${days} day${days === 1 ? '' : 's'}`;
+    const time = hours <= 24 ? hhmmss(start - t) : `${days} day${days === 1 ? "" : "s"}`;
     $("untilSchool").replaceChildren(document.createTextNode(`${time} until start of school.`));
     $("summer").style.display = "block";
     $("main").style.display = "none";
