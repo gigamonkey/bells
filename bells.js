@@ -236,7 +236,7 @@ class Schedule {
         } else {
           let nextStart = this.period(i + 1).startTime(t);
           if (t <= nextStart) {
-            return new Interval("Passing period", end, nextStart, true);
+            return new Interval("Passing period", end, nextStart, true, true);
           }
         }
       }
@@ -503,7 +503,7 @@ function updateProgress(t, c, s) {
     if (inFirstTen || inLastTen) {
       color = "rgba(255, 0, 0, 0.5)";
     } else {
-      "rgba(64, 0, 255, 0.25)";
+      color = "rgba(64, 0, 255, 0.25)";
     }
   }
 
