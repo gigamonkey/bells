@@ -43,6 +43,18 @@ const calendars = [
           { name: "Period 7", start: "15:39", end: "16:22" },
         ],
       },
+      "2022-09-01": [
+        { name: "Period 0", start: "7:26", end: "8:24" },
+        { name: "Period 1", start: "8:30", end: "9:12" },
+        { name: "Period 2A", start: "9:18", end: "10:26" },
+        { name: "Period 2B", start: "10:32", end: "11:40" },
+        { name: "Period 3", start: "11:46", end: "12:28" },
+        { name: "Lunch", start: "12:28", end: "13:08" },
+        { name: "Period 4", start: "13:14", end: "13:56" },
+        { name: "Period 5", start: "14:02", end: "14:44" },
+        { name: "Period 6", start: "14:50", end: "15:33" },
+        { name: "Period 7", start: "15:39", end: "16:37" },
+      ]
     },
     holidays: [
       "2022-09-05",
