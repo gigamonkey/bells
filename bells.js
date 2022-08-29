@@ -234,9 +234,10 @@ class Schedule {
           const nextDay = c.nextDay(t);
           return new Interval("After school", end, c.schedule(nextDay).startOfDay(nextDay), false);
         } else {
-          let nextStart = this.period(i + 1).startTime(t);
+          let next = this.period(i + 1);
+          let nextStart = next.startTime(t);
           if (t <= nextStart) {
-            return new Interval("Passing period", end, nextStart, true, true);
+            return new Interval(`Passing to ${next.name}`, end, nextStart, true, true);
           }
         }
       }
