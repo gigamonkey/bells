@@ -1,5 +1,3 @@
-const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
-
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
 let offset = 0;
@@ -395,6 +393,7 @@ function saveConfiguration() {
 }
 
 function setupConfigPanel() {
+  document.querySelector("#qr").onclick = toggleQR;
   document.querySelector("#gear").onclick = toggleConfig;
   document.querySelector("#sched").onclick = togglePeriods;
 
@@ -435,6 +434,11 @@ function barSpan(width, color) {
   let s = document.createElement("span");
   s.classList.add(color);
   return s;
+}
+
+function toggleQR() {
+  let div = document.querySelector("#qr-code");
+  div.style.display = div.style.display === "block" ? "none" : "block";
 }
 
 function toggleConfig() {
