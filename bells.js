@@ -199,11 +199,14 @@ class Schedule {
   }
 
   firstPeriodIndex(d) {
-    return this.periods.length === 9 ? (extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
+    const hasExtra = this.periods[0].name === "Period 0";
+    return hasExtra ? (extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
   }
 
   lastPeriodIndex(d) {
-    return this.periods.length === 9 ? (extraPeriods[d.getDay()].seventh ? 8 : 7) : this.periods.length - 1;
+    const last = this.periods.length - 1;
+    const hasExtra = this.periods[last].name === "Period 7";
+    return hasExtra ? (extraPeriods[d.getDay()].seventh ? last : last - 1) : last;
   }
 
   startOfDay(d) {
