@@ -1,3 +1,5 @@
+const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
+
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
 let offset = 0;
