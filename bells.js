@@ -301,10 +301,28 @@ class Schedule {
   }
 
   maybeWeekend(t, c) {
-    let day = t.getDay();
+
+    const nextDay = c.nextDay(t);
+
     let isWeekend = false;
     let start;
+    let d = new Date(t);
+    while (d < nextDay) {
+      if ([0, 6].includes(d.getDay())) {
+        if (c.isSchoolDay(t) && this.endOfDay(t) < t) {
+          isWeekend = true;
+          start = this.endOfDay(t);
+        } else if (!c.isSchoolDay(t)) {
+          isWeekend = true;
+          const prev = c.previousDay(t);
+          start = c.schedule(prev).endOfDay(prev);
+        }
+        break;
+      }
+      d.setDate(d.getDate() + 1);
+    }
 
+    /*
     if (day === 5 && this.endOfDay(t) < t) {
       isWeekend = true;
       start = this.endOfDay(t);
@@ -312,7 +330,8 @@ class Schedule {
       isWeekend = true;
       const prev = c.previousDay(t);
       start = c.schedule(prev).endOfDay(prev);
-    }
+      }
+    */
 
     if (isWeekend) {
       const next = c.nextDay(t);
