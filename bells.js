@@ -424,7 +424,7 @@ function onLoad(event) {
     };
     progressBars();
     update();
-    setInterval(update, 1000);
+    setTimeout(() => { setInterval(update, 1000); }, Date.now() % 1000)
   }
 }
 
