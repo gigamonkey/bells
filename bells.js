@@ -56,7 +56,6 @@ const calendars = [
         { name: "Period 7", start: "15:39", end: "16:37" },
       ],
       "2022-09-22": [
-
         // Normal schedule during day
         { name: "Period 0", start: "7:26", end: "8:24" },
         { name: "Period 1", start: "8:30", end: "9:28" },
@@ -78,6 +77,24 @@ const calendars = [
         { name: "Back to School Period 5", start: "19:35", end: "19:45" },
         { name: "Back to School Period 6", start: "19:50", end: "20:00" },
         { name: "Back to School Period 7", start: "20:05", end: "20:15" },
+      ],
+      "2022-12-14": [
+        { name: "Period 1 final", start: "8:30", end: "10:30" },
+        { name: "Period 2 final", start: "10:40", end: "12:40" },
+        { name: "Lunch", start: "12:40", end: "13:20" },
+        { name: "Finals Prep / Make Up", start: "13:26", end: "14:32" },
+      ],
+      "2022-12-15": [
+        { name: "Period 3 final", start: "8:30", end: "10:30" },
+        { name: "Period 4 final", start: "10:40", end: "12:40" },
+        { name: "Lunch", start: "12:40", end: "13:20" },
+        { name: "Finals Prep / Make Up", start: "13:26", end: "14:32" },
+      ],
+      "2022-12-16": [
+        { name: "Period 5 final", start: "8:30", end: "10:30" },
+        { name: "Period 6 final", start: "10:40", end: "12:40" },
+        { name: "Lunch", start: "12:40", end: "13:20" },
+        { name: "Finals Prep / Make Up", start: "13:26", end: "14:32" },
       ],
     },
     holidays: [
