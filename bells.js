@@ -129,6 +129,11 @@ const calendars = [
       "2023-05-15",
       "2023-05-29",
     ],
+    breakNames: {
+      "2022-11-18": "Thanksgiving break",
+      "2022-12-16": "Winter break",
+      "2023-05-31": "Spring break",
+    },
   },
 ];
 
@@ -143,6 +148,7 @@ class Calendar {
     this.lastDay = data.lastDay;
     this.schedules = data.schedules;
     this.holidays = data.holidays;
+    this.breakNames = data.breakNames;
   }
 
   isInCalendar(t) {
@@ -265,10 +271,13 @@ class Schedule {
     // of school today.
     let c = calendar(t);
 
+    let vacation = this.maybeVacation(t, c);
     let weekend = this.maybeWeekend(t, c);
     let holiday = this.maybeHoliday(t, c);
 
-    if (weekend !== null) {
+    if (vacation !== null) {
+      return vacation;
+    } else if (weekend !== null) {
       return weekend;
     } else if (holiday !== null) {
       return holiday;
@@ -355,6 +364,19 @@ class Schedule {
       const end = c.schedule(next).startOfDay(next);
       const label = start.getDay() < 5 || end.getDay() > 1 ? "Long weekend!" : "Weekend!";
       return new Interval(label, start, end, false, true);
+    } else {
+      return null;
+    }
+  }
+
+  maybeVacation(t, c) {
+    const prev = c.previousDay(t);
+    const next = c.nextDay(t);
+    if (daysBetween(prev, next) > 3) {
+      const start = c.schedule(prev).endOfDay(prev);
+      const end = c.schedule(next).startOfDay(next);
+      const name = c.breakNames[datestring(prev)];
+      return new Interval(`${name}!`, start, end, false, true);
     } else {
       return null;
     }
