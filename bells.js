@@ -179,7 +179,7 @@ class Calendar {
   }
 
   isSchoolDay(t) {
-    return t.getDay() !== 0 && t.getDay() !== 6 && this.holidays.indexOf(datestring(t)) == -1;
+    return t.getDay() !== 0 && t.getDay() !== 6 && !this.isHoliday(t)
   }
 
   isHoliday(t) {
@@ -370,7 +370,7 @@ class Schedule {
   }
 
   maybeVacation(t, c) {
-    if (c.isHoliday(t)) {
+    if (!c.isSchoolDay(t)) {
       const prev = c.previousDay(t);
       const next = c.nextDay(t);
 
