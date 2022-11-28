@@ -370,13 +370,16 @@ class Schedule {
   }
 
   maybeVacation(t, c) {
-    const prev = c.previousDay(t);
-    const next = c.nextDay(t);
-    if (daysBetween(prev, next) > 3) {
-      const start = c.schedule(prev).endOfDay(prev);
-      const end = c.schedule(next).startOfDay(next);
-      const name = c.breakNames[datestring(prev)];
-      return new Interval(`${name}!`, start, end, false, true);
+    if (c.isHoliday(t)) {
+      const prev = c.previousDay(t);
+      const next = c.nextDay(t);
+
+      if (daysBetween(prev, next) > 3) {
+        const start = c.schedule(prev).endOfDay(prev);
+        const end = c.schedule(next).startOfDay(next);
+        const name = c.breakNames[datestring(prev)];
+        return new Interval(`${name}!`, start, end, false, true);
+      }
     } else {
       return null;
     }
