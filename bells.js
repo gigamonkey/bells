@@ -203,7 +203,7 @@ class Calendar {
   }
 
   currentOrNextDay() {
-    let t = now();
+    const t = now();
     return this.isSchoolDay(t) && t < this.schedule(t).endOfDay(t) ? t : this.nextDay(t);
   }
 
@@ -370,8 +370,8 @@ class Schedule {
   }
 
   maybeVacation(t, c) {
-    if (!c.isSchoolDay(t)) {
-      const prev = c.previousDay(t);
+    if (!c.isSchoolDay(t) || t > c.schedule(t).endOfDay(t)) {
+      const prev = c.isSchoolDay(t) ? new Date(t) : c.previousDay(t);
       const next = c.nextDay(t);
 
       if (daysBetween(prev, next) > 3) {
