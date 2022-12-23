@@ -447,16 +447,16 @@ let extraPeriods = null;
 
 let togo = true;
 
-function noon(date) {
+const noon = (date) => {
   let d = new Date(date);
   d.setHours(12);
   d.setMinutes(0);
   d.setSeconds(0);
   d.setMilliseconds(0);
   return d;
-}
+};
 
-function onLoad(event) {
+const onLoad = (event) => {
   if (event.target.readyState === "complete") {
     loadConfiguration();
     setupConfigPanel();
@@ -468,21 +468,21 @@ function onLoad(event) {
     update();
     setTimeout(() => { setInterval(update, 1000); }, Date.now() % 1000)
   }
-}
+};
 
-function loadConfiguration() {
+const loadConfiguration = () => {
   extraPeriods = JSON.parse(localStorage.getItem("extraPeriods"));
   if (extraPeriods === null) {
     extraPeriods = DEFAULT_EXTRA_PERIODS;
     saveConfiguration();
   }
-}
+};
 
-function saveConfiguration() {
+const saveConfiguration = () => {
   localStorage.setItem("extraPeriods", JSON.stringify(extraPeriods));
-}
+};
 
-function setupConfigPanel() {
+const setupConfigPanel = () => {
   document.querySelector("#qr").onclick = toggleQR;
   document.querySelector("#gear").onclick = toggleConfig;
   document.querySelector("#sched").onclick = togglePeriods;
@@ -511,32 +511,32 @@ function setupConfigPanel() {
 
     day++;
   }
-}
+};
 
-function progressBars() {
+const progressBars = () => {
   for (let bar of document.querySelectorAll(".bar")) {
     bar.appendChild(barSpan(0, "done"));
     bar.appendChild(barSpan(0, "togo"));
   }
-}
+};
 
-function barSpan(width, color) {
+const barSpan = (width, color) => {
   let s = document.createElement("span");
   s.classList.add(color);
   return s;
-}
+};
 
-function toggleQR() {
+const toggleQR = () => {
   let div = document.querySelector("#qr-code");
   div.style.display = div.style.display === "block" ? "none" : "block";
-}
+};
 
-function toggleConfig() {
+const toggleConfig = () => {
   let table = document.querySelector("#periods_config");
   table.style.display = table.style.display === "table" ? "none" : "table";
-}
+};
 
-function togglePeriods() {
+const togglePeriods = () => {
   let table = document.querySelector("#periods");
   if (table.style.display === "table") {
     table.style.display = "none";
@@ -559,9 +559,9 @@ function togglePeriods() {
     }
     table.style.display = "table";
   }
-}
+};
 
-function update() {
+const update = () => {
   let t = now();
   let c = calendar(t);
 
@@ -573,9 +573,9 @@ function update() {
     updateProgress(t, c, s);
     updateCountdown(t, c, s);
   }
-}
+};
 
-function summerCountdown(t) {
+const summerCountdown = (t) => {
   const nextCal = nextCalendar(t);
   if (nextCal) {
     const start = nextCalendar(t).startOfYear();
@@ -591,9 +591,9 @@ function summerCountdown(t) {
     $("main").style.display = "none";
     $("summer").style.display = "none";
   }
-}
+};
 
-function updateProgress(t, c, s) {
+const updateProgress = (t, c, s) => {
   $("noCalendar").style.display = "none";
   $("summer").style.display = "none";
   $("main").style.display = "block";
@@ -626,9 +626,9 @@ function updateProgress(t, c, s) {
     $("today").replaceChildren();
     $("todaybar").replaceChildren();
   }
-}
+};
 
-function updateCountdown(t, cal, s) {
+const updateCountdown = (t, cal, s) => {
   let days = cal.schoolDaysLeft(t, s);
   if (days === 1) {
     $("countdown").innerHTML = "Last day of school!";
@@ -638,73 +638,73 @@ function updateCountdown(t, cal, s) {
   } else {
     $("countdown").replaceChildren();
   }
-}
+};
 
-function div(className, contents) {
+const div = (className, contents) => {
   const d = document.createElement("div");
   d.classList.add(className);
   d.innerHTML = contents;
   return d;
-}
+};
 
 // Adapted from https://stackoverflow.com/a/17727953
-function daysBetween(start, end) {
+const daysBetween = (start, end) => {
   // A day in UTC always lasts 24 hours (unlike in other time formats)
   const s = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
   const e = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
 
   // so it's safe to divide by 24 hours
   return (s - e) / (1000 * 60 * 60 * 24);
-}
+};
 
-function hoursBetween(start, end) {
+const hoursBetween = (start, end) => {
   return Math.abs((end - start) / (1000 * 60 * 60));
-}
+};
 
-function updateProgressBar(id, start, end, t) {
+const updateProgressBar = (id, start, end, t) => {
   let bar = $(id);
   let total = end - start;
   let done = Math.round((100 * (t - start)) / total);
   bar.childNodes[0].style.width = done + "%";
   bar.childNodes[1].style.width = 100 - done + "%";
-}
+};
 
-function td(text) {
+const td = (text) => {
   let td = document.createElement("td");
   td.innerText = text;
   return td;
-}
+};
 
-function periodName(p) {
+const periodName = (p) => {
   let d = document.createElement("p");
   d.innerHTML = p.name;
   return d;
-}
+};
 
-function periodTimes(p) {
+const periodTimes = (p) => {
   let d = document.createElement("p");
   d.innerHTML = timestring(p.start) + "–" + timestring(p.end);
   return d;
-}
+};
 
-function timestring(t) {
+const timestring = (t) => {
   return hours(t.getHours()) + ":" + xx(t.getMinutes());
-}
+};
 
-function datestring(t) {
+const datestring = (t) => {
   return t.getFullYear() + "-" + xx(t.getMonth() + 1) + "-" + xx(t.getDate());
-}
+};
 
-function hhmmss(millis) {
+const hhmmss = (millis) => {
   let seconds = Math.floor(millis / 1000);
   let minutes = Math.floor(seconds / 60);
   let ss = seconds % 60;
   let mm = minutes % 60;
   let hh = Math.floor(minutes / 60);
   return xx(hh) + ":" + xx(mm) + ":" + xx(ss);
-}
+};
 
-function countdownText(millis) {
+const countdownText = (millis) => {
   let seconds = Math.floor(millis / 1000);
   let minutes = Math.floor(seconds / 60);
   let ss = seconds % 60;
@@ -713,32 +713,32 @@ function countdownText(millis) {
   let hh = hours % 24;
   let dd = Math.floor(hours / 24);
   return `${dd} days, ${hh} hours, ${mm} minutes, ${ss} seconds of school left.`;
-}
+};
 
-function hours(h) {
+const hours = (h) => {
   // Render 12 as 12, not 0 as a simple h % 12 would.
   return ((h + 11) % 12) + 1;
-}
+};
 
-function xx(n) {
+const xx = (n) => {
   return (n < 10 ? "0" : "") + n;
-}
+};
 
 /**
  * Get the calendar for the given time. Undefined during the summer.
  */
-function calendar(t) {
+const calendar = (t) => {
   return calendars.map((d) => new Calendar(d)).find((c) => c.isInCalendar(t));
-}
+};
 
 /**
  * Get the calendar for the next year, if we have it.
  */
-function nextCalendar(t) {
+const nextCalendar = (t) => {
   return calendars.map((d) => new Calendar(d)).find((c) => t < c.startOfYear());
-}
+};
 
-function parseTime(x, date) {
+const parseTime = (x, date) => {
   let [h, m] = x.split(":").map((s) => parseInt(s));
   let d = new Date(date);
   d.setHours(h);
@@ -746,11 +746,11 @@ function parseTime(x, date) {
   d.setSeconds(0);
   d.setMilliseconds(0);
   return d;
-}
+};
 
-function parseDate(x) {
+const parseDate = (x) => {
   let [year, month, date] = x.split("-").map((s) => parseInt(s));
   return new Date(year, month - 1, date, 12, 0, 0, 0);
-}
+};
 
 document.addEventListener("readystatechange", onLoad);
