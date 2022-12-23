@@ -15,10 +15,11 @@ const now = () => new Date(new Date().getTime() + offset);
 
 const $ = (id) => document.getElementById(id);
 
-const calendars = await fetch("calendars.json").then(r => { if (r.ok) return r.json(); });
+const calendars = await fetch("calendars.json").then((r) => {
+  if (r.ok) return r.json();
+});
 
 class Calendar {
-
   firstDay;
   lastDay;
   schedules;
@@ -143,7 +144,6 @@ class Calendar {
 }
 
 class Schedule {
-
   calendar;
   periods;
 
@@ -205,16 +205,13 @@ class Schedule {
     if (daysOff) {
       return daysOff;
     } else {
-
       const first = this.firstPeriod(t);
       const last = this.lastPeriod(t);
 
       if (first.isAfter(t)) {
         return new Interval("Before school", this.calendar.previousSchoolDayEnd(t), first.startTime(t), false);
-
       } else if (last.isBefore(t)) {
         return new Interval("After school", last.endTime(t), this.calendar.nextSchoolDayStart(t), false);
-
       } else {
         for (let p = first; p !== null; p = p.next) {
           if (p.contains(t)) {
@@ -456,7 +453,7 @@ const countdownText = (t, until) => {
     return hhmmss(until - t);
   } else {
     const days = Math.floor(hours / 24);
-    const hh = (until - t) - days * 24 * 60 * 60 * 1000;
+    const hh = until - t - days * 24 * 60 * 60 * 1000;
     return `${days} day${days === 1 ? "" : "s"}, ${hhmmss(hh)}`;
   }
 };
@@ -466,7 +463,7 @@ const updateProgress = (t, s) => {
   $("summer").style.display = "none";
   $("main").style.display = "block";
   const interval = s.currentInterval(t);
-  const { start, end, isPassingPeriod, duringSchool } = interval
+  const { start, end, isPassingPeriod, duringSchool } = interval;
 
   // Default to passing period.
   let color = "rgba(64, 0, 64, 0.25)";
@@ -591,7 +588,7 @@ const hours = (h) => {
   return ((h + 11) % 12) + 1;
 };
 
-const xx = (n) => String(n).padStart(2, '0');
+const xx = (n) => String(n).padStart(2, "0");
 
 /**
  * Get the calendar for the given time. Undefined during the summer.
