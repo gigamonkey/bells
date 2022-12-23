@@ -6,309 +6,77 @@
     "schedules": {
       "default": {
         "NORMAL": [
-          {
-            "name": "Period 0",
-            "start": "7:26",
-            "end": "8:24"
-          },
-          {
-            "name": "Period 1",
-            "start": "8:30",
-            "end": "9:28"
-          },
-          {
-            "name": "Period 2",
-            "start": "9:34",
-            "end": "10:37"
-          },
-          {
-            "name": "Period 3",
-            "start": "10:43",
-            "end": "11:41"
-          },
-          {
-            "name": "Lunch",
-            "start": "11:41",
-            "end": "12:21"
-          },
-          {
-            "name": "Period 4",
-            "start": "12:27",
-            "end": "13:25"
-          },
-          {
-            "name": "Period 5",
-            "start": "13:31",
-            "end": "14:29"
-          },
-          {
-            "name": "Period 6",
-            "start": "14:35",
-            "end": "15:33"
-          },
-          {
-            "name": "Period 7",
-            "start": "15:39",
-            "end": "16:37"
-          }
+          {"name": "Period 0", "start": "7:26", "end": "8:24"},
+          {"name": "Period 1", "start": "8:30", "end": "9:28"},
+          {"name": "Period 2", "start": "9:34", "end": "10:37"},
+          {"name": "Period 3", "start": "10:43", "end": "11:41"},
+          {"name": "Lunch", "start": "11:41", "end": "12:21"},
+          {"name": "Period 4", "start": "12:27", "end": "13:25"},
+          {"name": "Period 5", "start": "13:31", "end": "14:29"},
+          {"name": "Period 6", "start": "14:35", "end": "15:33"},
+          {"name": "Period 7", "start": "15:39", "end": "16:37"}
         ],
         "LATE_START": [
-          {
-            "name": "Staff meeting",
-            "start": "8:03",
-            "end": "9:33"
-          },
-          {
-            "name": "Period 1",
-            "start": "10:00",
-            "end": "10:43"
-          },
-          {
-            "name": "Period 2",
-            "start": "10:49",
-            "end": "11:37"
-          },
-          {
-            "name": "Period 3",
-            "start": "11:43",
-            "end": "12:26"
-          },
-          {
-            "name": "Lunch",
-            "start": "12:26",
-            "end": "13:06"
-          },
-          {
-            "name": "Period 4",
-            "start": "13:12",
-            "end": "13:55"
-          },
-          {
-            "name": "Period 5",
-            "start": "14:01",
-            "end": "14:44"
-          },
-          {
-            "name": "Period 6",
-            "start": "14:50",
-            "end": "15:33"
-          },
-          {
-            "name": "Period 7",
-            "start": "15:39",
-            "end": "16:22"
-          }
+          {"name": "Staff meeting", "start": "8:03", "end": "9:33"},
+          {"name": "Period 1", "start": "10:00", "end": "10:43"},
+          {"name": "Period 2", "start": "10:49", "end": "11:37"},
+          {"name": "Period 3", "start": "11:43", "end": "12:26"},
+          {"name": "Lunch", "start": "12:26", "end": "13:06"},
+          {"name": "Period 4", "start": "13:12", "end": "13:55"},
+          {"name": "Period 5", "start": "14:01", "end": "14:44"},
+          {"name": "Period 6", "start": "14:50", "end": "15:33"},
+          {"name": "Period 7", "start": "15:39", "end": "16:22"}
         ]
       },
       "2022-09-01": [
-        {
-          "name": "Period 0",
-          "start": "7:26",
-          "end": "8:24"
-        },
-        {
-          "name": "Period 1",
-          "start": "8:30",
-          "end": "9:12"
-        },
-        {
-          "name": "Period 2A",
-          "start": "9:18",
-          "end": "10:26"
-        },
-        {
-          "name": "Period 2B",
-          "start": "10:32",
-          "end": "11:40"
-        },
-        {
-          "name": "Period 3",
-          "start": "11:46",
-          "end": "12:28"
-        },
-        {
-          "name": "Lunch",
-          "start": "12:28",
-          "end": "13:08"
-        },
-        {
-          "name": "Period 4",
-          "start": "13:14",
-          "end": "13:56"
-        },
-        {
-          "name": "Period 5",
-          "start": "14:02",
-          "end": "14:44"
-        },
-        {
-          "name": "Period 6",
-          "start": "14:50",
-          "end": "15:33"
-        },
-        {
-          "name": "Period 7",
-          "start": "15:39",
-          "end": "16:37"
-        }
+        {"name": "Period 0", "start": "7:26", "end": "8:24"},
+        {"name": "Period 1", "start": "8:30", "end": "9:12"},
+        {"name": "Period 2A", "start": "9:18", "end": "10:26"},
+        {"name": "Period 2B", "start": "10:32", "end": "11:40"},
+        {"name": "Period 3", "start": "11:46", "end": "12:28"},
+        {"name": "Lunch", "start": "12:28", "end": "13:08"},
+        {"name": "Period 4", "start": "13:14", "end": "13:56"},
+        {"name": "Period 5", "start": "14:02", "end": "14:44"},
+        {"name": "Period 6", "start": "14:50", "end": "15:33"},
+        {"name": "Period 7", "start": "15:39", "end": "16:37"}
       ],
       "2022-09-22": [
-        {
-          "name": "Period 0",
-          "start": "7:26",
-          "end": "8:24"
-        },
-        {
-          "name": "Period 1",
-          "start": "8:30",
-          "end": "9:28"
-        },
-        {
-          "name": "Period 2",
-          "start": "9:34",
-          "end": "10:37"
-        },
-        {
-          "name": "Period 3",
-          "start": "10:43",
-          "end": "11:41"
-        },
-        {
-          "name": "Lunch",
-          "start": "11:41",
-          "end": "12:21"
-        },
-        {
-          "name": "Period 4",
-          "start": "12:27",
-          "end": "13:25"
-        },
-        {
-          "name": "Period 5",
-          "start": "13:31",
-          "end": "14:29"
-        },
-        {
-          "name": "Period 6",
-          "start": "14:35",
-          "end": "15:33"
-        },
-        {
-          "name": "Period 7",
-          "start": "15:39",
-          "end": "16:37"
-        },
-        {
-          "name": "Back to School Period 0",
-          "start": "18:15",
-          "end": "18:25"
-        },
-        {
-          "name": "Back to School Period 1",
-          "start": "18:30",
-          "end": "18:40"
-        },
-        {
-          "name": "Principal's announcement",
-          "start": "18:45",
-          "end": "18:50"
-        },
-        {
-          "name": "Back to School Period 2",
-          "start": "18:50",
-          "end": "19:00"
-        },
-        {
-          "name": "Back to School Period 3",
-          "start": "19:05",
-          "end": "19:15"
-        },
-        {
-          "name": "Back to School Period 4",
-          "start": "19:20",
-          "end": "19:30"
-        },
-        {
-          "name": "Back to School Period 5",
-          "start": "19:35",
-          "end": "19:45"
-        },
-        {
-          "name": "Back to School Period 6",
-          "start": "19:50",
-          "end": "20:00"
-        },
-        {
-          "name": "Back to School Period 7",
-          "start": "20:05",
-          "end": "20:15"
-        }
+        {"name": "Period 0", "start": "7:26", "end": "8:24"},
+        {"name": "Period 1", "start": "8:30", "end": "9:28"},
+        {"name": "Period 2", "start": "9:34", "end": "10:37"},
+        {"name": "Period 3", "start": "10:43", "end": "11:41"},
+        {"name": "Lunch", "start": "11:41", "end": "12:21"},
+        {"name": "Period 4", "start": "12:27", "end": "13:25"},
+        {"name": "Period 5", "start": "13:31", "end": "14:29"},
+        {"name": "Period 6", "start": "14:35", "end": "15:33"},
+        {"name": "Period 7", "start": "15:39", "end": "16:37"},
+        {"name": "Back to School Period 0", "start": "18:15", "end": "18:25"},
+        {"name": "Back to School Period 1", "start": "18:30", "end": "18:40"},
+        {"name": "Principal's announcement", "start": "18:45", "end": "18:50"},
+        {"name": "Back to School Period 2", "start": "18:50", "end": "19:00"},
+        {"name": "Back to School Period 3", "start": "19:05", "end": "19:15"},
+        {"name": "Back to School Period 4", "start": "19:20", "end": "19:30"},
+        {"name": "Back to School Period 5", "start": "19:35", "end": "19:45"},
+        {"name": "Back to School Period 6", "start": "19:50", "end": "20:00"},
+        {"name": "Back to School Period 7", "start": "20:05", "end": "20:15"}
       ],
       "2022-12-14": [
-        {
-          "name": "Period 1 Final",
-          "start": "8:30",
-          "end": "10:30"
-        },
-        {
-          "name": "Period 2 Final",
-          "start": "10:40",
-          "end": "12:40"
-        },
-        {
-          "name": "Lunch",
-          "start": "12:40",
-          "end": "13:20"
-        },
-        {
-          "name": "Finals Prep / Make Up",
-          "start": "13:26",
-          "end": "14:32"
-        }
+        {"name": "Period 1 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 2 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
       ],
       "2022-12-15": [
-        {
-          "name": "Period 3 Final",
-          "start": "8:30",
-          "end": "10:30"
-        },
-        {
-          "name": "Period 4 Final",
-          "start": "10:40",
-          "end": "12:40"
-        },
-        {
-          "name": "Lunch",
-          "start": "12:40",
-          "end": "13:20"
-        },
-        {
-          "name": "Finals Prep / Make Up",
-          "start": "13:26",
-          "end": "14:32"
-        }
+        {"name": "Period 3 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 4 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
       ],
       "2022-12-16": [
-        {
-          "name": "Period 5 Final",
-          "start": "8:30",
-          "end": "10:30"
-        },
-        {
-          "name": "Period 6 Final",
-          "start": "10:40",
-          "end": "12:40"
-        },
-        {
-          "name": "Lunch",
-          "start": "12:40",
-          "end": "13:20"
-        },
-        {
-          "name": "Finals Prep / Make Up",
-          "start": "13:26",
-          "end": "14:32"
-        }
+        {"name": "Period 5 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 6 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
       ]
     },
     "holidays": [
@@ -345,7 +113,7 @@
     ],
     "breakNames": {
       "2022-11-21": "Thanksgiving break",
-      "2022-12-17": "Winter break",
+      "2022-12-19": "Winter break",
       "2023-02-17": "Presidents’ Day Weekend",
       "2023-04-03": "Spring break"
     }
