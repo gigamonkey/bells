@@ -8,7 +8,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 1, 3, 12, 22);
+//setOffset(2023, 5, 15, 8, 2, 50);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -70,65 +70,68 @@ class Calendar {
   }
 
   nextHoliday(t) {
-    let d = new Date(t);
+    const d = new Date(t);
     do {
       d.setDate(d.getDate() + 1);
     } while (!this.isHoliday(d));
     return d;
   }
 
-  nextStart(t) {
+  nextSchoolDayStart(t) {
     if (this.isSchoolDay(t)) {
       const start = this.schedule(t).startOfDay(t);
       if (start > t) {
         return start;
       }
     }
-    const next = this.nextDay(t);
+    const next = this.nextSchoolDay(t);
     return this.schedule(next).startOfDay(next);
   }
 
-  previousEnd(t) {
+  previousSchoolDayEnd(t) {
     if (this.isSchoolDay(t)) {
       const end = this.schedule(t).endOfDay(t);
       if (end < t) {
         return end;
       }
     }
-    const prev = this.previousDay(t);
+    const prev = this.previousSchoolDay(t);
     return this.schedule(prev).endOfDay(prev);
   }
 
-  nextDay(t) {
-    let d = new Date(t);
+  nextSchoolDay(t) {
+    const d = new Date(t);
     do {
       d.setDate(d.getDate() + 1);
     } while (!this.isSchoolDay(d));
     return d;
   }
 
-  previousDay(t) {
-    let d = new Date(t);
+  previousSchoolDay(t) {
+    const d = new Date(t);
     do {
       d.setDate(d.getDate() - 1);
     } while (!this.isSchoolDay(d));
     return d;
   }
 
-  currentOrNextDay() {
-    const t = now();
-    return this.isSchoolDay(t) && t < this.schedule(t).endOfDay(t) ? t : this.nextDay(t);
+  currentOrNextDay(t) {
+    if (this.isSchoolDay(t) && t < this.schedule(t).endOfDay(t)) {
+      return t;
+    } else {
+      return this.nextSchoolDay(t);
+    }
   }
 
   schoolDaysLeft(t, s) {
-    let end = this.endOfYear();
+    const end = this.endOfYear();
     let c = 0;
 
     // Current day, if not over.
     if (this.isSchoolDay(t) && t < s.endOfDay(t)) {
       c++;
     }
-    let d = new Date(t);
+    const d = new Date(t);
     do {
       d.setDate(d.getDate() + 1);
       if (this.isSchoolDay(d)) {
@@ -207,10 +210,10 @@ class Schedule {
       const last = this.lastPeriod(t);
 
       if (first.isAfter(t)) {
-        return new Interval("Before school", this.calendar.previousEnd(t), first.startTime(t), false);
+        return new Interval("Before school", this.calendar.previousSchoolDayEnd(t), first.startTime(t), false);
 
       } else if (last.isBefore(t)) {
-        return new Interval("After school", last.endTime(t), this.calendar.nextStart(t), false);
+        return new Interval("After school", last.endTime(t), this.calendar.nextSchoolDayStart(t), false);
 
       } else {
         for (let p = first; p !== null; p = p.next) {
@@ -224,23 +227,6 @@ class Schedule {
     }
   }
 
-  minutesLeftToday(t) {
-    let minutes = 0;
-    let first = this.firstPeriodIndex(t);
-    let last = this.lastPeriodIndex(t);
-
-    for (let i = first; i <= last; i++) {
-      let p = this.period(i);
-      let interval = p.toInterval(t);
-      if (interval.contains(t)) {
-        minutes += interval.minutesLeft(t);
-      } else if (t <= interval.start) {
-        minutes += interval.minutes();
-      }
-    }
-    return minutes;
-  }
-
   /*
    * Breaks include weekends and longer vacations, i.e. any period where the
    * number of days from the end of school to the start of school is three or
@@ -250,8 +236,8 @@ class Schedule {
    */
   maybeBreak(t) {
     if (this.notInSchool(t)) {
-      const prev = this.calendar.previousEnd(t);
-      const next = this.calendar.nextStart(t);
+      const prev = this.calendar.previousSchoolDayEnd(t);
+      const next = this.calendar.nextSchoolDayStart(t);
       const days = daysBetween(prev, next);
       if (days >= 3) {
         return new Interval(`${this.breakName(days, prev, next)}!`, prev, next, false, true);
@@ -282,7 +268,7 @@ class Period {
     this.name = name;
     this.start = start;
     this.end = end;
-    this.next = null;
+    this.next = null; // Set after all periods are made.
   }
 
   startTime(t) {
@@ -305,14 +291,14 @@ class Period {
     return this.endTime(t) < t;
   }
 
-
   toInterval(t) {
     return new Interval(this.name, this.startTime(t), this.endTime(t), true, false);
   }
 }
 
 /*
- * Intervals are specific spans of time on a particular date.
+ * Intervals are specific spans of time on a particular date that may represent
+ * a period or one of the intervals between periods.
  */
 class Interval {
   constructor(name, start, end, duringSchool, isPassingPeriod) {
@@ -322,18 +308,6 @@ class Interval {
     this.duringSchool = duringSchool;
     this.isPassingPeriod = isPassingPeriod;
   }
-
-  contains(t) {
-    return this.start <= t && t <= this.end;
-  }
-
-  minutesLeft(t) {
-    return Math.floor((this.end - t) / (1000 * 60));
-  }
-
-  minutes() {
-    return (this.end - this.start) / (1000 * 60);
-  }
 }
 
 // Kept in local storage
@@ -342,7 +316,7 @@ let extraPeriods = null;
 let togo = true;
 
 const noon = (date) => {
-  let d = new Date(date);
+  const d = new Date(date);
   d.setHours(12);
   d.setMinutes(0);
   d.setSeconds(0);
@@ -367,14 +341,14 @@ const setupConfigPanel = () => {
   document.querySelector("#gear").onclick = toggleConfig;
   document.querySelector("#sched").onclick = togglePeriods;
 
-  let rows = document.querySelectorAll("#configuration table tbody tr");
+  const rows = document.querySelectorAll("#configuration table tbody tr");
   let day = 1;
 
-  for (let node of rows) {
-    let cells = node.querySelectorAll("td");
-    let zero = cells[1].querySelector("input");
-    let seventh = cells[2].querySelector("input");
-    let ep = extraPeriods[day];
+  for (const node of rows) {
+    const cells = node.querySelectorAll("td");
+    const zero = cells[1].querySelector("input");
+    const seventh = cells[2].querySelector("input");
+    const ep = extraPeriods[day];
 
     zero.checked = ep.zero;
     seventh.checked = ep.seventh;
@@ -394,44 +368,45 @@ const setupConfigPanel = () => {
 };
 
 const progressBars = () => {
-  for (let bar of document.querySelectorAll(".bar")) {
+  for (const bar of document.querySelectorAll(".bar")) {
     bar.appendChild(barSpan(0, "done"));
     bar.appendChild(barSpan(0, "togo"));
   }
 };
 
 const barSpan = (width, color) => {
-  let s = document.createElement("span");
+  const s = document.createElement("span");
   s.classList.add(color);
   return s;
 };
 
 const toggleQR = () => {
-  let div = document.querySelector("#qr-code");
+  const div = document.querySelector("#qr-code");
   div.style.display = div.style.display === "block" ? "none" : "block";
 };
 
 const toggleConfig = () => {
-  let table = document.querySelector("#periods_config");
+  const table = document.querySelector("#periods_config");
   table.style.display = table.style.display === "table" ? "none" : "table";
 };
 
 const togglePeriods = () => {
-  let table = document.querySelector("#periods");
+  const table = document.querySelector("#periods");
   if (table.style.display === "table") {
     table.style.display = "none";
   } else {
     table.replaceChildren();
 
-    let c = calendar(now());
-    let t = c.currentOrNextDay();
-    let s = c.schedule(t);
-    let first = s.firstPeriodIndex(t);
-    let last = s.lastPeriodIndex(t);
+    const n = now();
+    const c = calendar(n);
+    const t = c.currentOrNextDay(n);
+    const s = c.schedule(t);
 
-    for (let i = first; i <= last; i++) {
-      let tr = document.createElement("tr");
-      let p = s.period(i);
+    const first = s.firstPeriod(t);
+    const last = s.lastPeriod(t);
+
+    for (let p = first; p !== null; p = p.next) {
+      const tr = document.createElement("tr");
       tr.append(td(p.name));
       tr.append(td(timestring(parseTime(p.start, t))));
       tr.append(td(timestring(parseTime(p.end, t))));
@@ -442,16 +417,14 @@ const togglePeriods = () => {
 };
 
 const update = () => {
-  let t = now();
-  let c = calendar(t);
+  const t = now();
+  const c = calendar(t);
 
   if (!c) {
     $("container").style.background = "rgba(255, 0, 128, 0.25)";
     summerCountdown(t);
   } else {
-    const s = c.schedule(t);
-    updateProgress(t, c, s);
-    updateCountdown(t, c, s);
+    normalCountdown(t, c);
   }
 };
 
@@ -459,8 +432,8 @@ const summerCountdown = (t) => {
   const nextCal = nextCalendar(t);
   if (nextCal) {
     const start = nextCalendar(t).startOfYear();
-    const time = daysCountdown(t, start);
-    $("untilSchool").replaceChildren(document.createTextNode(`${time} until start of school.`));
+    const time = summerCountdownText(start - t);
+    $("untilSchool").replaceChildren(document.createTextNode(`${time} until school starts.`));
     $("summer").style.display = "block";
     $("main").style.display = "none";
     $("noCalendar").style.display = "none";
@@ -471,13 +444,24 @@ const summerCountdown = (t) => {
   }
 };
 
-const daysCountdown = (t, until) => {
-  const days = daysBetween(t, until);
-  const hours = hoursBetween(t, until);
-  return hours <= 24 ? hhmmss(until - t) : `${days} day${days === 1 ? "" : "s"}`;
+const normalCountdown = (t, c) => {
+  const s = c.schedule(t);
+  updateProgress(t, s);
+  updateCountdown(t, c, s);
 };
 
-const updateProgress = (t, c, s) => {
+const countdownText = (t, until) => {
+  const hours = hoursBetween(t, until);
+  if (hours < 24) {
+    return hhmmss(until - t);
+  } else {
+    const days = Math.floor(hours / 24);
+    const hh = (until - t) - days * 24 * 60 * 60 * 1000;
+    return `${days} day${days === 1 ? "" : "s"}, ${hhmmss(hh)}`;
+  }
+};
+
+const updateProgress = (t, s) => {
   $("noCalendar").style.display = "none";
   $("summer").style.display = "none";
   $("main").style.display = "block";
@@ -502,7 +486,7 @@ const updateProgress = (t, c, s) => {
   $("container").style.background = color;
   $("period").replaceChildren(periodName(interval), periodTimes(interval));
 
-  const time = togo ? daysCountdown(t, end) : daysCountdown(start, t);
+  const time = togo ? countdownText(t, end) : countdownText(start, t);
   $("left").innerHTML = time + " " + (togo ? "to go" : "done");
   updateProgressBar("periodbar", start, end, t);
 
@@ -516,7 +500,7 @@ const updateProgress = (t, c, s) => {
 };
 
 const updateCountdown = (t, cal, s) => {
-  let days = cal.schoolDaysLeft(t, s);
+  const days = cal.schoolDaysLeft(t, s);
   if (days === 1) {
     $("countdown").innerHTML = "Last day of school!";
   } else if (days <= 30) {
@@ -549,27 +533,27 @@ const hoursBetween = (start, end) => {
 };
 
 const updateProgressBar = (id, start, end, t) => {
-  let bar = $(id);
-  let total = end - start;
-  let done = Math.round((100 * (t - start)) / total);
+  const bar = $(id);
+  const total = end - start;
+  const done = Math.round((100 * (t - start)) / total);
   bar.childNodes[0].style.width = done + "%";
   bar.childNodes[1].style.width = 100 - done + "%";
 };
 
 const td = (text) => {
-  let td = document.createElement("td");
+  const td = document.createElement("td");
   td.innerText = text;
   return td;
 };
 
 const periodName = (p) => {
-  let d = document.createElement("p");
+  const d = document.createElement("p");
   d.innerHTML = p.name;
   return d;
 };
 
 const periodTimes = (p) => {
-  let d = document.createElement("p");
+  const d = document.createElement("p");
   d.innerHTML = timestring(p.start) + "–" + timestring(p.end);
   return d;
 };
@@ -583,23 +567,23 @@ const datestring = (t) => {
 };
 
 const hhmmss = (millis) => {
-  let seconds = Math.floor(millis / 1000);
-  let minutes = Math.floor(seconds / 60);
-  let ss = seconds % 60;
-  let mm = minutes % 60;
-  let hh = Math.floor(minutes / 60);
+  const seconds = Math.floor(millis / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const ss = seconds % 60;
+  const mm = minutes % 60;
+  const hh = Math.floor(minutes / 60);
   return xx(hh) + ":" + xx(mm) + ":" + xx(ss);
 };
 
-const countdownText = (millis) => {
-  let seconds = Math.floor(millis / 1000);
-  let minutes = Math.floor(seconds / 60);
-  let ss = seconds % 60;
-  let mm = minutes % 60;
-  let hours = Math.floor(minutes / 60);
-  let hh = hours % 24;
-  let dd = Math.floor(hours / 24);
-  return `${dd} days, ${hh} hours, ${mm} minutes, ${ss} seconds of school left.`;
+const summerCountdownText = (millis) => {
+  const seconds = Math.floor(millis / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const ss = seconds % 60;
+  const mm = minutes % 60;
+  const hours = Math.floor(minutes / 60);
+  const hh = hours % 24;
+  const dd = Math.floor(hours / 24);
+  return `${dd} days, ${hh} hours, ${mm} minutes and ${ss} seconds`;
 };
 
 const hours = (h) => {
@@ -607,9 +591,7 @@ const hours = (h) => {
   return ((h + 11) % 12) + 1;
 };
 
-const xx = (n) => {
-  return (n < 10 ? "0" : "") + n;
-};
+const xx = (n) => String(n).padStart(2, '0');
 
 /**
  * Get the calendar for the given time. Undefined during the summer.
@@ -625,9 +607,12 @@ const nextCalendar = (t) => {
   return calendars.map((d) => new Calendar(d)).find((c) => t < c.startOfYear());
 };
 
+/*
+ * Parse a time string into a Date object on the same day as the given date.
+ */
 const parseTime = (x, date) => {
-  let [h, m] = x.split(":").map((s) => parseInt(s));
-  let d = new Date(date);
+  const [h, m] = x.split(":").map(Number);
+  const d = new Date(date);
   d.setHours(h);
   d.setMinutes(m);
   d.setSeconds(0);
@@ -635,17 +620,17 @@ const parseTime = (x, date) => {
   return d;
 };
 
+/*
+ * Parse a simple date string into a Date object.
+ */
 const parseDate = (x) => {
-  let [year, month, date] = x.split("-").map((s) => parseInt(s));
+  const [year, month, date] = x.split("-").map(Number);
   return new Date(year, month - 1, date, 12, 0, 0, 0);
 };
 
-const tomorrow = (t) => {
-  let d = new Date(t);
-  d.setDate(d.getDate() + 1);
-  return d;
-};
-
+/*
+ * Does the span of days from start to end (inclusive) include a Saturday or Sunday?
+ */
 const includesWeekend = (start, end) => {
   for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
     if ([0, 6].includes(d.getDay())) {
