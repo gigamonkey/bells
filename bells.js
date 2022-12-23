@@ -179,7 +179,7 @@ class Calendar {
   }
 
   isSchoolDay(t) {
-    return t.getDay() !== 0 && t.getDay() !== 6 && !this.isHoliday(t)
+    return t.getDay() !== 0 && t.getDay() !== 6 && !this.isHoliday(t);
   }
 
   isHoliday(t) {
@@ -327,7 +327,6 @@ class Schedule {
   }
 
   maybeWeekend(t, c) {
-
     const nextDay = c.nextDay(t);
 
     let isWeekend = false;
@@ -466,7 +465,9 @@ const onLoad = (event) => {
     };
     progressBars();
     update();
-    setTimeout(() => { setInterval(update, 1000); }, Date.now() % 1000)
+    setTimeout(() => {
+      setInterval(update, 1000);
+    }, Date.now() % 1000);
   }
 };
 
@@ -602,9 +603,9 @@ const updateProgress = (t, c, s) => {
   // Default to passing period.
   let color = "rgba(64, 0, 64, 0.25)";
 
-  const tenMinutes = (10 * 60 * 1000);
-  const inFirstTen = (t - p.start) < tenMinutes;
-  const inLastTen = (p.end - t) < tenMinutes;
+  const tenMinutes = 10 * 60 * 1000;
+  const inFirstTen = t - p.start < tenMinutes;
+  const inLastTen = p.end - t < tenMinutes;
 
   if (!p.isPassingPeriod) {
     if (inFirstTen || inLastTen) {
