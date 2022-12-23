@@ -8,140 +8,22 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
+//setOffset(2023, 1, 13, 16);
+
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
 
 const $ = (id) => document.getElementById(id);
 
-const calendars = [
-  {
-    year: "2022-2023",
-    firstDay: "2022-08-15",
-    lastDay: "2023-06-02",
-    schedules: {
-      default: {
-        NORMAL: [
-          { name: "Period 0", start: "7:26", end: "8:24" },
-          { name: "Period 1", start: "8:30", end: "9:28" },
-          { name: "Period 2", start: "9:34", end: "10:37" },
-          { name: "Period 3", start: "10:43", end: "11:41" },
-          { name: "Lunch", start: "11:41", end: "12:21" },
-          { name: "Period 4", start: "12:27", end: "13:25" },
-          { name: "Period 5", start: "13:31", end: "14:29" },
-          { name: "Period 6", start: "14:35", end: "15:33" },
-          { name: "Period 7", start: "15:39", end: "16:37" },
-        ],
-        LATE_START: [
-          { name: "Staff meeting", start: "8:03", end: "9:33" },
-          { name: "Period 1", start: "10:00", end: "10:43" },
-          { name: "Period 2", start: "10:49", end: "11:37" },
-          { name: "Period 3", start: "11:43", end: "12:26" },
-          { name: "Lunch", start: "12:26", end: "13:06" },
-          { name: "Period 4", start: "13:12", end: "13:55" },
-          { name: "Period 5", start: "14:01", end: "14:44" },
-          { name: "Period 6", start: "14:50", end: "15:33" },
-          { name: "Period 7", start: "15:39", end: "16:22" },
-        ],
-      },
-      "2022-09-01": [
-        { name: "Period 0", start: "7:26", end: "8:24" },
-        { name: "Period 1", start: "8:30", end: "9:12" },
-        { name: "Period 2A", start: "9:18", end: "10:26" },
-        { name: "Period 2B", start: "10:32", end: "11:40" },
-        { name: "Period 3", start: "11:46", end: "12:28" },
-        { name: "Lunch", start: "12:28", end: "13:08" },
-        { name: "Period 4", start: "13:14", end: "13:56" },
-        { name: "Period 5", start: "14:02", end: "14:44" },
-        { name: "Period 6", start: "14:50", end: "15:33" },
-        { name: "Period 7", start: "15:39", end: "16:37" },
-      ],
-      "2022-09-22": [
-        // Normal schedule during day
-        { name: "Period 0", start: "7:26", end: "8:24" },
-        { name: "Period 1", start: "8:30", end: "9:28" },
-        { name: "Period 2", start: "9:34", end: "10:37" },
-        { name: "Period 3", start: "10:43", end: "11:41" },
-        { name: "Lunch", start: "11:41", end: "12:21" },
-        { name: "Period 4", start: "12:27", end: "13:25" },
-        { name: "Period 5", start: "13:31", end: "14:29" },
-        { name: "Period 6", start: "14:35", end: "15:33" },
-        { name: "Period 7", start: "15:39", end: "16:37" },
-
-        // Back to school night
-        { name: "Back to School Period 0", start: "18:15", end: "18:25" },
-        { name: "Back to School Period 1", start: "18:30", end: "18:40" },
-        { name: "Principal's announcement", start: "18:45", end: "18:50" },
-        { name: "Back to School Period 2", start: "18:50", end: "19:00" },
-        { name: "Back to School Period 3", start: "19:05", end: "19:15" },
-        { name: "Back to School Period 4", start: "19:20", end: "19:30" },
-        { name: "Back to School Period 5", start: "19:35", end: "19:45" },
-        { name: "Back to School Period 6", start: "19:50", end: "20:00" },
-        { name: "Back to School Period 7", start: "20:05", end: "20:15" },
-      ],
-      "2022-12-14": [
-        { name: "Period 1 Final", start: "8:30", end: "10:30" },
-        { name: "Period 2 Final", start: "10:40", end: "12:40" },
-        { name: "Lunch", start: "12:40", end: "13:20" },
-        { name: "Finals Prep / Make Up", start: "13:26", end: "14:32" },
-      ],
-      "2022-12-15": [
-        { name: "Period 3 Final", start: "8:30", end: "10:30" },
-        { name: "Period 4 Final", start: "10:40", end: "12:40" },
-        { name: "Lunch", start: "12:40", end: "13:20" },
-        { name: "Finals Prep / Make Up", start: "13:26", end: "14:32" },
-      ],
-      "2022-12-16": [
-        { name: "Period 5 Final", start: "8:30", end: "10:30" },
-        { name: "Period 6 Final", start: "10:40", end: "12:40" },
-        { name: "Lunch", start: "12:40", end: "13:20" },
-        { name: "Finals Prep / Make Up", start: "13:26", end: "14:32" },
-      ],
-    },
-    holidays: [
-      "2022-09-05",
-      "2022-10-10",
-      "2022-10-28",
-      "2022-11-11",
-      "2022-11-21",
-      "2022-11-22",
-      "2022-11-23",
-      "2022-11-24",
-      "2022-11-25",
-      "2022-12-19",
-      "2022-12-20",
-      "2022-12-21",
-      "2022-12-22",
-      "2022-12-23",
-      "2022-12-26",
-      "2022-12-27",
-      "2022-12-28",
-      "2022-12-29",
-      "2022-12-30",
-      "2023-01-02",
-      "2023-01-16",
-      "2023-02-17",
-      "2023-02-20",
-      "2023-04-03",
-      "2023-04-04",
-      "2023-04-05",
-      "2023-04-06",
-      "2023-04-07",
-      "2023-05-15",
-      "2023-05-29",
-    ],
-    breakNames: {
-      "2022-11-18": "Thanksgiving break",
-      "2022-12-16": "Winter break",
-      "2023-05-31": "Spring break",
-    },
-  },
-];
+const calendars = await fetch("calendars.json").then(r => { if (r.ok) return r.json(); });
 
 class Calendar {
+
   firstDay;
   lastDay;
   schedules;
   holidays;
+  breakNames;
 
   constructor(data) {
     this.firstDay = data.firstDay;
@@ -184,6 +66,36 @@ class Calendar {
 
   isHoliday(t) {
     return this.holidays.indexOf(datestring(t)) !== -1;
+  }
+
+  nextHoliday(t) {
+    let d = new Date(t);
+    do {
+      d.setDate(d.getDate() + 1);
+    } while (!this.isHoliday(d));
+    return d;
+  }
+
+  nextStart(t) {
+    if (this.isSchoolDay(t)) {
+      const start = this.schedule(t).startOfDay(t);
+      if (start > t) {
+        return start;
+      }
+    }
+    const next = this.nextDay(t);
+    return this.schedule(next).startOfDay(next);
+  }
+
+  previousEnd(t) {
+    if (this.isSchoolDay(t)) {
+      const end = this.schedule(t).endOfDay(t);
+      if (end < t) {
+        return end;
+      }
+    }
+    const prev = this.previousDay(t);
+    return this.schedule(prev).endOfDay(prev);
   }
 
   nextDay(t) {
@@ -246,7 +158,8 @@ class Schedule {
   }
 
   firstPeriodIndex(d) {
-    const hasExtra = this.periods[0].name === "Period 0";
+    const zeroName = this.periods[0].name;
+    const hasExtra = zeroName === "Period 0" || zeroName === "Staff meeting";
     return hasExtra ? (extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
   }
 
@@ -264,23 +177,22 @@ class Schedule {
     return this.lastPeriod(d).endTime(d);
   }
 
-  currentPeriod(t) {
-    // Figure out what period, if any, we are in. May be the weekend or
-    // the long period between the end of school today and the start of
-    // school tomorrow or from the end of school yesterday and the start
-    // of school today.
+  notInSchool(d, c) {
+    return !c.isSchoolDay(d) || this.endOfDay(d) < d || this.startOfDay(d) > d;
+  }
+
+  currentInterval(t) {
+    // Figure out what period, if any, we are in. May be the weekend or a
+    // vacation or the period between the end of one school day and the start of
+    // the next though we label that one period either "After school" or "Before
+    // school" depending which day it is. Otherwise, it's a period during
+    // school, an actual period or a passing period.
     let c = calendar(t);
 
-    let vacation = this.maybeVacation(t, c);
-    let weekend = this.maybeWeekend(t, c);
-    let holiday = this.maybeHoliday(t, c);
+    let daysOff = this.maybeBreak(t, c);
 
-    if (vacation !== null) {
-      return vacation;
-    } else if (weekend !== null) {
-      return weekend;
-    } else if (holiday !== null) {
-      return holiday;
+    if (daysOff) {
+      return daysOff;
     } else {
       let first = this.firstPeriodIndex(t);
       let last = this.lastPeriodIndex(t);
@@ -326,78 +238,46 @@ class Schedule {
     return minutes;
   }
 
-  maybeWeekend(t, c) {
-    const nextDay = c.nextDay(t);
+  /*
+   * Breaks include weekends and longer vacations, i.e. any period where the
+   * number of days from the end of school to the start of school is three or
+   * more (i.e. Friday to Monday is three days.) In theory there could be a mid
+   * week break but there aren't actually so all breaks are either weekends,
+   * long weekends, or a named break.
+   */
+  maybeBreak(t, c) {
+    if (this.notInSchool(t, c)) {
+      const prev = c.previousEnd(t);
+      const next = c.nextStart(t);
+      const days = daysBetween(prev, next);
+      console.log(`${days} between ${prev} and ${next}`);
 
-    let isWeekend = false;
-    let start;
-    let d = new Date(t);
-    while (d < nextDay) {
-      if ([0, 6].includes(d.getDay())) {
-        if (c.isSchoolDay(t) && this.endOfDay(t) < t) {
-          isWeekend = true;
-          start = this.endOfDay(t);
-        } else if (!c.isSchoolDay(t)) {
-          isWeekend = true;
-          const prev = c.previousDay(t);
-          start = c.schedule(prev).endOfDay(prev);
+      if (days >= 3) {
+
+        let name;
+        if (days > 4) {
+          name = c.breakNames[datestring(c.nextHoliday(prev))] || "Vacation";
+        } else if (includesWeekend(prev, next)) {
+          name = days > 3 ? "Long weekend" : "Weekend";
+        } else {
+          // This should never happen since there are no breaks that don't
+          // include a weekend
+          name = "Mid-week vacation?";
         }
-        break;
-      }
-      d.setDate(d.getDate() + 1);
-    }
 
-    /*
-    if (day === 5 && this.endOfDay(t) < t) {
-      isWeekend = true;
-      start = this.endOfDay(t);
-    } else if ([0, 6].includes(day)) {
-      isWeekend = true;
-      const prev = c.previousDay(t);
-      start = c.schedule(prev).endOfDay(prev);
-      }
-    */
-
-    if (isWeekend) {
-      const next = c.nextDay(t);
-      const end = c.schedule(next).startOfDay(next);
-      const label = start.getDay() < 5 || end.getDay() > 1 ? "Long weekend!" : "Weekend!";
-      return new Interval(label, start, end, false, true);
-    } else {
-      return null;
-    }
-  }
-
-  maybeVacation(t, c) {
-    if (!c.isSchoolDay(t) || t > c.schedule(t).endOfDay(t)) {
-      const prev = c.isSchoolDay(t) ? new Date(t) : c.previousDay(t);
-      const next = c.nextDay(t);
-
-      if (daysBetween(prev, next) > 3) {
         const start = c.schedule(prev).endOfDay(prev);
         const end = c.schedule(next).startOfDay(next);
-        const name = c.breakNames[datestring(prev)];
         return new Interval(`${name}!`, start, end, false, true);
       }
-    } else {
-      return null;
-    }
-  }
-
-  maybeHoliday(t, c) {
-    if (c.isHoliday(t)) {
-      const prev = c.previousDay(t);
-      const next = c.nextDay(t);
-      const start = c.schedule(prev).endOfDay(prev);
-      const end = c.schedule(next).startOfDay(next);
-      return new Interval("Holiday!", start, end, false, true);
-    } else {
-      return null;
     }
   }
 }
 
-// Actual periods on the schedle.
+/*
+ * Periods on the schedule. Start and end are times like 8:03 and 10:30, not
+ * connected to any particular date. The startTime and endTime methods can parse
+ * the period endpoints to actual times relative to a given date.
+ */
 class Period {
   constructor(name, start, end) {
     this.name = name;
@@ -418,7 +298,9 @@ class Period {
   }
 }
 
-// An actual concrete named interval of time.
+/*
+ * Intervals are specific spans of time on a particular date.
+ */
 class Interval {
   constructor(name, start, end, duringSchool, isPassingPeriod) {
     this.name = name;
@@ -453,22 +335,6 @@ const noon = (date) => {
   d.setSeconds(0);
   d.setMilliseconds(0);
   return d;
-};
-
-const onLoad = (event) => {
-  if (event.target.readyState === "complete") {
-    loadConfiguration();
-    setupConfigPanel();
-    $("left").onclick = () => {
-      togo = !togo;
-      update();
-    };
-    progressBars();
-    update();
-    setTimeout(() => {
-      setInterval(update, 1000);
-    }, Date.now() % 1000);
-  }
 };
 
 const loadConfiguration = () => {
@@ -598,16 +464,17 @@ const updateProgress = (t, c, s) => {
   $("noCalendar").style.display = "none";
   $("summer").style.display = "none";
   $("main").style.display = "block";
-  let p = s.currentPeriod(t);
+  const interval = s.currentInterval(t);
+  const { start, end, isPassingPeriod, duringSchool } = interval
 
   // Default to passing period.
   let color = "rgba(64, 0, 64, 0.25)";
 
   const tenMinutes = 10 * 60 * 1000;
-  const inFirstTen = t - p.start < tenMinutes;
-  const inLastTen = p.end - t < tenMinutes;
+  const inFirstTen = t - start < tenMinutes;
+  const inLastTen = end - t < tenMinutes;
 
-  if (!p.isPassingPeriod) {
+  if (!isPassingPeriod) {
     if (inFirstTen || inLastTen) {
       color = "rgba(255, 0, 0, 0.5)";
     } else {
@@ -616,11 +483,11 @@ const updateProgress = (t, c, s) => {
   }
 
   $("container").style.background = color;
-  $("period").replaceChildren(periodName(p), periodTimes(p));
-  $("left").innerHTML = hhmmss(togo ? p.end - t : t - p.start) + " " + (togo ? "to go" : "done");
-  updateProgressBar("periodbar", p.start, p.end, t);
+  $("period").replaceChildren(periodName(interval), periodTimes(interval));
+  $("left").innerHTML = hhmmss(togo ? end - t : t - start) + " " + (togo ? "to go" : "done");
+  updateProgressBar("periodbar", start, end, t);
 
-  if (p.duringSchool) {
+  if (duringSchool) {
     $("today").innerHTML = hhmmss(togo ? s.endOfDay(t) - t : t - s.startOfDay(t)) + " " + (togo ? "to go" : "done");
     updateProgressBar("todaybar", s.startOfDay(t), s.endOfDay(t), t);
   } else {
@@ -754,4 +621,33 @@ const parseDate = (x) => {
   return new Date(year, month - 1, date, 12, 0, 0, 0);
 };
 
-document.addEventListener("readystatechange", onLoad);
+const tomorrow = (t) => {
+  let d = new Date(t);
+  d.setDate(d.getDate() + 1);
+  return d;
+};
+
+const includesWeekend = (start, end) => {
+  for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+    if ([0, 6].includes(d.getDay())) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const go = () => {
+  loadConfiguration();
+  setupConfigPanel();
+  $("left").onclick = () => {
+    togo = !togo;
+    update();
+  };
+  progressBars();
+  update();
+  setTimeout(() => {
+    setInterval(update, 1000);
+  }, Date.now() % 1000);
+};
+
+go();
