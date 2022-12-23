@@ -8,7 +8,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 1, 13, 16);
+//setOffset(2023, 1, 3, 12, 22);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -52,6 +52,7 @@ class Calendar {
   schedule(t) {
     const d = datestring(t);
     return new Schedule(
+      this,
       d in this.schedules
         ? this.schedules[d]
         : t.getDay() === 1
@@ -139,10 +140,18 @@ class Calendar {
 }
 
 class Schedule {
+
+  calendar;
   periods;
 
-  constructor(periods) {
+  constructor(calendar, periods) {
+    this.calendar = calendar;
     this.periods = periods.map((x) => new Period(x.name, x.start, x.end));
+    this.periods.forEach((p, i, ps) => {
+      if (i < ps.length - 1) {
+        p.next = ps[i + 1];
+      }
+    });
   }
 
   period(i) {
@@ -158,15 +167,16 @@ class Schedule {
   }
 
   firstPeriodIndex(d) {
-    const zeroName = this.periods[0].name;
-    const hasExtra = zeroName === "Period 0" || zeroName === "Staff meeting";
-    return hasExtra ? (extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
+    const firstName = this.periods[0].name;
+    const hasZeroPeriod = firstName === "Period 0" || firstName === "Staff meeting";
+    return hasZeroPeriod ? (extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
   }
 
   lastPeriodIndex(d) {
     const last = this.periods.length - 1;
-    const hasExtra = this.periods[last].name === "Period 7";
-    return hasExtra ? (extraPeriods[d.getDay()].seventh ? last : last - 1) : last;
+    const lastName = this.periods[last].name;
+    const hasSeventh = lastName === "Period 7";
+    return hasSeventh ? (extraPeriods[d.getDay()].seventh ? last : last - 1) : last;
   }
 
   startOfDay(d) {
@@ -177,44 +187,37 @@ class Schedule {
     return this.lastPeriod(d).endTime(d);
   }
 
-  notInSchool(d, c) {
-    return !c.isSchoolDay(d) || this.endOfDay(d) < d || this.startOfDay(d) > d;
+  notInSchool(d) {
+    return !this.calendar.isSchoolDay(d) || this.endOfDay(d) < d || this.startOfDay(d) > d;
   }
 
   currentInterval(t) {
-    // Figure out what period, if any, we are in. May be the weekend or a
-    // vacation or the period between the end of one school day and the start of
-    // the next though we label that one period either "After school" or "Before
-    // school" depending which day it is. Otherwise, it's a period during
-    // school, an actual period or a passing period.
-    let c = calendar(t);
+    // Figure out what interval we are in. May be an actual period, a passing
+    // period, the weekend, a vacation or the period between the end of one
+    // school day and the start of the next. (Though we label that last one
+    // either "After school" or "Before school" depending which day it is.)
 
-    let daysOff = this.maybeBreak(t, c);
+    const daysOff = this.maybeBreak(t);
 
     if (daysOff) {
       return daysOff;
     } else {
-      let first = this.firstPeriodIndex(t);
-      let last = this.lastPeriodIndex(t);
 
-      for (let i = first; i <= last; i++) {
-        let p = this.period(i);
-        let start = p.startTime(t);
-        let end = p.endTime(t);
+      const first = this.firstPeriod(t);
+      const last = this.lastPeriod(t);
 
-        if (i === first && t < start) {
-          const prevDay = c.previousDay(t);
-          return new Interval("Before school", c.schedule(prevDay).endOfDay(prevDay), start, false);
-        } else if (start <= t && t <= end) {
-          return p.toInterval(t);
-        } else if (i === last) {
-          const nextDay = c.nextDay(t);
-          return new Interval("After school", end, c.schedule(nextDay).startOfDay(nextDay), false);
-        } else {
-          let next = this.period(i + 1);
-          let nextStart = next.startTime(t);
-          if (t <= nextStart) {
-            return new Interval(`Passing to ${next.name}`, end, nextStart, true, true);
+      if (first.isAfter(t)) {
+        return new Interval("Before school", this.calendar.previousEnd(t), first.startTime(t), false);
+
+      } else if (last.isBefore(t)) {
+        return new Interval("After school", last.endTime(t), this.calendar.nextStart(t), false);
+
+      } else {
+        for (let p = first; p !== null; p = p.next) {
+          if (p.contains(t)) {
+            return p.toInterval(t);
+          } else if (p.isBefore(t) && p.next.isAfter(t)) {
+            return new Interval(`Passing to ${p.next.name}`, p.endTime(t), p.next.startTime(t), true, true);
           }
         }
       }
@@ -245,44 +248,41 @@ class Schedule {
    * week break but there aren't actually so all breaks are either weekends,
    * long weekends, or a named break.
    */
-  maybeBreak(t, c) {
-    if (this.notInSchool(t, c)) {
-      const prev = c.previousEnd(t);
-      const next = c.nextStart(t);
+  maybeBreak(t) {
+    if (this.notInSchool(t)) {
+      const prev = this.calendar.previousEnd(t);
+      const next = this.calendar.nextStart(t);
       const days = daysBetween(prev, next);
-      console.log(`${days} between ${prev} and ${next}`);
-
       if (days >= 3) {
-
-        let name;
-        if (days > 4) {
-          name = c.breakNames[datestring(c.nextHoliday(prev))] || "Vacation";
-        } else if (includesWeekend(prev, next)) {
-          name = days > 3 ? "Long weekend" : "Weekend";
-        } else {
-          // This should never happen since there are no breaks that don't
-          // include a weekend
-          name = "Mid-week vacation?";
-        }
-
-        const start = c.schedule(prev).endOfDay(prev);
-        const end = c.schedule(next).startOfDay(next);
-        return new Interval(`${name}!`, start, end, false, true);
+        return new Interval(`${this.breakName(days, prev, next)}!`, prev, next, false, true);
       }
+    }
+  }
+
+  breakName(days, start, end) {
+    if (days > 4) {
+      return this.calendar.breakNames[datestring(this.calendar.nextHoliday(start))] || "Vacation";
+    } else if (includesWeekend(start, end)) {
+      return days > 3 ? "Long weekend" : "Weekend";
+    } else {
+      // This should never happen since all breaks include a weekend
+      return "Mid-week vacation?";
     }
   }
 }
 
 /*
- * Periods on the schedule. Start and end are times like 8:03 and 10:30, not
- * connected to any particular date. The startTime and endTime methods can parse
- * the period endpoints to actual times relative to a given date.
+ * Actual periods on the schedule. Start and end are strings like 8:03 and
+ * 10:30, not connected to any particular date. The startTime and endTime
+ * methods can parse the period endpoints to actual times relative to a given
+ * date.
  */
 class Period {
   constructor(name, start, end) {
     this.name = name;
     this.start = start;
     this.end = end;
+    this.next = null;
   }
 
   startTime(t) {
@@ -292,6 +292,19 @@ class Period {
   endTime(t) {
     return parseTime(this.end, t);
   }
+
+  isAfter(t) {
+    return this.startTime(t) > t;
+  }
+
+  contains(t) {
+    return this.startTime(t) < t && t < this.endTime(t);
+  }
+
+  isBefore(t) {
+    return this.endTime(t) < t;
+  }
+
 
   toInterval(t) {
     return new Interval(this.name, this.startTime(t), this.endTime(t), true, false);
@@ -436,7 +449,7 @@ const update = () => {
     $("container").style.background = "rgba(255, 0, 128, 0.25)";
     summerCountdown(t);
   } else {
-    let s = c.schedule(t);
+    const s = c.schedule(t);
     updateProgress(t, c, s);
     updateCountdown(t, c, s);
   }
@@ -446,9 +459,7 @@ const summerCountdown = (t) => {
   const nextCal = nextCalendar(t);
   if (nextCal) {
     const start = nextCalendar(t).startOfYear();
-    const days = daysBetween(t, start);
-    const hours = hoursBetween(t, start);
-    const time = hours <= 24 ? hhmmss(start - t) : `${days} day${days === 1 ? "" : "s"}`;
+    const time = daysCountdown(t, start);
     $("untilSchool").replaceChildren(document.createTextNode(`${time} until start of school.`));
     $("summer").style.display = "block";
     $("main").style.display = "none";
@@ -458,6 +469,12 @@ const summerCountdown = (t) => {
     $("main").style.display = "none";
     $("summer").style.display = "none";
   }
+};
+
+const daysCountdown = (t, until) => {
+  const days = daysBetween(t, until);
+  const hours = hoursBetween(t, until);
+  return hours <= 24 ? hhmmss(until - t) : `${days} day${days === 1 ? "" : "s"}`;
 };
 
 const updateProgress = (t, c, s) => {
@@ -484,7 +501,9 @@ const updateProgress = (t, c, s) => {
 
   $("container").style.background = color;
   $("period").replaceChildren(periodName(interval), periodTimes(interval));
-  $("left").innerHTML = hhmmss(togo ? end - t : t - start) + " " + (togo ? "to go" : "done");
+
+  const time = togo ? daysCountdown(t, end) : daysCountdown(start, t);
+  $("left").innerHTML = time + " " + (togo ? "to go" : "done");
   updateProgressBar("periodbar", start, end, t);
 
   if (duringSchool) {
