@@ -1,4 +1,4 @@
-import { Calendar, Schedule, Period, Interval } from './calendar.js';
+import { Calendar } from './calendar.js';
 import { timestring, hoursBetween, hhmmss, ddhhmmss, parseTime } from './datetime.js';
 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
@@ -46,9 +46,9 @@ const setupConfigPanel = () => {
   $('#gear').onclick = toggleConfig;
   $('#sched').onclick = togglePeriods;
 
-  const rows = $$('#configuration table tbody tr');
   let day = 1;
 
+  const rows = $$('#configuration table tbody tr');
   for (const node of rows) {
     const cells = node.querySelectorAll('td');
     const zero = cells[1].querySelector('input');
@@ -72,7 +72,7 @@ const setupConfigPanel = () => {
   }
 };
 
-const progressBars = () => {
+const addProgressBars = () => {
   for (const bar of $$('.bar')) {
     bar.appendChild(barSpan(0, 'done'));
     bar.appendChild(barSpan(0, 'togo'));
@@ -121,7 +121,10 @@ const togglePeriods = () => {
   }
 };
 
+let timeoutID;
+
 const update = () => {
+  if (timeoutID) clearTimeout(timeoutID);
   const t = now();
   const c = calendar(t);
   if (!c) {
@@ -129,6 +132,7 @@ const update = () => {
   } else {
     normalCountdown(t, c);
   }
+  timeoutID = setTimeout(update, 1000 - t.getMilliseconds());
 };
 
 const summerCountdown = (t) => {
@@ -191,6 +195,8 @@ const updateProgress = (t, s) => {
   $('#period').replaceChildren(periodName(interval), periodTimes(interval));
 
   const time = togo ? countdownText(t, end) : countdownText(start, t);
+  // console.log(`t: ${Number(t) % 1000}; e: ${Number(end) % 1000}; d: ${(Number(end) - Number(t)) % 1000}`);
+
   $('#left').innerHTML = time + ' ' + (togo ? 'to go' : 'done');
   updateProgressBar('periodbar', start, end, t);
 
@@ -267,11 +273,8 @@ const go = () => {
     togo = !togo;
     update();
   };
-  progressBars();
+  addProgressBars();
   update();
-  setTimeout(() => {
-    setInterval(update, 1000);
-  }, Date.now() % 1000);
 };
 
 go();

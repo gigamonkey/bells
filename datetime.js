@@ -7,7 +7,7 @@ const timestring = (t) => {
 };
 
 const hhmmss = (millis) => {
-  const seconds = Math.floor(millis / 1000);
+  const seconds = Math.round(millis / 1000);
   const minutes = Math.floor(seconds / 60);
   const ss = seconds % 60;
   const mm = minutes % 60;
