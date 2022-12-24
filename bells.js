@@ -1,5 +1,5 @@
 import { Calendar, Schedule, Period, Interval } from './calendar.js';
-import { timestring, hoursBetween, hhmmss } from './datetime.js';
+import { timestring, hoursBetween, hhmmss, ddhhmmss } from './datetime.js';
 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
@@ -12,11 +12,14 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
 };
 
 //setOffset(2023, 5, 15, 8, 2, 50);
+setOffset(2022, 7, 10)
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
 
-const $ = (id) => document.getElementById(id);
+
+const $ = (q) => document.querySelector(q);
+const $$ = (q) => document.querySelectorAll(q);
 
 const calendars = await fetch("calendars.json").then((r) => {
   if (r.ok) return r.json();
@@ -41,11 +44,11 @@ const saveConfiguration = () => {
 };
 
 const setupConfigPanel = () => {
-  document.querySelector("#qr").onclick = toggleQR;
-  document.querySelector("#gear").onclick = toggleConfig;
-  document.querySelector("#sched").onclick = togglePeriods;
+  $("#qr").onclick = toggleQR;
+  $("#gear").onclick = toggleConfig;
+  $("#sched").onclick = togglePeriods;
 
-  const rows = document.querySelectorAll("#configuration table tbody tr");
+  const rows = $$("#configuration table tbody tr");
   let day = 1;
 
   for (const node of rows) {
@@ -72,7 +75,7 @@ const setupConfigPanel = () => {
 };
 
 const progressBars = () => {
-  for (const bar of document.querySelectorAll(".bar")) {
+  for (const bar of $$(".bar")) {
     bar.appendChild(barSpan(0, "done"));
     bar.appendChild(barSpan(0, "togo"));
   }
@@ -85,17 +88,17 @@ const barSpan = (width, color) => {
 };
 
 const toggleQR = () => {
-  const div = document.querySelector("#qr-code");
+  const div = $("#qr-code");
   div.style.display = div.style.display === "block" ? "none" : "block";
 };
 
 const toggleConfig = () => {
-  const table = document.querySelector("#periods_config");
+  const table = $("#periods_config");
   table.style.display = table.style.display === "table" ? "none" : "table";
 };
 
 const togglePeriods = () => {
-  const table = document.querySelector("#periods");
+  const table = $("#periods");
   if (table.style.display === "table") {
     table.style.display = "none";
   } else {
@@ -135,16 +138,16 @@ const summerCountdown = (t) => {
   if (nextCal) {
     const start = nextCalendar(t).startOfYear();
     const time = summerCountdownText(start - t);
-    $("untilSchool").replaceChildren(document.createTextNode(`${time} until school starts.`));
-    $("summer").style.display = "block";
-    $("main").style.display = "none";
-    $("noCalendar").style.display = "none";
+    $("#untilSchool").replaceChildren(document.createTextNode(`${time} until school starts.`));
+    $("#summer").style.display = "block";
+    $("#main").style.display = "none";
+    $("#noCalendar").style.display = "none";
   } else {
-    $("noCalendar").style.display = "block";
-    $("main").style.display = "none";
-    $("summer").style.display = "none";
+    $("#noCalendar").style.display = "block";
+    $("#main").style.display = "none";
+    $("#summer").style.display = "none";
   }
-  $("container").style.background = "rgba(255, 0, 128, 0.25)";
+  $("#container").style.background = "rgba(255, 0, 128, 0.25)";
 };
 
 const normalCountdown = (t, c) => {
@@ -165,9 +168,9 @@ const countdownText = (t, until) => {
 };
 
 const updateProgress = (t, s) => {
-  $("noCalendar").style.display = "none";
-  $("summer").style.display = "none";
-  $("main").style.display = "block";
+  $("#noCalendar").style.display = "none";
+  $("#summer").style.display = "none";
+  $("#main").style.display = "block";
   const interval = s.currentInterval(t);
   const { start, end, isPassingPeriod, duringSchool } = interval;
 
@@ -186,43 +189,36 @@ const updateProgress = (t, s) => {
     }
   }
 
-  $("container").style.background = color;
-  $("period").replaceChildren(periodName(interval), periodTimes(interval));
+  $("#container").style.background = color;
+  $("#period").replaceChildren(periodName(interval), periodTimes(interval));
 
   const time = togo ? countdownText(t, end) : countdownText(start, t);
-  $("left").innerHTML = time + " " + (togo ? "to go" : "done");
+  $("#left").innerHTML = time + " " + (togo ? "to go" : "done");
   updateProgressBar("periodbar", start, end, t);
 
   if (duringSchool) {
-    $("today").innerHTML = hhmmss(togo ? s.endOfDay(t) - t : t - s.startOfDay(t)) + " " + (togo ? "to go" : "done");
+    $("#today").innerHTML = hhmmss(togo ? s.endOfDay(t) - t : t - s.startOfDay(t)) + " " + (togo ? "to go" : "done");
     updateProgressBar("todaybar", s.startOfDay(t), s.endOfDay(t), t);
   } else {
-    $("today").replaceChildren();
-    $("todaybar").replaceChildren();
+    $("#today").replaceChildren();
+    $("#todaybar").replaceChildren();
   }
 };
 
 const updateCountdown = (t, cal, s) => {
   const days = cal.schoolDaysLeft(t, s);
   if (days === 1) {
-    $("countdown").innerHTML = "Last day of school!";
+    $("#countdown").innerHTML = "Last day of school!";
   } else if (days <= 30) {
     const s = days == 1 ? "" : "s";
-    $("countdown").innerHTML = `${days} school day${s} left in the year.`;
+    $("#countdown").innerHTML = `${days} school day${s} left in the year.`;
   } else {
-    $("countdown").replaceChildren();
+    $("#countdown").replaceChildren();
   }
 };
 
-const div = (className, contents) => {
-  const d = document.createElement("div");
-  d.classList.add(className);
-  d.innerHTML = contents;
-  return d;
-};
-
 const updateProgressBar = (id, start, end, t) => {
-  const bar = $(id);
+  const bar = $(`#${id}`);
   const total = end - start;
   const done = Math.round((100 * (t - start)) / total);
   bar.childNodes[0].style.width = done + "%";
@@ -248,7 +244,7 @@ const periodTimes = (p) => {
 };
 
 const summerCountdownText = (millis) => {
-  const [ days, hours, minutes, seconds ] = ddhhmmsss(millis);
+  const [ days, hours, minutes, seconds ] = ddhhmmss(millis);
   return `${days} days, ${hours} hours, ${minutes} minutes and ${seconds} seconds`;
 };
 
@@ -269,7 +265,7 @@ const nextCalendar = (t) => {
 const go = () => {
   loadConfiguration();
   setupConfigPanel();
-  $("left").onclick = () => {
+  $("#left").onclick = () => {
     togo = !togo;
     update();
   };
