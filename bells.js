@@ -1,5 +1,5 @@
 import { Calendar, Schedule, Period, Interval } from './calendar.js';
-import { timestring, hoursBetween, hhmmss, ddhhmmss } from './datetime.js';
+import { timestring, hoursBetween, hhmmss, ddhhmmss, parseTime } from './datetime.js';
 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
