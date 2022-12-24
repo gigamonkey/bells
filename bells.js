@@ -12,19 +12,17 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
 };
 
 //setOffset(2023, 5, 15, 8, 2, 50);
-setOffset(2022, 7, 10)
+setOffset(2022, 7, 10);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
 
-
 const $ = (q) => document.querySelector(q);
 const $$ = (q) => document.querySelectorAll(q);
 
-const calendars = await fetch("calendars.json").then((r) => {
+const calendars = await fetch('calendars.json').then((r) => {
   if (r.ok) return r.json();
 });
-
 
 // Kept in local storage
 let extraPeriods = null;
@@ -32,7 +30,7 @@ let extraPeriods = null;
 let togo = true;
 
 const loadConfiguration = () => {
-  extraPeriods = JSON.parse(localStorage.getItem("extraPeriods"));
+  extraPeriods = JSON.parse(localStorage.getItem('extraPeriods'));
   if (extraPeriods === null) {
     extraPeriods = DEFAULT_EXTRA_PERIODS;
     saveConfiguration();
@@ -40,21 +38,21 @@ const loadConfiguration = () => {
 };
 
 const saveConfiguration = () => {
-  localStorage.setItem("extraPeriods", JSON.stringify(extraPeriods));
+  localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
 };
 
 const setupConfigPanel = () => {
-  $("#qr").onclick = toggleQR;
-  $("#gear").onclick = toggleConfig;
-  $("#sched").onclick = togglePeriods;
+  $('#qr').onclick = toggleQR;
+  $('#gear').onclick = toggleConfig;
+  $('#sched').onclick = togglePeriods;
 
-  const rows = $$("#configuration table tbody tr");
+  const rows = $$('#configuration table tbody tr');
   let day = 1;
 
   for (const node of rows) {
-    const cells = node.querySelectorAll("td");
-    const zero = cells[1].querySelector("input");
-    const seventh = cells[2].querySelector("input");
+    const cells = node.querySelectorAll('td');
+    const zero = cells[1].querySelector('input');
+    const seventh = cells[2].querySelector('input');
     const ep = extraPeriods[day];
 
     zero.checked = ep.zero;
@@ -75,32 +73,32 @@ const setupConfigPanel = () => {
 };
 
 const progressBars = () => {
-  for (const bar of $$(".bar")) {
-    bar.appendChild(barSpan(0, "done"));
-    bar.appendChild(barSpan(0, "togo"));
+  for (const bar of $$('.bar')) {
+    bar.appendChild(barSpan(0, 'done'));
+    bar.appendChild(barSpan(0, 'togo'));
   }
 };
 
 const barSpan = (width, color) => {
-  const s = document.createElement("span");
+  const s = document.createElement('span');
   s.classList.add(color);
   return s;
 };
 
 const toggleQR = () => {
-  const div = $("#qr-code");
-  div.style.display = div.style.display === "block" ? "none" : "block";
+  const div = $('#qr-code');
+  div.style.display = div.style.display === 'block' ? 'none' : 'block';
 };
 
 const toggleConfig = () => {
-  const table = $("#periods_config");
-  table.style.display = table.style.display === "table" ? "none" : "table";
+  const table = $('#periods_config');
+  table.style.display = table.style.display === 'table' ? 'none' : 'table';
 };
 
 const togglePeriods = () => {
-  const table = $("#periods");
-  if (table.style.display === "table") {
-    table.style.display = "none";
+  const table = $('#periods');
+  if (table.style.display === 'table') {
+    table.style.display = 'none';
   } else {
     table.replaceChildren();
 
@@ -113,13 +111,13 @@ const togglePeriods = () => {
     const last = s.lastPeriod(t);
 
     for (let p = first; p !== null; p = p.next) {
-      const tr = document.createElement("tr");
+      const tr = document.createElement('tr');
       tr.append(td(p.name));
       tr.append(td(timestring(parseTime(p.start, t))));
       tr.append(td(timestring(parseTime(p.end, t))));
       table.append(tr);
     }
-    table.style.display = "table";
+    table.style.display = 'table';
   }
 };
 
@@ -138,16 +136,16 @@ const summerCountdown = (t) => {
   if (nextCal) {
     const start = nextCalendar(t).startOfYear();
     const time = summerCountdownText(start - t);
-    $("#untilSchool").replaceChildren(document.createTextNode(`${time} until school starts.`));
-    $("#summer").style.display = "block";
-    $("#main").style.display = "none";
-    $("#noCalendar").style.display = "none";
+    $('#untilSchool').replaceChildren(document.createTextNode(`${time} until school starts.`));
+    $('#summer').style.display = 'block';
+    $('#main').style.display = 'none';
+    $('#noCalendar').style.display = 'none';
   } else {
-    $("#noCalendar").style.display = "block";
-    $("#main").style.display = "none";
-    $("#summer").style.display = "none";
+    $('#noCalendar').style.display = 'block';
+    $('#main').style.display = 'none';
+    $('#summer').style.display = 'none';
   }
-  $("#container").style.background = "rgba(255, 0, 128, 0.25)";
+  $('#container').style.background = 'rgba(255, 0, 128, 0.25)';
 };
 
 const normalCountdown = (t, c) => {
@@ -163,19 +161,19 @@ const countdownText = (t, until) => {
   } else {
     const days = Math.floor(hours / 24);
     const hh = until - t - days * 24 * 60 * 60 * 1000;
-    return `${days} day${days === 1 ? "" : "s"}, ${hhmmss(hh)}`;
+    return `${days} day${days === 1 ? '' : 's'}, ${hhmmss(hh)}`;
   }
 };
 
 const updateProgress = (t, s) => {
-  $("#noCalendar").style.display = "none";
-  $("#summer").style.display = "none";
-  $("#main").style.display = "block";
+  $('#noCalendar').style.display = 'none';
+  $('#summer').style.display = 'none';
+  $('#main').style.display = 'block';
   const interval = s.currentInterval(t);
   const { start, end, isPassingPeriod, duringSchool } = interval;
 
   // Default to passing period.
-  let color = "rgba(64, 0, 64, 0.25)";
+  let color = 'rgba(64, 0, 64, 0.25)';
 
   const tenMinutes = 10 * 60 * 1000;
   const inFirstTen = t - start < tenMinutes;
@@ -183,37 +181,37 @@ const updateProgress = (t, s) => {
 
   if (!isPassingPeriod) {
     if (inFirstTen || inLastTen) {
-      color = "rgba(255, 0, 0, 0.5)";
+      color = 'rgba(255, 0, 0, 0.5)';
     } else {
-      color = "rgba(64, 0, 255, 0.25)";
+      color = 'rgba(64, 0, 255, 0.25)';
     }
   }
 
-  $("#container").style.background = color;
-  $("#period").replaceChildren(periodName(interval), periodTimes(interval));
+  $('#container').style.background = color;
+  $('#period').replaceChildren(periodName(interval), periodTimes(interval));
 
   const time = togo ? countdownText(t, end) : countdownText(start, t);
-  $("#left").innerHTML = time + " " + (togo ? "to go" : "done");
-  updateProgressBar("periodbar", start, end, t);
+  $('#left').innerHTML = time + ' ' + (togo ? 'to go' : 'done');
+  updateProgressBar('periodbar', start, end, t);
 
   if (duringSchool) {
-    $("#today").innerHTML = hhmmss(togo ? s.endOfDay(t) - t : t - s.startOfDay(t)) + " " + (togo ? "to go" : "done");
-    updateProgressBar("todaybar", s.startOfDay(t), s.endOfDay(t), t);
+    $('#today').innerHTML = hhmmss(togo ? s.endOfDay(t) - t : t - s.startOfDay(t)) + ' ' + (togo ? 'to go' : 'done');
+    updateProgressBar('todaybar', s.startOfDay(t), s.endOfDay(t), t);
   } else {
-    $("#today").replaceChildren();
-    $("#todaybar").replaceChildren();
+    $('#today').replaceChildren();
+    $('#todaybar').replaceChildren();
   }
 };
 
 const updateCountdown = (t, cal, s) => {
   const days = cal.schoolDaysLeft(t, s);
   if (days === 1) {
-    $("#countdown").innerHTML = "Last day of school!";
+    $('#countdown').innerHTML = 'Last day of school!';
   } else if (days <= 30) {
-    const s = days == 1 ? "" : "s";
-    $("#countdown").innerHTML = `${days} school day${s} left in the year.`;
+    const s = days == 1 ? '' : 's';
+    $('#countdown').innerHTML = `${days} school day${s} left in the year.`;
   } else {
-    $("#countdown").replaceChildren();
+    $('#countdown').replaceChildren();
   }
 };
 
@@ -221,30 +219,30 @@ const updateProgressBar = (id, start, end, t) => {
   const bar = $(`#${id}`);
   const total = end - start;
   const done = Math.round((100 * (t - start)) / total);
-  bar.childNodes[0].style.width = done + "%";
-  bar.childNodes[1].style.width = 100 - done + "%";
+  bar.childNodes[0].style.width = done + '%';
+  bar.childNodes[1].style.width = 100 - done + '%';
 };
 
 const td = (text) => {
-  const td = document.createElement("td");
+  const td = document.createElement('td');
   td.innerText = text;
   return td;
 };
 
 const periodName = (p) => {
-  const d = document.createElement("p");
+  const d = document.createElement('p');
   d.innerHTML = p.name;
   return d;
 };
 
 const periodTimes = (p) => {
-  const d = document.createElement("p");
-  d.innerHTML = timestring(p.start) + "–" + timestring(p.end);
+  const d = document.createElement('p');
+  d.innerHTML = timestring(p.start) + '–' + timestring(p.end);
   return d;
 };
 
 const summerCountdownText = (millis) => {
-  const [ days, hours, minutes, seconds ] = ddhhmmss(millis);
+  const [days, hours, minutes, seconds] = ddhhmmss(millis);
   return `${days} days, ${hours} hours, ${minutes} minutes and ${seconds} seconds`;
 };
 
@@ -265,7 +263,7 @@ const nextCalendar = (t) => {
 const go = () => {
   loadConfiguration();
   setupConfigPanel();
-  $("#left").onclick = () => {
+  $('#left').onclick = () => {
     togo = !togo;
     update();
   };

@@ -39,9 +39,9 @@ class Calendar {
       d in this.schedules
         ? this.schedules[d]
         : t.getDay() === 1
-        ? this.schedules["default"].LATE_START
-        : this.schedules["default"].NORMAL,
-      this.extraPeriods
+        ? this.schedules['default'].LATE_START
+        : this.schedules['default'].NORMAL,
+      this.extraPeriods,
     );
   }
 
@@ -155,14 +155,14 @@ class Schedule {
 
   firstPeriodIndex(d) {
     const firstName = this.periods[0].name;
-    const hasZeroPeriod = firstName === "Period 0" || firstName === "Staff meeting";
+    const hasZeroPeriod = firstName === 'Period 0' || firstName === 'Staff meeting';
     return hasZeroPeriod ? (this.extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
   }
 
   lastPeriodIndex(d) {
     const last = this.periods.length - 1;
     const lastName = this.periods[last].name;
-    const hasSeventh = lastName === "Period 7";
+    const hasSeventh = lastName === 'Period 7';
     return hasSeventh ? (this.extraPeriods[d.getDay()].seventh ? last : last - 1) : last;
   }
 
@@ -193,9 +193,9 @@ class Schedule {
       const last = this.lastPeriod(t);
 
       if (first.isAfter(t)) {
-        return new Interval("Before school", this.calendar.previousSchoolDayEnd(t), first.startTime(t), false);
+        return new Interval('Before school', this.calendar.previousSchoolDayEnd(t), first.startTime(t), false);
       } else if (last.isBefore(t)) {
-        return new Interval("After school", last.endTime(t), this.calendar.nextSchoolDayStart(t), false);
+        return new Interval('After school', last.endTime(t), this.calendar.nextSchoolDayStart(t), false);
       } else {
         for (let p = first; p !== null; p = p.next) {
           if (p.contains(t)) {
@@ -228,12 +228,12 @@ class Schedule {
 
   breakName(days, start, end) {
     if (days > 4) {
-      return this.calendar.breakNames[datestring(this.calendar.nextHoliday(start))] || "Vacation";
+      return this.calendar.breakNames[datestring(this.calendar.nextHoliday(start))] || 'Vacation';
     } else if (includesWeekend(start, end)) {
-      return days > 3 ? "Long weekend" : "Weekend";
+      return days > 3 ? 'Long weekend' : 'Weekend';
     } else {
       // This should never happen since all breaks include a weekend
-      return "Mid-week vacation?";
+      return 'Mid-week vacation?';
     }
   }
 }
