@@ -17,4 +17,4 @@ lint:
 
 
 publish:
-	./publish.sh index.html style.css bells.js
+	./publish.sh $(files)
