@@ -1,3 +1,11 @@
+files := index.html
+files += style.css
+files += bells.js
+files += calendar.js
+files += datetime.js
+files += bells-qr.png
+files += calendars.json
+
 all: pretty lint
 
 pretty:
@@ -9,4 +17,4 @@ lint:
 
 
 publish:
-	./publish.sh index.html style.css bells.js bells-qr.png calendars.json
+	./publish.sh index.html style.css bells.js
