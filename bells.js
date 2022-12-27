@@ -1,5 +1,5 @@
 import { Calendar } from './calendar.js';
-import { timestring, hoursBetween, hhmmss, ddhhmmss, parseTime } from './datetime.js';
+import { timestring, hours, hhmmss, ddhhmmss, parseTime } from './datetime.js';
 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
@@ -12,6 +12,8 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
 };
 
 //setOffset(2023, 5, 15, 8, 2, 50);
+//setOffset(2023, 2, 14, 12, 36, 55);
+//setOffset(2023, 2, 16, 16, 31, 29);
 //setOffset(2022, 7, 10);
 
 // Always use this to get the "current" time to ease testing.
@@ -139,7 +141,7 @@ const summerCountdown = (t) => {
   const nextCal = nextCalendar(t);
   if (nextCal) {
     const start = nextCalendar(t).startOfYear();
-    const time = summerCountdownText(start - t);
+    const time = countdownText(start - t);
     $('#untilSchool').replaceChildren(document.createTextNode(`${time} until school starts.`));
     $('#summer').style.display = 'block';
     $('#main').style.display = 'none';
@@ -158,13 +160,13 @@ const normalCountdown = (t, c) => {
   updateCountdown(t, c, s);
 };
 
-const countdownText = (t, until) => {
-  const hours = hoursBetween(t, until);
-  if (hours < 24) {
-    return hhmmss(until - t);
+const countdownText = (millis) => {
+  const h = hours(millis);
+  if (h < 24) {
+    return hhmmss(millis);
   } else {
-    const days = Math.floor(hours / 24);
-    const hh = until - t - days * 24 * 60 * 60 * 1000;
+    const days = Math.floor(h / 24);
+    const hh = millis - (days * 24 * 60 * 60 * 1000);
     return `${days} day${days === 1 ? '' : 's'}, ${hhmmss(hh)}`;
   }
 };
@@ -180,8 +182,8 @@ const updateProgress = (t, s) => {
   let color = 'rgba(64, 0, 64, 0.25)';
 
   const tenMinutes = 10 * 60 * 1000;
-  const inFirstTen = t - start < tenMinutes;
-  const inLastTen = end - t < tenMinutes;
+  const inFirstTen = interval.done(t) < tenMinutes;
+  const inLastTen = interval.left(t) < tenMinutes;
 
   if (!isPassingPeriod) {
     if (inFirstTen || inLastTen) {
@@ -194,19 +196,24 @@ const updateProgress = (t, s) => {
   $('#container').style.background = color;
   $('#period').replaceChildren(periodName(interval), periodTimes(interval));
 
-  const time = togo ? countdownText(t, end) : countdownText(start, t);
-  // console.log(`t: ${Number(t) % 1000}; e: ${Number(end) % 1000}; d: ${(Number(end) - Number(t)) % 1000}`);
+  const time = togo ? countdownText(interval.left(t)) : countdownText(interval.done(t));
 
   $('#left').innerHTML = time + ' ' + (togo ? 'to go' : 'done');
   updateProgressBar('periodbar', start, end, t);
 
   if (duringSchool) {
-    $('#today').innerHTML = hhmmss(togo ? s.endOfDay(t) - t : t - s.startOfDay(t)) + ' ' + (togo ? 'to go' : 'done');
-    updateProgressBar('todaybar', s.startOfDay(t), s.endOfDay(t), t);
+    updateTodayProgress(t, s);
   } else {
     $('#today').replaceChildren();
     $('#todaybar').replaceChildren();
   }
+};
+
+const updateTodayProgress = (t, s) => {
+  const start = s.startOfDay(t);
+  const end = s.endOfDay(t);
+  $('#today').innerHTML = hhmmss(togo ? end - t : t - start) + ' ' + (togo ? 'to go' : 'done');
+  updateProgressBar('todaybar', start, end, t);
 };
 
 const updateCountdown = (t, cal, s) => {
@@ -245,11 +252,6 @@ const periodTimes = (p) => {
   const d = document.createElement('p');
   d.innerHTML = timestring(p.start) + '–' + timestring(p.end);
   return d;
-};
-
-const summerCountdownText = (millis) => {
-  const [days, hours, minutes, seconds] = ddhhmmss(millis);
-  return `${days} days, ${hours} hours, ${minutes} minutes and ${seconds} seconds`;
 };
 
 /**

@@ -289,6 +289,14 @@ class Interval {
     this.duringSchool = duringSchool;
     this.isPassingPeriod = isPassingPeriod;
   }
+
+  left(t) {
+    return this.end - t;
+  }
+
+  done(t) {
+    return t - this.start;
+  }
 }
 
-export { Calendar, Schedule, Period, Interval };
+export { Calendar };

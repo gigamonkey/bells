@@ -3,7 +3,7 @@ const datestring = (t) => {
 };
 
 const timestring = (t) => {
-  return hours(t.getHours()) + ':' + xx(t.getMinutes());
+  return oneToTwelve(t.getHours()) + ':' + xx(t.getMinutes());
 };
 
 const hhmmss = (millis) => {
@@ -26,7 +26,7 @@ const ddhhmmss = (millis) => {
   return [dd, hh, mm, ss];
 };
 
-const hours = (h) => {
+const oneToTwelve = (h) => {
   // Render 12 as 12, not 0 as a simple h % 12 would.
   return ((h + 11) % 12) + 1;
 };
@@ -64,9 +64,8 @@ const daysBetween = (start, end) => {
   return (s - e) / (1000 * 60 * 60 * 24);
 };
 
-const hoursBetween = (start, end) => {
-  return Math.abs((end - start) / (1000 * 60 * 60));
-};
+const hours = (millis) => millis / (1000 * 60 * 60);
+
 const noon = (date) => {
   const d = new Date(date);
   d.setHours(12);
@@ -90,13 +89,13 @@ const includesWeekend = (start, end) => {
 
 export {
   datestring,
-  timestring,
-  hhmmss,
+  daysBetween,
   ddhhmmss,
+  hhmmss,
+  hours,
+  includesWeekend,
+  noon,
   parseDate,
   parseTime,
-  daysBetween,
-  hoursBetween,
-  noon,
-  includesWeekend,
+  timestring,
 };
