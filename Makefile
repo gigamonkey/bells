@@ -3,6 +3,7 @@ files += style.css
 files += bells.js
 files += calendar.js
 files += datetime.js
+files += dom.js
 files += bells-qr.png
 files += calendars.json
 
