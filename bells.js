@@ -1,5 +1,6 @@
 import { Calendar } from './calendar.js';
 import { timestring, hours, hhmmss, ddhhmmss, parseTime } from './datetime.js';
+import { $, $$, text } from './dom.js';
 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
 
@@ -18,9 +19,6 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
-
-const $ = (q) => document.querySelector(q);
-const $$ = (q) => document.querySelectorAll(q);
 
 const calendars = await fetch('calendars.json').then((r) => {
   if (r.ok) return r.json();
@@ -82,7 +80,7 @@ const addProgressBars = () => {
 };
 
 const barSpan = (width, color) => {
-  const s = document.createElement('span');
+  const s = $('<span>');
   s.classList.add(color);
   return s;
 };
@@ -113,7 +111,7 @@ const togglePeriods = () => {
     const last = s.lastPeriod(t);
 
     for (let p = first; p !== null; p = p.next) {
-      const tr = document.createElement('tr');
+      const tr = $('<tr>');
       tr.append(td(p.name));
       tr.append(td(timestring(parseTime(p.start, t))));
       tr.append(td(timestring(parseTime(p.end, t))));
@@ -142,7 +140,7 @@ const summerCountdown = (t) => {
   if (nextCal) {
     const start = nextCalendar(t).startOfYear();
     const time = countdownText(start - t);
-    $('#untilSchool').replaceChildren(document.createTextNode(`${time} until school starts.`));
+    $('#untilSchool').replaceChildren(text(`${time} until school starts.`));
     $('#summer').style.display = 'block';
     $('#main').style.display = 'none';
     $('#noCalendar').style.display = 'none';
@@ -237,19 +235,19 @@ const updateProgressBar = (id, start, end, t) => {
 };
 
 const td = (text) => {
-  const td = document.createElement('td');
+  const td = $('<td>');
   td.innerText = text;
   return td;
 };
 
 const periodName = (p) => {
-  const d = document.createElement('p');
+  const d = $('<p>');
   d.innerHTML = p.name;
   return d;
 };
 
 const periodTimes = (p) => {
-  const d = document.createElement('p');
+  const d = $('<p>');
   d.innerHTML = timestring(p.start) + '–' + timestring(p.end);
   return d;
 };
