@@ -2,7 +2,7 @@ import { Calendar } from './calendar.js';
 import { timestring, hours, hhmmss, ddhhmmss, parseTime } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
-const DEFAULT_EXTRA_PERIODS = Array(7).fill({ zero: false, seventh: false });
+const DEFAULT_EXTRA_PERIODS = Array(7).fill().map(() => ({ zero: false, seventh: false }));
 
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
