@@ -77,6 +77,21 @@
         {"name": "Period 6 Final", "start": "10:40", "end": "12:40"},
         {"name": "Lunch", "start": "12:40", "end": "13:20"},
         {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
+      ],
+      "2023-01-26": [
+        {"name": "Period 0", "start": "7:26", "end": "8:24"},
+        {"name": "Period 1", "start": "8:30", "end": "9:28"},
+        {"name": "Period 2", "start": "9:34", "end": "10:37"},
+        {"name": "Period 3", "start": "10:43", "end": "11:41"},
+        {"name": "Lunch", "start": "11:41", "end": "12:21"},
+        {"name": "Period 4", "start": "12:27", "end": "13:25"},
+        {"name": "Period 5", "start": "13:31", "end": "14:29"},
+        {"name": "Period 6", "start": "14:35", "end": "15:33"},
+        {"name": "Period 7", "start": "15:39", "end": "16:37"},
+        {"name": "Open House Community Time", "start": "17:30", "end": "18:30"},
+        {"name": "Open House Rotation 1", "start": "18:30", "end": "18:55"},
+        {"name": "Open House Rotation 2", "start": "19:00", "end": "19:25"},
+        {"name": "Open House Rotation 3", "start": "19:30", "end": "19:55"}
       ]
     },
     "holidays": [
