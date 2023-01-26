@@ -16,6 +16,8 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
 //setOffset(2023, 2, 14, 12, 36, 55);
 //setOffset(2023, 2, 16, 16, 31, 29);
 //setOffset(2022, 7, 10);
+//setOffset(2023, 1, 26, 8, 29, 55)
+//setOffset(2023, 1, 26, 18, 35);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -74,9 +76,13 @@ const setupConfigPanel = () => {
 
 const addProgressBars = () => {
   for (const bar of $$('.bar')) {
-    bar.appendChild(barSpan(0, 'done'));
-    bar.appendChild(barSpan(0, 'togo'));
+    addProgressBarSpans(bar);
   }
+};
+
+const addProgressBarSpans = (bar) => {
+  bar.appendChild(barSpan(0, 'done'));
+  bar.appendChild(barSpan(0, 'togo'));
 };
 
 const barSpan = (width, color) => {
@@ -230,6 +236,7 @@ const updateProgressBar = (id, start, end, t) => {
   const bar = $(`#${id}`);
   const total = end - start;
   const done = Math.round((100 * (t - start)) / total);
+  if (bar.childNodes.length == 0) addProgressBarSpans(bar);
   bar.childNodes[0].style.width = done + '%';
   bar.childNodes[1].style.width = 100 - done + '%';
 };
