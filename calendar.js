@@ -107,12 +107,16 @@ class Calendar {
     }
   }
 
+  duringSchool(t, s) {
+    return this.isSchoolDay(t) && t < s.endOfDay(t);
+  }
+
   schoolDaysLeft(t, s) {
     const end = this.endOfYear();
     let c = 0;
 
     // Current day, if not over.
-    if (this.isSchoolDay(t) && t < s.endOfDay(t)) {
+    if (this.duringSchool(t, s)) {
       c++;
     }
     const d = new Date(t);

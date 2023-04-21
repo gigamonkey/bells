@@ -18,6 +18,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
 //setOffset(2022, 7, 10);
 //setOffset(2023, 1, 26, 8, 29, 55)
 //setOffset(2023, 1, 26, 18, 35);
+//setOffset(2023, 4, 21, 16, 35);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -221,12 +222,13 @@ const updateTodayProgress = (t, s) => {
 };
 
 const updateCountdown = (t, cal, s) => {
+  const inSchool = cal.duringSchool(t, s);
   const days = cal.schoolDaysLeft(t, s);
   if (days === 1) {
     $('#countdown').innerHTML = 'Last day of school!';
   } else if (days <= 30) {
     const s = days == 1 ? '' : 's';
-    $('#countdown').innerHTML = `${days} school day${s} left in the year.`;
+    $('#countdown').innerHTML = `${days} school day${s} left in the year${inSchool ? ' counting today' : ''}.`;
   } else {
     $('#countdown').replaceChildren();
   }
