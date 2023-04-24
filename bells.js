@@ -224,11 +224,13 @@ const updateTodayProgress = (t, s) => {
 const updateCountdown = (t, cal, s) => {
   const inSchool = cal.duringSchool(t, s);
   const days = cal.schoolDaysLeft(t, s);
+  const calendarDays = cal.calendarDaysLeft(t, s);
   if (days === 1) {
     $('#countdown').innerHTML = 'Last day of school!';
   } else if (days <= 30) {
     const s = days == 1 ? '' : 's';
-    $('#countdown').innerHTML = `${days} school day${s} left in the year${inSchool ? ' counting today' : ''}.`;
+    const s2 = calendarDays == 1 ? '' : 's';
+    $('#countdown').innerHTML = `${days} school day${s} left in the year${inSchool ? ' counting today' : ''}. (${calendarDays} calendar day${s2})`;
   } else {
     $('#countdown').replaceChildren();
   }

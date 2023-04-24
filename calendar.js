@@ -128,6 +128,12 @@ class Calendar {
     } while (noon(d) <= noon(end));
     return c;
   }
+
+  calendarDaysLeft(t, s) {
+    const end = this.endOfYear();
+    return daysBetween(noon(t), noon(end));
+  }
+
 }
 
 class Schedule {
