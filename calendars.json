@@ -161,6 +161,33 @@
         {"name": "Open House Rotation 1", "start": "18:30", "end": "18:55"},
         {"name": "Open House Rotation 2", "start": "19:00", "end": "19:25"},
         {"name": "Open House Rotation 3", "start": "19:30", "end": "19:55"}
+      ],
+      "2023-05-30": [
+        {"name": "Period 1 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 2 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"}
+      ],
+      "2023-05-30": [
+        {"name": "Period 3 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 4 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"}
+      ],
+      "2023-06-01": [
+        {"name": "Period 5 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 6 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"}
+      ],
+      "2023-06-02": [
+        {"name": "Period 1", "start": "8:30", "end": "9:05"},
+        {"name": "Period 2", "start": "9:11", "end": "9:46"},
+        {"name": "Period 3", "start": "9:52", "end": "10:27"},
+        {"name": "Period 4", "start": "10:33", "end": "11:08"},
+        {"name": "Period 5", "start": "11:14", "end": "11:49"},
+        {"name": "Period 6", "start": "11:55", "end": "12:30"},
+        {"name": "Lunch", "start": "12:30", "end": "13:10"}
       ]
     },
     "holidays": [
