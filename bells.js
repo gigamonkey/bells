@@ -233,7 +233,7 @@ const updateCountdown = (t, cal, s) => {
   } else if (days <= 30) {
     const s = days == 1 ? '' : 's';
     const s2 = calendarDays == 1 ? '' : 's';
-    const time = hours < 100 ? `(${hhmmss(millis)}) ` : '';
+    const time = hours < 100 ? `(${hhmmss(millis)} in school) ` : '';
     $('#countdown').innerHTML = `${days} school day${s} ${time}left in the year${inSchool ? ' counting today' : ''}. (${calendarDays} calendar day${s2})`;
   } else {
     $('#countdown').replaceChildren();
