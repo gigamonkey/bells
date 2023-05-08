@@ -186,8 +186,7 @@
         {"name": "Period 3", "start": "9:52", "end": "10:27"},
         {"name": "Period 4", "start": "10:33", "end": "11:08"},
         {"name": "Period 5", "start": "11:14", "end": "11:49"},
-        {"name": "Period 6", "start": "11:55", "end": "12:30"},
-        {"name": "Lunch", "start": "12:30", "end": "13:10"}
+        {"name": "Period 6", "start": "11:55", "end": "12:30"}
       ]
     },
     "holidays": [

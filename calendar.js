@@ -129,6 +129,34 @@ class Calendar {
     return c;
   }
 
+  schoolMillisLeft(t, s) {
+
+    const eoy = this.endOfYear().getTime();
+
+    let millis = 0;
+
+    // If we are starting during school, add millis until the end of the day.
+    if (this.duringSchool(t, s)) {
+      millis += s.endOfDay(t) - t;
+      if (s.endOfDay(t).getTime() === eoy) {
+        return millis;
+      }
+    }
+
+    // Now count full days (which may include today if it's before school.
+    let start = this.nextSchoolDayStart(t);
+    let end = this.schedule(start).endOfDay(start);
+    while (true) {
+      millis += end.getTime() - start.getTime();
+      if (end.getTime() === eoy) {
+        return millis;
+      } else {
+        start = this.nextSchoolDayStart(end);
+        end = this.schedule(start).endOfDay(start);
+      }
+    }
+  }
+
   calendarDaysLeft(t, s) {
     const end = this.endOfYear();
     return daysBetween(noon(t), noon(end));
