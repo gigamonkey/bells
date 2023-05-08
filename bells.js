@@ -19,7 +19,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
 //setOffset(2023, 1, 26, 8, 29, 55)
 //setOffset(2023, 1, 26, 18, 35);
 //setOffset(2023, 4, 21, 16, 35);
-//setOffset(2023, 5, 12, 8, 30, 55);
+//setOffset(2023, 5, 30, 8, 30, 55);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -224,21 +224,27 @@ const updateTodayProgress = (t, s) => {
 
 const updateCountdown = (t, cal, s) => {
   const inSchool = cal.duringSchool(t, s);
-  const days = cal.schoolDaysLeft(t, s);
+  const left = cal.schoolDaysLeft(t, s);
   const millis = cal.schoolMillisLeft(t, s);
   const hours = millis / (1000 * 60 * 60);
   const calendarDays = cal.calendarDaysLeft(t, s);
-  if (days === 1) {
+  const classDays = Math.max(0, left - 4);
+  if (left === 1) {
     $('#countdown').innerHTML = 'Last day of school!';
-  } else if (days <= 30) {
-    const s = days == 1 ? '' : 's';
-    const s2 = calendarDays == 1 ? '' : 's';
+  } else if (left <= 30) {
     const time = hours < 100 ? `(${hhmmss(millis)} in school) ` : '';
-    $('#countdown').innerHTML = `${days} school day${s} ${time}left in the year${inSchool ? ' counting today' : ''}. (${calendarDays} calendar day${s2})`;
+    $('#countdown').innerHTML = `${days(left, 'school')} ${time}left in the year${inSchool ? ' counting today' : ''}.<br>${days(calendarDays, 'calendar')}.<br>${days(classDays, 'class')} until exams.`;
   } else {
     $('#countdown').replaceChildren();
   }
 };
+
+const plural = (n, w) => {
+  return n === 1 ? w : `${w}s`;
+};
+
+const days = (n, what) => plural(n, `${n} ${what} day`);
+
 
 const updateProgressBar = (id, start, end, t) => {
   const bar = $(`#${id}`);
