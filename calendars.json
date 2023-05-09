@@ -162,6 +162,18 @@
         {"name": "Open House Rotation 2", "start": "19:00", "end": "19:25"},
         {"name": "Open House Rotation 3", "start": "19:30", "end": "19:55"}
       ],
+      "2023-05-18": [
+        {"name": "Period 0", "start": "7:23", "end": "8:21"},
+        {"name": "Period 1", "start": "8:30", "end": "9:10"},
+        {"name": "Period 2", "start": "9:16", "end": "9:56"},
+        {"name": "Period 3", "start": "10:02", "end": "10:42"},
+        {"name": "Period 4", "start": "10:48", "end": "11:28"},
+        {"name": "Lunch", "start": "11:28", "end": "12:08"},
+        {"name": "Period 5", "start": "12:14", "end": "12:54"},
+        {"name": "Period 6", "start": "13:00", "end": "13:40"},
+        {"name": "Carnival", "start": "13:40", "end": "15:33"},
+        {"name": "Period 7", "start": "15:39", "end": "16:34"}
+      ],
       "2023-05-30": [
         {"name": "Period 1 Final", "start": "8:30", "end": "10:30"},
         {"name": "Period 2 Final", "start": "10:40", "end": "12:40"},
