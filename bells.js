@@ -12,14 +12,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 5, 15, 8, 2, 50);
-//setOffset(2023, 2, 14, 12, 36, 55);
-//setOffset(2023, 2, 16, 16, 31, 29);
-//setOffset(2022, 7, 10);
-//setOffset(2023, 1, 26, 8, 29, 55)
-//setOffset(2023, 1, 26, 18, 35);
-//setOffset(2023, 4, 21, 16, 35);
-//setOffset(2023, 5, 30, 8, 30, 55);
+//setOffset(2023, 6, 2, 12, 29, 55);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -232,8 +225,11 @@ const updateCountdown = (t, cal, s) => {
   if (left === 1) {
     $('#countdown').innerHTML = 'Last day of school!';
   } else if (left <= 30) {
-    const time = hours < 100 ? `(${hhmmss(millis)} in school) ` : '';
-    $('#countdown').innerHTML = `${days(left, 'school')} ${time}left in the year${inSchool ? ' counting today' : ''}.<br>${days(calendarDays, 'calendar')}.<br>${days(classDays, 'class')} until exams.`;
+    let text = `${days(left, 'school')} left in the year${inSchool ? ' counting today' : ''}.<br>`
+    text += hours < 100 ? `${hhmmss(millis)} in school<br>` : '';
+    text += `${days(calendarDays, 'calendar')}.<br>`
+    text += classDays > 0 ? `${days(classDays, 'class')} until exams.` : '';
+    $('#countdown').innerHTML = text;
   } else {
     $('#countdown').replaceChildren();
   }
