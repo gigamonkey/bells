@@ -108,7 +108,7 @@ class Calendar {
   }
 
   duringSchool(t, s) {
-    return this.isSchoolDay(t) && t < s.endOfDay(t);
+    return this.isSchoolDay(t) && s.startOfDay(t) < t && t < s.endOfDay(t);
   }
 
   schoolDaysLeft(t, s) {
