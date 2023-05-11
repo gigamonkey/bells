@@ -226,7 +226,7 @@ const updateCountdown = (t, cal, s) => {
     $('#countdown').innerHTML = 'Last day of school!';
   } else if (left <= 30) {
     let text = `${days(left, 'school')} left in the year${inSchool ? ' counting today' : ''}.<br>`
-    text += hours < 100 ? `${hhmmss(millis)} in school<br>` : '';
+    //text += hours < 100 ? `${hhmmss(millis)} in school<br>` : '';
     text += `${days(calendarDays, 'calendar')}.<br>`
     text += classDays > 0 ? `${days(classDays, 'class')} until exams.` : '';
     $('#countdown').innerHTML = text;
