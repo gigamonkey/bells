@@ -225,10 +225,9 @@ const updateCountdown = (t, cal, s) => {
   if (left === 1) {
     $('#countdown').innerHTML = 'Last day of school!';
   } else if (left <= 30) {
-    let text = `${days(left, 'school')} left in the year${inSchool ? ' counting today' : ''}.<br>`
-    //text += hours < 100 ? `${hhmmss(millis)} in school<br>` : '';
-    text += `${days(calendarDays, 'calendar')}.<br>`
-    text += classDays > 0 ? `${days(classDays, 'class')} until exams.` : '';
+    let text = classDays > 0 ? `${days(classDays, 'class')} until exams.<br>` : '';
+    text += `${days(left, 'school')} left in the year${inSchool ? ' counting today' : ''}.<br>`
+    text += `${days(calendarDays, 'calendar')}.`
     $('#countdown').innerHTML = text;
   } else {
     $('#countdown').replaceChildren();
@@ -240,7 +239,6 @@ const plural = (n, w) => {
 };
 
 const days = (n, what) => plural(n, `${n} ${what} day`);
-
 
 const updateProgressBar = (id, start, end, t) => {
   const bar = $(`#${id}`);
