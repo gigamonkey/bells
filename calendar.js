@@ -115,8 +115,8 @@ class Calendar {
     const end = this.endOfYear();
     let c = 0;
 
-    // Current day, if not over.
-    if (this.duringSchool(t, s)) {
+    // Current day, if school day and not over.
+    if (this.isSchoolDay(t, s) && t < s.endOfDay(t)) {
       c++;
     }
     const d = new Date(t);
@@ -136,8 +136,9 @@ class Calendar {
     let millis = 0;
 
     // If we are starting during school, add millis until the end of the day.
-    if (this.duringSchool(t, s)) {
-      millis += s.endOfDay(t) - t;
+    if (this.isSchoolDay(t, s) && t < s.endOfDay(t)) {
+      const start = Math.max(t, this.schedule(t).startOfDay(t));
+      millis += s.endOfDay(t) - start;
       if (s.endOfDay(t).getTime() === eoy) {
         return millis;
       }
