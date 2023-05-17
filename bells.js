@@ -222,11 +222,12 @@ const updateCountdown = (t, cal, s) => {
   const hours = millis / (1000 * 60 * 60);
   const calendarDays = cal.calendarDaysLeft(t, s);
   const classDays = Math.max(0, left - 4);
+  const countingToday = inSchool ? ' counting today' : '';
   if (left === 1) {
     $('#countdown').innerHTML = 'Last day of school!';
   } else if (left <= 30) {
-    let text = classDays > 0 ? `${days(classDays, 'class')} until exams.<br>` : '';
-    text += `${days(left, 'school')} left in the year${inSchool ? ' counting today' : ''}.<br>`
+    let text = classDays > 0 ? `${days(classDays, 'class')} until exams${countingToday}.<br>` : '';
+    text += `${days(left, 'school')} left in the year${countingToday}.<br>`
     text += `${days(calendarDays, 'calendar')}.`
     $('#countdown').innerHTML = text;
   } else {
