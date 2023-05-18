@@ -12,7 +12,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 5, 16, 16, 0);
+//setOffset(2023, 5, 29, 12, 0);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -228,7 +228,7 @@ const updateCountdown = (t, cal, s) => {
   } else if (left <= 30) {
     let text = classDays > 0 ? `${days(classDays, 'class')} until exams${countingToday}.<br>` : '';
     text += `${days(left, 'school')} left in the year${countingToday}.<br>`
-    text += `${days(calendarDays, 'calendar')}.`
+    text += `${days(calendarDays, 'calendar')} until summer vacation!`
     $('#countdown').innerHTML = text;
   } else {
     $('#countdown').replaceChildren();

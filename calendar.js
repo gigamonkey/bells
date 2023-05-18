@@ -159,7 +159,8 @@ class Calendar {
   }
 
   calendarDaysLeft(t, s) {
-    const end = this.endOfYear();
+    const end = new Date(this.endOfYear());
+    end.setDate(end.getDate() + 1);
     return daysBetween(noon(t), noon(end));
   }
 
