@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600&display=swap');
+
 html {
-    font-family: 'Gill Sans', sans-serif;
+    font-family: 'Lato', sans-serif;
 }
 
 body {
@@ -10,6 +12,7 @@ body {
 
 h1 {
   text-align: center;
+  font-weight: 600;
   flex: 0 1 0;
 }
 
@@ -64,7 +67,7 @@ h1 {
 }
 
 #countdown {
-    font-size: min(20px, 4vw);
+    font-size: min(20px, 3.5vw);
     padding-top: 20px;
     margin: 0 auto;
 }
