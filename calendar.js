@@ -32,6 +32,11 @@ class Calendar {
     return parseTime(sched.lastPeriod(d).end, d);
   }
 
+  isLastDay(t) {
+    const eoy = this.endOfYear();
+    return this.schedule(eoy).startOfDay(eoy) < t;
+  }
+
   schedule(t) {
     const d = datestring(t);
     return new Schedule(
@@ -138,17 +143,17 @@ class Calendar {
     // If we are starting during school, add millis until the end of the day.
     if (this.isSchoolDay(t, s) && t < s.endOfDay(t)) {
       const start = Math.max(t, this.schedule(t).startOfDay(t));
-      millis += s.endOfDay(t) - start;
+      millis += specialEOD(s, t).getTime() - start;
       if (s.endOfDay(t).getTime() === eoy) {
         return millis;
       }
     }
 
-    // Now count full days (which may include today if it's before school.
+    // Now count full days after today
     let start = this.nextSchoolDayStart(t);
     let end = this.schedule(start).endOfDay(start);
     while (true) {
-      millis += end.getTime() - start.getTime();
+      millis += specialEOD(this.schedule(start), end).getTime() - start.getTime();
       if (end.getTime() === eoy) {
         return millis;
       } else {
@@ -165,6 +170,33 @@ class Calendar {
   }
 
 }
+
+
+// KLUDGE. We want Lunch and Finals Make Up in the schedule but we don't want to
+// count them in the time countdown. Should probably move this into the calendar
+// data.
+const exams = [
+  new Date(2023, 4, 30),
+  new Date(2023, 4, 31),
+  new Date(2023, 5, 1),
+];
+
+const sameDay = (d1, d2) => {
+  return d1.getYear() == d2.getYear() &&
+    d1.getMonth() == d2.getMonth() &&
+    d1.getDate() == d2.getDate();
+}
+
+const isExamDay = (d) => exams.some(e => sameDay(e, d));
+
+const specialEOD = (s, t) => {
+  const end = s.endOfDay(t);
+  if (isExamDay(new Date(t))) {
+    end.setHours(12, 40);
+  }
+  return end;
+};
+
 
 class Schedule {
   calendar;

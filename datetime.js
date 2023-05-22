@@ -1,3 +1,7 @@
+const plural = (n, w) => {
+  return n === 1 ? w : `${w}s`;
+};
+
 const datestring = (t) => {
   return t.getFullYear() + '-' + xx(t.getMonth() + 1) + '-' + xx(t.getDate());
 };
@@ -23,7 +27,16 @@ const ddhhmmss = (millis) => {
   const mm = minutes % 60;
   const hh = hours % 24;
   const dd = Math.floor(hours / 24);
-  return [dd, hh, mm, ss];
+  return `${dd} ${plural(dd, 'day')} ${hh} ${plural(hh, 'hour')} ${mm} ${plural(mm, 'minute')} ${ss} ${plural(ss, 'second')}`;
+};
+
+const timeCountdown = (millis) => {
+  const seconds = Math.floor(millis / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const ss = seconds % 60;
+  const mm = minutes % 60;
+  return `${hours} ${plural(hours, 'hour')} ${mm} ${plural(mm, 'minute')} ${ss} ${plural(ss, 'second')}`;
 };
 
 const oneToTwelve = (h) => {
@@ -98,4 +111,5 @@ export {
   parseDate,
   parseTime,
   timestring,
+  timeCountdown,
 };

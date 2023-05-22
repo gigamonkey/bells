@@ -1,5 +1,5 @@
 import { Calendar } from './calendar.js';
-import { timestring, hours, hhmmss, ddhhmmss, parseTime } from './datetime.js';
+import { timestring, hours, hhmmss, ddhhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill().map(() => ({ zero: false, seventh: false }));
@@ -12,7 +12,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 5, 29, 12, 0);
+//setOffset(2023, 5, 26, 8, 30);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -223,12 +223,16 @@ const updateCountdown = (t, cal, s) => {
   const calendarDays = cal.calendarDaysLeft(t, s);
   const classDays = Math.max(0, left - 4);
   const countingToday = inSchool ? ' counting today' : '';
-  if (left === 1) {
-    $('#countdown').innerHTML = 'Last day of school!';
-  } else if (left <= 30) {
+
+  if (left <= 30) {
     let text = classDays > 0 ? `${days(classDays, 'class')} until exams${countingToday}.<br>` : '';
-    text += `${days(left, 'school')} left in the year${countingToday}.<br>`
-    text += `${days(calendarDays, 'calendar')} until summer vacation!`
+    if (cal.isLastDay(t)) {
+      text += 'Last day of school!<br>';
+    } else {
+      text += `${days(left, 'school')} left in the year${countingToday}.<br>`
+      text += `${days(calendarDays, 'calendar')} until summer vacation!<br>`
+    }
+    text += `${timeCountdown(millis)} to go.`;
     $('#countdown').innerHTML = text;
   } else {
     $('#countdown').replaceChildren();
@@ -244,7 +248,7 @@ const days = (n, what) => plural(n, `${n} ${what} day`);
 const updateProgressBar = (id, start, end, t) => {
   const bar = $(`#${id}`);
   const total = end - start;
-  const done = Math.round((100 * (t - start)) / total);
+  const done = (100 * (t - start)) / total;
   if (bar.childNodes.length == 0) addProgressBarSpans(bar);
   bar.childNodes[0].style.width = done + '%';
   bar.childNodes[1].style.width = 100 - done + '%';
