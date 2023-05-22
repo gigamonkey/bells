@@ -2,22 +2,25 @@ html {
     font-family: 'Gill Sans', sans-serif;
 }
 
-h1 { text-align: center; }
-
-#container {
-    position: absolute;
-    top: 10vh;
-    left: 10vw;
-    width: 80vw;
-    height: 80vh;
-    font-size: 36px;
-    margin: auto;
-    text-align: center;
-    /*padding: 10px;*/
-    color: rgba(64, 64, 128, 1);
+body {
+  display: flex;
+  flex-direction: column;
+  height: 95vh;
 }
 
+h1 {
+  text-align: center;
+  flex: 0 1 0;
+}
 
+#container {
+    flex: 1;
+    font-size: 36px;
+    width: 80vw;
+    margin: auto;
+    text-align: center;
+    color: rgba(64, 64, 128, 1);
+}
 
 #configuration, #main {
     text-align: center;
@@ -61,9 +64,11 @@ h1 { text-align: center; }
 }
 
 #countdown {
-    font-size: 20px;
+    font-size: min(20px, 4vw);
     padding-top: 20px;
+    margin: 0 auto;
 }
+
 
 .bar {
     height: 20px;
@@ -86,15 +91,14 @@ span.togo {
 }
 
 #countdown-link {
+  flex: 0 1 0;
     font-size: 10px;
     text-align: right !important;
-    position: absolute;
-    bottom: 24px;
-    right: 24px;
+    margin: 12px auto;
 }
 
 #countdown-link img {
   height: 12px;
-  width 12px;
+  width: 12px;
   vertical-align: middle;
 }
