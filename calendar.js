@@ -141,15 +141,16 @@ class Calendar {
     let millis = 0;
 
     // If we are starting during school, add millis until the end of the day.
-    if (this.isSchoolDay(t, s) && t < s.endOfDay(t)) {
-      const start = Math.max(t, this.schedule(t).startOfDay(t));
+    if (this.isSchoolDay(t, s) && s.startOfDay(t) < t && t < s.endOfDay(t)) {
+      const start = Math.max(new Date(t), this.schedule(t).startOfDay(t));
       millis += specialEOD(s, t).getTime() - start;
       if (s.endOfDay(t).getTime() === eoy) {
         return millis;
       }
     }
 
-    // Now count full days after today
+    // Now count full days after the current time. (Will be today if we are
+    // before school or tomorrow if we are during or after school.)
     let start = this.nextSchoolDayStart(t);
     let end = this.schedule(start).endOfDay(start);
     while (true) {

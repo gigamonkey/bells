@@ -12,7 +12,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 5, 26, 8, 30);
+//setOffset(2023, 5, 23, 8, 29, 55);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
