@@ -10,33 +10,20 @@ const timestring = (t) => {
   return oneToTwelve(t.getHours()) + ':' + xx(t.getMinutes());
 };
 
-const hhmmss = (millis) => {
+const millisToHMS = (millis) => {
   const seconds = Math.round(millis / 1000);
   const minutes = Math.floor(seconds / 60);
-  const ss = seconds % 60;
-  const mm = minutes % 60;
-  const hh = Math.floor(minutes / 60);
-  return xx(hh) + ':' + xx(mm) + ':' + xx(ss);
+  return [ Math.floor(minutes / 60), minutes % 60, seconds % 60 ];
 };
 
-const ddhhmmss = (millis) => {
-  const seconds = Math.floor(millis / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const ss = seconds % 60;
-  const mm = minutes % 60;
-  const hh = hours % 24;
-  const dd = Math.floor(hours / 24);
-  return `${dd} ${plural(dd, 'day')} ${hh} ${plural(hh, 'hour')} ${mm} ${plural(mm, 'minute')} ${ss} ${plural(ss, 'second')}`;
+const hhmmss = (millis) => {
+  const [ h, m, s ] = millisToHMS(millis);
+  return xx(h) + ':' + xx(m) + ':' + xx(s);
 };
 
 const timeCountdown = (millis) => {
-  const seconds = Math.floor(millis / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const ss = seconds % 60;
-  const mm = minutes % 60;
-  return `${hours} ${plural(hours, 'hour')} ${mm} ${plural(mm, 'minute')} ${ss} ${plural(ss, 'second')}`;
+  const [ h, m, s ] = millisToHMS(millis);
+  return `${h} ${plural(h, 'hour')} ${m} ${plural(m, 'minute')} ${s} ${plural(s, 'second')}`;
 };
 
 const oneToTwelve = (h) => {
@@ -103,7 +90,6 @@ const includesWeekend = (start, end) => {
 export {
   datestring,
   daysBetween,
-  ddhhmmss,
   hhmmss,
   hours,
   includesWeekend,

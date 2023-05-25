@@ -1,5 +1,5 @@
 import { Calendar } from './calendar.js';
-import { timestring, hours, hhmmss, ddhhmmss, parseTime, timeCountdown } from './datetime.js';
+import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill().map(() => ({ zero: false, seventh: false }));
@@ -12,7 +12,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 5, 23, 8, 29, 55);
+//setOffset(2023, 5, 25, 12, 29, 55);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -232,7 +232,9 @@ const updateCountdown = (t, cal, s) => {
       text += `${days(left, 'school')} left in the year${countingToday}.<br>`
       text += `${days(calendarDays, 'calendar')} until summer vacation!<br>`
     }
-    text += `${timeCountdown(millis)} to go.`;
+    if (hours < 100) {
+      text += `${timeCountdown(millis)} to go.`;
+    }
     $('#countdown').innerHTML = text;
   } else {
     $('#countdown').replaceChildren();
