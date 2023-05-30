@@ -12,7 +12,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 5, 25, 12, 29, 55);
+//setOffset(2023, 6, 1, 9, 55, 0);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -133,6 +133,8 @@ const update = () => {
   } else {
     normalCountdown(t, c);
   }
+  // We use setTimeout rather than setInterval so we can stay as synced as
+  // possible with exactly when the second rolls over.
   timeoutID = setTimeout(update, 1000 - t.getMilliseconds());
 };
 
@@ -235,6 +237,9 @@ const updateCountdown = (t, cal, s) => {
     if (hours < 100) {
       text += `${timeCountdown(millis)} to go.`;
     }
+    if (t.getMonth() === 4 && t.getDate() === 30) {
+      text += '<br><br>* Adjusted due to fire alarm.';
+    }
     $('#countdown').innerHTML = text;
   } else {
     $('#countdown').replaceChildren();
@@ -270,7 +275,8 @@ const periodName = (p) => {
 
 const periodTimes = (p) => {
   const d = $('<p>');
-  d.innerHTML = timestring(p.start) + '–' + timestring(p.end);
+  const a = p.end.getMonth() === 4 && p.end.getDate() === 30 ? '*' : '';
+  d.innerHTML = timestring(p.start) + '–' + timestring(p.end) + a;
   return d;
 };
 
