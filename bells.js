@@ -12,7 +12,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 6, 1, 9, 55, 0);
+//setOffset(2023, 5, 30, 9, 55, 0);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
@@ -237,7 +237,7 @@ const updateCountdown = (t, cal, s) => {
     if (hours < 100) {
       text += `${timeCountdown(millis)} to go.`;
     }
-    if (t.getMonth() === 4 && t.getDate() === 30) {
+    if (inSchool && t.getMonth() === 4 && t.getDate() === 30) {
       text += '<br><br>* Adjusted due to fire alarm.';
     }
     $('#countdown').innerHTML = text;
