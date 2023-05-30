@@ -175,10 +175,10 @@
         {"name": "Period 7", "start": "15:39", "end": "16:34"}
       ],
       "2023-05-30": [
-        {"name": "Period 1 Final", "start": "8:30", "end": "10:30"},
-        {"name": "Period 2 Final", "start": "10:40", "end": "12:40"},
-        {"name": "Lunch", "start": "12:40", "end": "13:20"},
-        {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"}
+        {"name": "Period 1 Final", "start": "8:30", "end": "10:45"},
+        {"name": "Period 2 Final", "start": "10:55", "end": "12:55"},
+        {"name": "Lunch", "start": "12:55", "end": "13:35"},
+        {"name": "Finals Prep / Make Up", "start": "13:35", "end": "14:40"}
       ],
       "2023-05-31": [
         {"name": "Period 3 Final", "start": "8:30", "end": "10:30"},
