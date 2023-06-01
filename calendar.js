@@ -141,7 +141,7 @@ class Calendar {
     let millis = 0;
 
     // If we are starting during school, add millis until the end of the day.
-    if (this.isSchoolDay(t, s) && s.startOfDay(t) < t && t < s.endOfDay(t)) {
+    if (this.isSchoolDay(t, s) && s.startOfDay(t) < t && t < specialEOD(s, t).getTime()) {
       const start = Math.max(new Date(t), this.schedule(t).startOfDay(t));
       millis += specialEOD(s, t).getTime() - start;
       if (s.endOfDay(t).getTime() === eoy) {
