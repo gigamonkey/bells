@@ -237,9 +237,6 @@ const updateCountdown = (t, cal, s) => {
     if (hours < 100) {
       text += `${timeCountdown(millis)} to go.`;
     }
-    if (inSchool && t.getMonth() === 4 && t.getDate() === 30) {
-      text += '<br><br>* Adjusted due to fire alarm.';
-    }
     $('#countdown').innerHTML = text;
   } else {
     $('#countdown').replaceChildren();
@@ -275,8 +272,7 @@ const periodName = (p) => {
 
 const periodTimes = (p) => {
   const d = $('<p>');
-  const a = p.end.getMonth() === 4 && p.end.getDate() === 30 ? '*' : '';
-  d.innerHTML = timestring(p.start) + '–' + timestring(p.end) + a;
+  d.innerHTML = timestring(p.start) + '–' + timestring(p.end);
   return d;
 };
 
