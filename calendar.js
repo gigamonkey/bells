@@ -1,5 +1,54 @@
 import { datestring, parseDate, parseTime, daysBetween, noon, includesWeekend } from './datetime.js';
 
+const DEFAULT_EXTRA_PERIODS = Array(7).fill().map(() => ({ zero: false, seventh: false }));
+
+let extraPeriods = JSON.parse(localStorage.getItem('extraPeriods'));
+
+if (extraPeriods === null) {
+  extraPeriods = DEFAULT_EXTRA_PERIODS;
+  saveConfiguration();
+}
+
+const getZero = (day) => {
+  return extraPeriods[day].zero;
+}
+
+const getSeventh = (day) => {
+  return extraPeriods[day].seventh;
+}
+
+const setZero = (day, value) => {
+  extraPeriods[day].zero = value;
+  saveConfiguration();
+}
+
+const setSeventh = (day, value) => {
+  extraPeriods[day].seventh = value;
+  saveConfiguration();
+}
+
+const saveConfiguration = () => {
+  localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
+};
+
+const calendars = await fetch('calendars.json').then((r) => {
+  if (r.ok) return r.json();
+});
+
+/**
+ * Get the calendar for the given time. Undefined during the summer.
+ */
+const calendar = (t) => {
+  return calendars.map((d) => new Calendar(d, extraPeriods)).find((c) => c.isInCalendar(t));
+};
+
+/**
+ * Get the calendar for the next year, if we have it.
+ */
+const nextCalendar = (t) => {
+  return calendars.map((d) => new Calendar(d, extraPeriods)).find((c) => t < c.startOfYear());
+};
+
 class Calendar {
   firstDay;
   lastDay;
@@ -214,9 +263,18 @@ class Schedule {
     this.extraPeriods = extraPeriods;
   }
 
+  // FIXME: Is this used?
   period(i) {
     return this.periods[i];
   }
+
+  // If we number the periods then on a normal day the first period is period 1
+  // or 0 if the user has zeroth period and the last period is period 6 or 7 if
+  // the user has 7th period. Otherwise, the first period is the smallest
+  // numbered period ad the last period is the largerst numbered period. This
+  // will handle things like back to school night and exams where there may be
+  // periods past the end of the day that we want to count down but which we
+  // don't want to include in the length of the day.
 
   firstPeriod(d) {
     return this.periods[this.firstPeriodIndex(d)];
@@ -372,4 +430,4 @@ class Interval {
   }
 }
 
-export { Calendar };
+export { calendar, nextCalendar, getZero, getSeventh, setZero, setSeventh };

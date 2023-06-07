@@ -1,8 +1,6 @@
-import { Calendar } from './calendar.js';
+import { calendar, nextCalendar, getZero, getSeventh, setZero, setSeventh  } from './calendar.js';
 import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
-
-const DEFAULT_EXTRA_PERIODS = Array(7).fill().map(() => ({ zero: false, seventh: false }));
 
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
@@ -12,31 +10,12 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 5, 30, 9, 55, 0);
+//setOffset(2023, 5, 2, 10, 29, 55);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => new Date(new Date().getTime() + offset);
 
-const calendars = await fetch('calendars.json').then((r) => {
-  if (r.ok) return r.json();
-});
-
-// Kept in local storage
-let extraPeriods = null;
-
 let togo = true;
-
-const loadConfiguration = () => {
-  extraPeriods = JSON.parse(localStorage.getItem('extraPeriods'));
-  if (extraPeriods === null) {
-    extraPeriods = DEFAULT_EXTRA_PERIODS;
-    saveConfiguration();
-  }
-};
-
-const saveConfiguration = () => {
-  localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
-};
 
 const setupConfigPanel = () => {
   $('#qr').onclick = toggleQR;
@@ -50,19 +29,17 @@ const setupConfigPanel = () => {
     const cells = node.querySelectorAll('td');
     const zero = cells[1].querySelector('input');
     const seventh = cells[2].querySelector('input');
-    const ep = extraPeriods[day];
+    const d = day; // capture value.
 
-    zero.checked = ep.zero;
-    seventh.checked = ep.seventh;
+    zero.checked = getZero(d);
+    seventh.checked = getSeventh(d);
 
     zero.onchange = () => {
-      ep.zero = zero.checked;
-      saveConfiguration();
+      setZero(d, zero.checked);
     };
 
     seventh.onchange = () => {
-      ep.seventh = seventh.checked;
-      saveConfiguration();
+      setSeventh(d, seventh.checked);
     };
 
     day++;
@@ -276,29 +253,10 @@ const periodTimes = (p) => {
   return d;
 };
 
-/**
- * Get the calendar for the given time. Undefined during the summer.
- */
-const calendar = (t) => {
-  return calendars.map((d) => new Calendar(d, extraPeriods)).find((c) => c.isInCalendar(t));
-};
-
-/**
- * Get the calendar for the next year, if we have it.
- */
-const nextCalendar = (t) => {
-  return calendars.map((d) => new Calendar(d, extraPeriods)).find((c) => t < c.startOfYear());
-};
-
-const go = () => {
-  loadConfiguration();
-  setupConfigPanel();
-  $('#left').onclick = () => {
-    togo = !togo;
-    update();
-  };
-  addProgressBars();
+setupConfigPanel();
+$('#left').onclick = () => {
+  togo = !togo;
   update();
 };
-
-go();
+addProgressBars();
+update();
