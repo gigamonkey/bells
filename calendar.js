@@ -4,11 +4,6 @@ const DEFAULT_EXTRA_PERIODS = Array(7).fill().map(() => ({ zero: false, seventh:
 
 let extraPeriods = JSON.parse(localStorage.getItem('extraPeriods'));
 
-if (extraPeriods === null) {
-  extraPeriods = DEFAULT_EXTRA_PERIODS;
-  saveConfiguration();
-}
-
 const getZero = (day) => {
   return extraPeriods[day].zero;
 }
@@ -31,9 +26,21 @@ const saveConfiguration = () => {
   localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
 };
 
-const calendars = await fetch('calendars.json').then((r) => {
-  if (r.ok) return r.json();
-});
+const loadCalendarData = () => {
+  const href = new URL(import.meta.url).href;
+  const dataURL = href.slice(0, href.lastIndexOf('/')) + '/calendars.json';
+
+  return fetch(dataURL).then((r) => {
+    if (r.ok) return r.json();
+  });
+};
+
+const calendars = await loadCalendarData();
+
+if (extraPeriods === null) {
+  extraPeriods = DEFAULT_EXTRA_PERIODS;
+  saveConfiguration();
+}
 
 /**
  * Get the calendar for the given time. Undefined during the summer.
