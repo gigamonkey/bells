@@ -25,7 +25,7 @@ h1 {
     color: rgba(64, 64, 128, 1);
 }
 
-#configuration, #main {
+#configuration, #main, #summer {
     text-align: center;
     padding: 10px;
     margin: 0;
@@ -104,4 +104,8 @@ span.togo {
   height: 12px;
   width: 12px;
   vertical-align: middle;
+}
+
+#summerbar {
+  margin-top: 12px;
 }

@@ -1,4 +1,4 @@
-import { calendar, nextCalendar, getZero, getSeventh, setZero, setSeventh  } from './calendar.js';
+import { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh  } from './calendar.js';
 import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
@@ -124,6 +124,7 @@ const summerCountdown = (t) => {
     $('#summer').style.display = 'block';
     $('#main').style.display = 'none';
     $('#noCalendar').style.display = 'none';
+    updateSummerProgress(t);
   } else {
     $('#noCalendar').style.display = 'block';
     $('#main').style.display = 'none';
@@ -192,6 +193,11 @@ const updateTodayProgress = (t, s) => {
   const end = s.endOfDay(t);
   $('#today').innerHTML = hhmmss(togo ? end - t : t - start) + ' ' + (togo ? 'to go' : 'done');
   updateProgressBar('todaybar', start, end, t);
+};
+
+const updateSummerProgress = (t) => {
+  const { start, end } = summer(t);
+  updateProgressBar('summerbar', start, end, t);
 };
 
 const updateCountdown = (t, cal, s) => {

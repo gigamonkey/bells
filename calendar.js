@@ -50,6 +50,25 @@ const calendar = (t) => {
 };
 
 /**
+ * Get just the start and end timestamps for the summer.
+ */
+const summer = (t) => {
+  const cals = calendars.map((d) => new Calendar(d, extraPeriods));
+
+  return {
+    start: cals
+      .map(c => c.endOfYear())
+      .filter(e => e < t)
+      .reduce((max, e) => Math.max(max, e), -Infinity),
+
+    end: cals
+      .map(c => c.startOfYear())
+      .filter(s => s > t)
+      .reduce((min, e) => Math.min(min, e), Infinity)
+  };
+};
+
+/**
  * Get the calendar for the next year, if we have it.
  */
 const nextCalendar = (t) => {
@@ -437,4 +456,4 @@ class Interval {
   }
 }
 
-export { calendar, nextCalendar, getZero, getSeventh, setZero, setSeventh };
+export { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh };
