@@ -1,6 +1,9 @@
+import { Temporal } from '@js-temporal/polyfill';
 import { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh  } from './calendar.js';
 import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
+
+const tz = Temporal.TimeZone.from('America/Los_Angeles');
 
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
@@ -13,7 +16,19 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
 //setOffset(2023, 5, 2, 10, 29, 55);
 
 // Always use this to get the "current" time to ease testing.
-const now = () => new Date(new Date().getTime() + offset);
+const now = () => {
+  // This is a terrible kludge. Because everything else is written in terms of
+  // date we just use Temporal to adjust our notion of now to account for the
+  // difference between the current timezone (i.e. where the browser is) and the
+  // home timezone of BHS. Really this whole thing should be rewritten to use
+  // Temporal throughout.
+  const instant = Temporal.Now.instant().epochMilliseconds;
+  const localTime = Temporal.Now.plainDateTimeISO();
+  const otherTime = localTime.toZonedDateTime(tz);
+  const delta = Math.abs(Temporal.Instant.from(otherTime).epochMilliseconds - instant);
+  return new Date(instant - delta + offset);
+}
+
 
 let togo = true;
 
@@ -86,7 +101,6 @@ const togglePeriods = () => {
     const s = c.schedule(t);
 
     const first = s.firstPeriod(t);
-    const last = s.lastPeriod(t);
 
     for (let p = first; p !== null; p = p.next) {
       const tr = $('<tr>');
