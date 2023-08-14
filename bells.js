@@ -1,5 +1,5 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh  } from './calendar.js';
+import { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh, toggleTeacher  } from './calendar.js';
 import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
@@ -13,7 +13,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 5, 2, 10, 29, 55);
+//setOffset(2023, 8, 14, 8, 4, 0);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => {
@@ -33,6 +33,7 @@ const now = () => {
 let togo = true;
 
 const setupConfigPanel = () => {
+  $('#apple').onclick = toggleTeacher;
   $('#qr').onclick = toggleQR;
   $('#gear').onclick = toggleConfig;
   $('#sched').onclick = togglePeriods;
@@ -96,7 +97,7 @@ const togglePeriods = () => {
     table.replaceChildren();
 
     const n = now();
-    const c = calendar(n);
+    const c = calendar(n) || nextCalendar(n);
     const t = c.currentOrNextDay(n);
     const s = c.schedule(t);
 

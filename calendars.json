@@ -1,6 +1,7 @@
 [
   {
     "year": "2023-2024",
+    "firstDayTeachers": "2023-08-14",
     "firstDay": "2023-08-16",
     "lastDay": "2024-06-04",
     "schedules": {
@@ -27,7 +28,16 @@
           {"name": "Period 6", "start": "14:50", "end": "15:33"},
           {"name": "Period 7", "start": "15:39", "end": "16:22"}
         ]
-      }
+      },
+      "2023-08-14": [
+        {"name": "Coffee & Treats in Library", "start": "8:03", "end": "8:20"},
+        {"name": "Welcome Back", "start": "8:20", "end": "9:25"},
+        {"name": "Rotation Block #1", "start": "9:30", "end": "10:50"},
+        {"name": "Photos", "start": "11:00", "end": "11:35"},
+        {"name": "Lunch", "start": "11:35", "end": "12:30"},
+        {"name": "Rotation Block #2", "start": "12:38", "end": "14:08"},
+        {"name": "Rotation Block #3", "start": "14:13", "end": "15:33"}
+      ]
     },
     "holidays": [
       "2023-09-04",
@@ -70,6 +80,7 @@
   },
   {
     "year": "2022-2023",
+    "firstDayTeachers": "2022-08-13",
     "firstDay": "2022-08-15",
     "lastDay": "2023-06-02",
     "schedules": {

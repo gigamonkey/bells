@@ -3,6 +3,7 @@ import { datestring, parseDate, parseTime, daysBetween, noon, includesWeekend } 
 const DEFAULT_EXTRA_PERIODS = Array(7).fill().map(() => ({ zero: false, seventh: false }));
 
 let extraPeriods = JSON.parse(localStorage.getItem('extraPeriods'));
+let otherData = JSON.parse(localStorage.getItem('otherData')) || {};
 
 const getZero = (day) => {
   return extraPeriods[day].zero;
@@ -22,8 +23,14 @@ const setSeventh = (day, value) => {
   saveConfiguration();
 }
 
+const toggleTeacher = () => {
+  otherData.isTeacher = !otherData?.isTeacher;
+  saveConfiguration();
+}
+
 const saveConfiguration = () => {
   localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
+  localStorage.setItem('otherData', JSON.stringify(otherData));
 };
 
 const loadCalendarData = () => {
@@ -83,7 +90,7 @@ class Calendar {
   breakNames;
 
   constructor(data, extraPeriods) {
-    this.firstDay = data.firstDay;
+    this.firstDay = otherData?.isTeacher ? data.firstDayTeachers : data.firstDay;
     this.lastDay = data.lastDay;
     this.schedules = data.schedules;
     this.holidays = data.holidays;
@@ -116,7 +123,7 @@ class Calendar {
     const d = datestring(t);
     return new Schedule(
       this,
-      d in this.schedules
+      (d in this.schedules && d >= this.firstDay)
         ? this.schedules[d]
         : t.getDay() === 1
         ? this.schedules['default'].LATE_START
@@ -180,10 +187,14 @@ class Calendar {
   }
 
   currentOrNextDay(t) {
-    if (this.isSchoolDay(t) && t < this.schedule(t).endOfDay(t)) {
-      return t;
+    if (t < this.startOfYear()) {
+      return this.startOfYear();
     } else {
-      return this.nextSchoolDay(t);
+      if (this.isSchoolDay(t) && t < this.schedule(t).endOfDay(t)) {
+        return t;
+      } else {
+        return this.nextSchoolDay(t);
+      }
     }
   }
 
@@ -456,4 +467,4 @@ class Interval {
   }
 }
 
-export { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh };
+export { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh, toggleTeacher };
