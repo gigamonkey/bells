@@ -33,7 +33,7 @@ const now = () => {
 let togo = true;
 
 const setupConfigPanel = () => {
-  $('#apple').onclick = toggleTeacher;
+  //$('#apple').onclick = toggleTeacher;
   $('#qr').onclick = toggleQR;
   $('#gear').onclick = toggleConfig;
   $('#sched').onclick = togglePeriods;
