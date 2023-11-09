@@ -69,6 +69,24 @@
         {"name": "Back to School Period 5", "start": "19:35", "end": "19:45"},
         {"name": "Back to School Period 6", "start": "19:50", "end": "20:00"},
         {"name": "Back to School Period 7", "start": "20:05", "end": "20:15"}
+      ],
+      "2023-12-20": [
+        {"name": "Period 1 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 2 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
+      ],
+      "2023-12-21": [
+        {"name": "Period 3 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 4 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
+      ],
+      "2023-12-22": [
+        {"name": "Period 5 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 6 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
       ]
     },
     "holidays": [

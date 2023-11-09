@@ -13,16 +13,16 @@ const timestring = (t) => {
 const millisToHMS = (millis) => {
   const seconds = Math.round(millis / 1000);
   const minutes = Math.floor(seconds / 60);
-  return [ Math.floor(minutes / 60), minutes % 60, seconds % 60 ];
+  return [Math.floor(minutes / 60), minutes % 60, seconds % 60];
 };
 
 const hhmmss = (millis) => {
-  const [ h, m, s ] = millisToHMS(millis);
+  const [h, m, s] = millisToHMS(millis);
   return xx(h) + ':' + xx(m) + ':' + xx(s);
 };
 
 const timeCountdown = (millis) => {
-  const [ h, m, s ] = millisToHMS(millis);
+  const [h, m, s] = millisToHMS(millis);
   return `${h} ${plural(h, 'hour')} ${m} ${plural(m, 'minute')} ${s} ${plural(s, 'second')}`;
 };
 

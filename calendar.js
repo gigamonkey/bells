@@ -1,32 +1,34 @@
 import { datestring, parseDate, parseTime, daysBetween, noon, includesWeekend } from './datetime.js';
 
-const DEFAULT_EXTRA_PERIODS = Array(7).fill().map(() => ({ zero: false, seventh: false }));
+const DEFAULT_EXTRA_PERIODS = Array(7)
+  .fill()
+  .map(() => ({ zero: false, seventh: false }));
 
 let extraPeriods = JSON.parse(localStorage.getItem('extraPeriods'));
 let otherData = JSON.parse(localStorage.getItem('otherData')) || {};
 
 const getZero = (day) => {
   return extraPeriods[day].zero;
-}
+};
 
 const getSeventh = (day) => {
   return extraPeriods[day].seventh;
-}
+};
 
 const setZero = (day, value) => {
   extraPeriods[day].zero = value;
   saveConfiguration();
-}
+};
 
 const setSeventh = (day, value) => {
   extraPeriods[day].seventh = value;
   saveConfiguration();
-}
+};
 
 const toggleTeacher = () => {
   otherData.isTeacher = !otherData?.isTeacher;
   saveConfiguration();
-}
+};
 
 const saveConfiguration = () => {
   localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
@@ -64,14 +66,14 @@ const summer = (t) => {
 
   return {
     start: cals
-      .map(c => c.endOfYear())
-      .filter(e => e < t)
+      .map((c) => c.endOfYear())
+      .filter((e) => e < t)
       .reduce((max, e) => Math.max(max, e), -Infinity),
 
     end: cals
-      .map(c => c.startOfYear())
-      .filter(s => s > t)
-      .reduce((min, e) => Math.min(min, e), Infinity)
+      .map((c) => c.startOfYear())
+      .filter((s) => s > t)
+      .reduce((min, e) => Math.min(min, e), Infinity),
   };
 };
 
@@ -123,7 +125,7 @@ class Calendar {
     const d = datestring(t);
     return new Schedule(
       this,
-      (d in this.schedules && d >= this.firstDay)
+      d in this.schedules && d >= this.firstDay
         ? this.schedules[d]
         : t.getDay() === 1
         ? this.schedules['default'].LATE_START
@@ -221,7 +223,6 @@ class Calendar {
   }
 
   schoolMillisLeft(t, s) {
-
     const eoy = this.endOfYear().getTime();
 
     let millis = 0;
@@ -255,26 +256,18 @@ class Calendar {
     end.setDate(end.getDate() + 1);
     return daysBetween(noon(t), noon(end));
   }
-
 }
-
 
 // KLUDGE. We want Lunch and Finals Make Up in the schedule but we don't want to
 // count them in the time countdown. Should probably move this into the calendar
 // data.
-const exams = [
-  new Date(2023, 4, 30),
-  new Date(2023, 4, 31),
-  new Date(2023, 5, 1),
-];
+const exams = [new Date(2023, 4, 30), new Date(2023, 4, 31), new Date(2023, 5, 1)];
 
 const sameDay = (d1, d2) => {
-  return d1.getYear() == d2.getYear() &&
-    d1.getMonth() == d2.getMonth() &&
-    d1.getDate() == d2.getDate();
-}
+  return d1.getYear() == d2.getYear() && d1.getMonth() == d2.getMonth() && d1.getDate() == d2.getDate();
+};
 
-const isExamDay = (d) => exams.some(e => sameDay(e, d));
+const isExamDay = (d) => exams.some((e) => sameDay(e, d));
 
 const specialEOD = (s, t) => {
   const end = s.endOfDay(t);
@@ -283,7 +276,6 @@ const specialEOD = (s, t) => {
   }
   return end;
 };
-
 
 class Schedule {
   calendar;

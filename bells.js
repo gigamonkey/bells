@@ -1,5 +1,5 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh, toggleTeacher  } from './calendar.js';
+import { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh, toggleTeacher } from './calendar.js';
 import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
@@ -13,7 +13,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2023, 8, 14, 8, 4, 0);
+//setOffset(2023, 12, 20, 14, 4, 0);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => {
@@ -27,8 +27,7 @@ const now = () => {
   const otherTime = localTime.toZonedDateTime(tz);
   const delta = Math.abs(Temporal.Instant.from(otherTime).epochMilliseconds - instant);
   return new Date(instant - delta + offset);
-}
-
+};
 
 let togo = true;
 
@@ -160,7 +159,7 @@ const countdownText = (millis) => {
     return hhmmss(millis);
   } else {
     const days = Math.floor(h / 24);
-    const hh = millis - (days * 24 * 60 * 60 * 1000);
+    const hh = millis - days * 24 * 60 * 60 * 1000;
     return `${days} day${days === 1 ? '' : 's'}, ${hhmmss(hh)}`;
   }
 };
@@ -229,8 +228,8 @@ const updateCountdown = (t, cal, s) => {
     if (cal.isLastDay(t)) {
       text += 'Last day of school!<br>';
     } else {
-      text += `${days(left, 'school')} left in the year${countingToday}.<br>`
-      text += `${days(calendarDays, 'calendar')} until summer vacation!<br>`
+      text += `${days(left, 'school')} left in the year${countingToday}.<br>`;
+      text += `${days(calendarDays, 'calendar')} until summer vacation!<br>`;
     }
     if (hours < 100) {
       text += `${timeCountdown(millis)} to go.`;
