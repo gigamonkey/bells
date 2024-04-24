@@ -220,7 +220,7 @@ const updateCountdown = (t, cal, s) => {
   const millis = cal.schoolMillisLeft(t, s);
   const hours = millis / (1000 * 60 * 60);
   const calendarDays = cal.calendarDaysLeft(t, s);
-  const classDays = Math.max(0, left - 4);
+  const classDays = Math.max(0, left - (3 + 2)); // three days of exams plus two chaos days
   const countingToday = inSchool ? ' counting today' : '';
 
   if (left <= 30) {

@@ -204,21 +204,22 @@ class Calendar {
     return this.isSchoolDay(t) && s.startOfDay(t) < t && t < s.endOfDay(t);
   }
 
-  schoolDaysLeft(t, s) {
-    const end = this.endOfYear();
-    let c = 0;
+  beforeOrDuringSchool(t, s) {
+    return this.isSchoolDay(t) && t < s.endOfDay(t);
+  }
 
-    // Current day, if school day and not over.
-    if (this.isSchoolDay(t, s) && t < s.endOfDay(t)) {
-      c++;
-    }
+  schoolDaysLeft(t, s) {
+
+    const end = this.endOfYear();
     const d = new Date(t);
-    do {
+
+    let c = this.beforeOrDuringSchool(t, s) ? 1 : 0;
+
+    d.setDate(d.getDate() + 1);
+    while (noon(d) <= noon(end)) {
+      if (this.isSchoolDay(d)) c++;
       d.setDate(d.getDate() + 1);
-      if (this.isSchoolDay(d)) {
-        c++;
-      }
-    } while (noon(d) <= noon(end));
+    }
     return c;
   }
 
