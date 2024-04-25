@@ -67,11 +67,14 @@ h1 {
 }
 
 #countdown {
-    font-size: min(20px, 3.5vw);
+    font-size: min(25px, 3.5vw);
     padding-top: 20px;
     margin: 0 auto;
 }
 
+#countdown > p {
+  margin: 0.5em 0 0 0;
+}
 
 .bar {
     height: 20px;
