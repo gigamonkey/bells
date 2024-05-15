@@ -1,5 +1,5 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh, toggleTeacher } from './calendar.js';
+import { calendar, summer, nextCalendar, getZero, getSeventh, getExt, setZero, setSeventh, setExt, toggleTeacher } from './calendar.js';
 import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
@@ -44,10 +44,12 @@ const setupConfigPanel = () => {
     const cells = node.querySelectorAll('td');
     const zero = cells[1].querySelector('input');
     const seventh = cells[2].querySelector('input');
+    const ext = cells[3].querySelector('input');
     const d = day; // capture value.
 
     zero.checked = getZero(d);
     seventh.checked = getSeventh(d);
+    ext.checkd = getExt(d);
 
     zero.onchange = () => {
       setZero(d, zero.checked);
@@ -55,6 +57,10 @@ const setupConfigPanel = () => {
 
     seventh.onchange = () => {
       setSeventh(d, seventh.checked);
+    };
+
+    ext.onchange = () => {
+      setExt(d, ext.checked);
     };
 
     day++;

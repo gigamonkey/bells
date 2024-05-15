@@ -16,6 +16,10 @@ const getSeventh = (day) => {
   return extraPeriods[day].seventh;
 };
 
+const getExt = (day) => {
+  return extraPeriods[day].ext;
+};
+
 const setZero = (day, value) => {
   extraPeriods[day].zero = value;
   saveConfiguration();
@@ -26,12 +30,18 @@ const setSeventh = (day, value) => {
   saveConfiguration();
 };
 
+const setExt = (day, value) => {
+  extraPeriods[day].ext = value;
+  saveConfiguration();
+};
+
 const toggleTeacher = () => {
   otherData.isTeacher = !otherData?.isTeacher;
   saveConfiguration();
 };
 
 const saveConfiguration = () => {
+  console.log(extraPeriods);
   localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
   localStorage.setItem('otherData', JSON.stringify(otherData));
 };
@@ -313,8 +323,19 @@ class Schedule {
   lastPeriodIndex(d) {
     const last = this.periods.length - 1;
     const lastName = this.periods[last].name;
-    const hasSeventh = lastName === 'Period 7';
-    return hasSeventh ? (this.extraPeriods[d.getDay()].seventh ? last : last - 1) : last;
+    const hasSeventh = lastName === 'Period Ext';
+    if (hasSeventh) {
+      const extra = this.extraPeriods[d.getDay()];
+      if (extra.ext) {
+        return this.periods.length - 1;
+      } else if (extra.seventh) {
+        return this.periods.length - 2;
+      } else {
+        return this.periods.length - 3;
+      }
+    } else {
+      return this.periods.length - 3;
+    }
   }
 
   startOfDay(d) {
@@ -450,4 +471,4 @@ class Interval {
   }
 }
 
-export { calendar, summer, nextCalendar, getZero, getSeventh, setZero, setSeventh, toggleTeacher };
+export { calendar, summer, nextCalendar, getZero, getSeventh, getExt, setZero, setSeventh, setExt, toggleTeacher };
