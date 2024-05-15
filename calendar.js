@@ -1,3 +1,4 @@
+import calendars from './calendars.json';
 import { datestring, parseDate, parseTime, daysBetween, noon, includesWeekend } from './datetime.js';
 
 const DEFAULT_EXTRA_PERIODS = Array(7)
@@ -34,17 +35,6 @@ const saveConfiguration = () => {
   localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
   localStorage.setItem('otherData', JSON.stringify(otherData));
 };
-
-const loadCalendarData = () => {
-  const href = new URL(import.meta.url).href;
-  const dataURL = href.slice(0, href.lastIndexOf('/')) + '/calendars.json';
-
-  return fetch(dataURL).then((r) => {
-    if (r.ok) return r.json();
-  });
-};
-
-const calendars = await loadCalendarData();
 
 if (extraPeriods === null) {
   extraPeriods = DEFAULT_EXTRA_PERIODS;
