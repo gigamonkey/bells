@@ -158,6 +158,36 @@
         {"name": "Period 6 Final", "start": "10:40", "end": "12:40"},
         {"name": "Lunch", "start": "12:40", "end": "13:20"},
         {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
+      ],
+      "2024-05-29": [
+        {"name": "Period 1 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 2 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
+      ],
+      "2023-05-30": [
+        {"name": "Period 3 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 4 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
+      ],
+      "2023-05-31": [
+        {"name": "Period 5 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 6 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
+      ],
+      "2024-06-03": [
+        {"name": "Period 1", "start": "8:30", "end": "9:50"},
+        {"name": "Period 3", "start": "9:56", "end": "11:16"},
+        {"name": "Period 5", "start": "11:22", "end": "12:42"},
+        {"name": "Lunch", "start": "12:42", "end": "13:22"}
+      ],
+      "2024-06-04": [
+        {"name": "Period 2", "start": "8:30", "end": "9:50"},
+        {"name": "Period 4", "start": "9:56", "end": "11:16"},
+        {"name": "Period 6", "start": "11:22", "end": "12:42"},
+        {"name": "Lunch", "start": "12:42", "end": "13:22"}
       ]
     },
     "holidays": [
