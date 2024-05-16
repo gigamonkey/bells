@@ -252,7 +252,7 @@ class Calendar {
 // KLUDGE. We want Lunch and Finals Make Up in the schedule but we don't want to
 // count them in the time countdown. Should probably move this into the calendar
 // data.
-const exams = [new Date(2023, 4, 30), new Date(2023, 4, 31), new Date(2023, 5, 1)];
+const exams = [new Date(2024, 4, 29), new Date(2024, 4, 30), new Date(2024, 4, 31)];
 
 const sameDay = (d1, d2) => {
   return d1.getYear() == d2.getYear() && d1.getMonth() == d2.getMonth() && d1.getDate() == d2.getDate();
