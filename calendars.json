@@ -159,6 +159,18 @@
         {"name": "Lunch", "start": "12:40", "end": "13:20"},
         {"name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32"}
       ],
+      "2024-05-24": [
+        {"name": "Period 0", "start": "7:26", "end": "8:24"},
+        {"name": "Period 1", "start": "8:30", "end": "9:12"},
+        {"name": "Period 2", "start": "9:18", "end": "10:00"},
+        {"name": "Period 3", "start": "10:06", "end": "10:48"},
+        {"name": "Period 4", "start": "10:54", "end": "11:36"},
+        {"name": "Lunch", "start": "11:36", "end": "12:16"},
+        {"name": "Period 5", "start": "12:22", "end": "13:04"},
+        {"name": "Period 6", "start": "13:10", "end": "13:49"},
+        {"name": "Carnival", "start": "13:52", "end": "15:42"},
+        {"name": "Period 7", "start": "15:48", "end": "16:30"}
+      ],
       "2024-05-29": [
         {"name": "Period 1 Final", "start": "8:30", "end": "10:30"},
         {"name": "Period 2 Final", "start": "10:40", "end": "12:40"},
