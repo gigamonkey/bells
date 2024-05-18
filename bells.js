@@ -1,5 +1,5 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { calendar, summer, nextCalendar, getZero, getSeventh, getExt, setZero, setSeventh, setExt, toggleTeacher } from './calendar.js';
+import { calendar, summer, nextCalendar, getZero, getSeventh, getExt, setZero, setSeventh, setExt, toggleTeacher, isTeacher } from './calendar.js';
 import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
@@ -13,7 +13,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2024, 5, 24, 11, 4, 0);
+//setOffset(2024, 6, 3, 8, 0, 0);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => {
@@ -32,10 +32,12 @@ const now = () => {
 let togo = true;
 
 const setupConfigPanel = () => {
-  //$('#apple').onclick = toggleTeacher;
+  $('#apple').onclick = toggleTeacher;
   $('#qr').onclick = toggleQR;
   $('#gear').onclick = toggleConfig;
   $('#sched').onclick = togglePeriods;
+
+  $('#apple').innerText = isTeacher() ? '🍎' : '✏️';
 
   let day = 1;
 
@@ -49,7 +51,7 @@ const setupConfigPanel = () => {
 
     zero.checked = getZero(d);
     seventh.checked = getSeventh(d);
-    ext.checkd = getExt(d);
+    ext.checked = getExt(d);
 
     zero.onchange = () => {
       setZero(d, zero.checked);
@@ -223,7 +225,7 @@ const updateSummerProgress = (t) => {
 const updateCountdown = (t, cal, s) => {
   const inSchool = cal.duringSchool(t, s);
   const left = cal.schoolDaysLeft(t, s);
-  const millis = cal.schoolMillisLeft(t, s);
+  const millis = cal.schoolMillisLeft(t);
   const hours = millis / (1000 * 60 * 60);
   const calendarDays = cal.calendarDaysLeft(t, s);
   const classDays = Math.max(0, left - (3 + 2)); // three days of exams plus two chaos days

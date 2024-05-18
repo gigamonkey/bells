@@ -20,6 +20,8 @@ const getExt = (day) => {
   return extraPeriods[day].ext;
 };
 
+const isTeacher = () => otherData?.isTeacher;
+
 const setZero = (day, value) => {
   extraPeriods[day].zero = value;
   saveConfiguration();
@@ -35,13 +37,13 @@ const setExt = (day, value) => {
   saveConfiguration();
 };
 
-const toggleTeacher = () => {
+const toggleTeacher = (e) => {
   otherData.isTeacher = !otherData?.isTeacher;
+  e.target.innerText = otherData.isTeacher ? '🍎' : '✏️';
   saveConfiguration();
 };
 
 const saveConfiguration = () => {
-  console.log(extraPeriods);
   localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
   localStorage.setItem('otherData', JSON.stringify(otherData));
 };
@@ -131,6 +133,7 @@ class Calendar {
         ? this.schedules['default'].LATE_START
         : this.schedules['default'].NORMAL,
       this.extraPeriods,
+      t
     );
   }
 
@@ -223,15 +226,15 @@ class Calendar {
     return c;
   }
 
-  schoolMillisLeft(t, s) {
+  schoolMillisLeft(t) {
     const eoy = this.endOfYear().getTime();
 
     let millis = 0;
 
     // If we are starting during school, add millis until the end of the day.
-    if (this.isSchoolDay(t, s) && s.startOfDay(t) < t && t < specialEOD(s, t).getTime()) {
+    if (this.duringSchool(t, this.schedule(t))) {
       const start = Math.max(new Date(t), this.schedule(t).startOfDay(t));
-      millis += specialEOD(s, t).getTime() - start;
+      millis += s.endOfDay(t).getTime() - start;
       if (s.endOfDay(t).getTime() === eoy) {
         return millis;
       }
@@ -242,7 +245,7 @@ class Calendar {
     let start = this.nextSchoolDayStart(t);
     let end = this.schedule(start).endOfDay(start);
     while (true) {
-      millis += specialEOD(this.schedule(start), end).getTime() - start.getTime();
+      millis += end.getTime() - start.getTime();
       if (end.getTime() === eoy) {
         return millis;
       } else {
@@ -259,83 +262,59 @@ class Calendar {
   }
 }
 
-// KLUDGE. We want Lunch and Finals Make Up in the schedule but we don't want to
-// count them in the time countdown. Should probably move this into the calendar
-// data.
-const exams = [new Date(2024, 4, 29), new Date(2024, 4, 30), new Date(2024, 4, 31)];
-
-const sameDay = (d1, d2) => {
-  return d1.getYear() == d2.getYear() && d1.getMonth() == d2.getMonth() && d1.getDate() == d2.getDate();
-};
-
-const isExamDay = (d) => exams.some((e) => sameDay(e, d));
-
-const specialEOD = (s, t) => {
-  const end = s.endOfDay(t);
-  if (isExamDay(new Date(t))) {
-    end.setHours(12, 40);
-  }
-  return end;
-};
-
 class Schedule {
   calendar;
   periods;
 
-  constructor(calendar, periods, extraPeriods) {
+  constructor(calendar, periods, extraPeriods, t) {
     this.calendar = calendar;
-    this.periods = periods.map((x) => new Period(x.name, x.start, x.end));
+    this.periods = periods.map((x) => new Period(x.name, x.start, x.end, x.teachers, x.nonSchool));
     this.periods.forEach((p, i, ps) => {
       if (i < ps.length - 1) {
         p.next = ps[i + 1];
       }
     });
     this.extraPeriods = extraPeriods;
+    this.t = t;
+    this.isTeacher = otherData?.isTeacher;
   }
 
-  // FIXME: Is this used?
-  period(i) {
-    return this.periods[i];
+  actualPeriods() {
+    // Get the actual periods we have. First we filter 0, 7, and Ext periods
+    // unless we have them and also all teacher-only periods unless the user is
+    // a teacher. Then we trim "nonSchool" periods from the ends of the day.
+    // This is for periods like Lunch and Carnival when they're at the end of
+    // the day (assuming you don't have 7th or Ext) and you could go home.
+    const base = this.periods.filter(p => this.hasPeriod(p));
+
+    while (base[0].nonSchool) base.shift();
+    while (base[base.length - 1].nonSchool) base.pop();
+
+    return base;
   }
 
-  // If we number the periods then on a normal day the first period is period 1
-  // or 0 if the user has zeroth period and the last period is period 6 or 7 if
-  // the user has 7th period. Otherwise, the first period is the smallest
-  // numbered period ad the last period is the largerst numbered period. This
-  // will handle things like back to school night and exams where there may be
-  // periods past the end of the day that we want to count down but which we
-  // don't want to include in the length of the day.
+  hasPeriod(p) {
+    const extra = this.extraPeriods[this.t.getDay()];
+    if (p.name === 'Period 0') {
+      return extra.zero;
+    } else if (p.name === 'Period 7') {
+      return extra.seventh;
+    } else if (p.name === 'Period Ext') {
+      return extra.ext;
+    } else if (p.teachers) {
+      return this.isTeacher;
+    } else {
+      return true;
+    }
+  }
 
   firstPeriod(d) {
-    return this.periods[this.firstPeriodIndex(d)];
+    return this.actualPeriods()[0];
   }
 
   lastPeriod(d) {
-    return this.periods[this.lastPeriodIndex(d)];
-  }
-
-  firstPeriodIndex(d) {
-    const firstName = this.periods[0].name;
-    const hasZeroPeriod = firstName === 'Period 0' || firstName === 'Staff meeting';
-    return hasZeroPeriod ? (this.extraPeriods[d.getDay()].zero ? 0 : 1) : 0;
-  }
-
-  lastPeriodIndex(d) {
-    const last = this.periods.length - 1;
-    const lastName = this.periods[last].name;
-    const hasSeventh = lastName === 'Period Ext';
-    if (hasSeventh) {
-      const extra = this.extraPeriods[d.getDay()];
-      if (extra.ext) {
-        return this.periods.length - 1;
-      } else if (extra.seventh) {
-        return this.periods.length - 2;
-      } else {
-        return this.periods.length - 3;
-      }
-    } else {
-      return this.periods.length - 3;
-    }
+    const ps = this.actualPeriods();
+    return ps[ps.length - 1];
   }
 
   startOfDay(d) {
@@ -417,10 +396,12 @@ class Schedule {
  * date.
  */
 class Period {
-  constructor(name, start, end) {
+  constructor(name, start, end, teachers, nonSchool) {
     this.name = name;
     this.start = start;
     this.end = end;
+    this.teachers = teachers;
+    this.nonSchool = nonSchool;
     this.next = null; // Set after all periods are made.
   }
 
@@ -471,4 +452,4 @@ class Interval {
   }
 }
 
-export { calendar, summer, nextCalendar, getZero, getSeventh, getExt, setZero, setSeventh, setExt, toggleTeacher };
+export { calendar, summer, nextCalendar, getZero, getSeventh, getExt, setZero, setSeventh, setExt, toggleTeacher, isTeacher };
