@@ -83,7 +83,11 @@ const summer = (t) => {
  * Get the calendar for the next year, if we have it.
  */
 const nextCalendar = (t) => {
-  return calendars.map((d) => new Calendar(d, extraPeriods)).find((c) => t < c.startOfYear());
+  const cals = calendars.map((d) => new Calendar(d, extraPeriods));
+  return cals.reduce((n, c) => {
+    if (c.startOfYear() < t) return n;
+    return n == null || n.startOfYear() > c.startOfYear() ? c : n;
+  }, null);
 };
 
 class Calendar {
