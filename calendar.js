@@ -230,10 +230,11 @@ class Calendar {
     const eoy = this.endOfYear().getTime();
 
     let millis = 0;
+    let s = this.schedule(t);
 
     // If we are starting during school, add millis until the end of the day.
-    if (this.duringSchool(t, this.schedule(t))) {
-      const start = Math.max(new Date(t), this.schedule(t).startOfDay(t));
+    if (this.duringSchool(t, s)) {
+      const start = Math.max(new Date(t), s.startOfDay(t));
       millis += s.endOfDay(t).getTime() - start;
       if (s.endOfDay(t).getTime() === eoy) {
         return millis;
@@ -265,7 +266,17 @@ class Calendar {
 class Schedule {
   calendar;
   periods;
+  extraPeriods;
+  t;
+  isTeacher;
 
+  // FIXME: now that we store the time t in the Schedule object there are a
+  // bunch of methods that presumably don't need to be passed the time like
+  // startOfDay and endOfDay. Either that or be smarter about not making a whole
+  // new Schedule object every second which was presumably the original idea: we
+  // only need to make a new schedule when it's a new day but then any question
+  // about a particular time needs to pass in the time. As it stands we have the
+  // worst of both worlds. So fix it one way or the other.
   constructor(calendar, periods, extraPeriods, t) {
     this.calendar = calendar;
     this.periods = periods.map((x) => new Period(x.name, x.start, x.end, x.teachers, x.nonSchool));

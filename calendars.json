@@ -92,7 +92,7 @@
           {"name": "Period Ext", "start": "15:39", "end": "17:09"}
         ],
         "LATE_START": [
-          {"name": "Staff meeting", "start": "8:03", "end": "9:33"},
+          {"name": "Staff meeting", "start": "8:03", "end": "9:33", "teachers": true},
           {"name": "Period 1", "start": "10:00", "end": "10:43"},
           {"name": "Period 2", "start": "10:49", "end": "11:37"},
           {"name": "Period 3", "start": "11:43", "end": "12:26"},

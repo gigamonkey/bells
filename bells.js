@@ -108,15 +108,13 @@ const togglePeriods = () => {
     const t = c.currentOrNextDay(n);
     const s = c.schedule(t);
 
-    const first = s.firstPeriod(t);
-
-    for (let p = first; p !== null; p = p.next) {
+    s.actualPeriods().forEach(p => {
       const tr = $('<tr>');
       tr.append(td(p.name));
       tr.append(td(timestring(parseTime(p.start, t))));
       tr.append(td(timestring(parseTime(p.end, t))));
       table.append(tr);
-    }
+    });
     table.style.display = 'table';
   }
 };
