@@ -1,9 +1,7 @@
 import calendars from './calendars.json';
 import { datestring, parseDate, parseTime, daysBetween, noon, includesWeekend } from './datetime.js';
 
-const DEFAULT_EXTRA_PERIODS = Array(7)
-  .fill()
-  .map(() => ({ zero: false, seventh: false }));
+const DEFAULT_EXTRA_PERIODS = Array.from({length:7}, () => ({ zero: false, seventh: false, ext: false }));
 
 let extraPeriods = JSON.parse(localStorage.getItem('extraPeriods'));
 let otherData = JSON.parse(localStorage.getItem('otherData')) || {};
