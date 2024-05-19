@@ -30,7 +30,14 @@
           {"name": "Period 7", "start": "15:39", "end": "16:22"},
           {"name": "Period Ext", "start": "15:39", "end": "17:09"}
         ]
-      }
+      },
+      "2024-08-12": [
+        {"name": "PD", "start": "8:03", "end": "15:33", "teachers": true}
+      ],
+      "2024-08-13": [
+        {"name": "PD", "start": "8:30", "end": "15:33", "teachers": true}
+      ]
+
     },
     "holidays": [
       "2024-09-02",
