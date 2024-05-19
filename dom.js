@@ -43,8 +43,7 @@ const html = (html) => {
 /*
  * Get an object containing all DOM objects with an id.
  */
-const byId = () => Object.fromEntries([...document.querySelectorAll('[id]')].map(e => [e.id, e]));
-
+const byId = () => Object.fromEntries([...document.querySelectorAll('[id]')].map((e) => [e.id, e]));
 
 /*
  * Decorate a DOM element with a CSS class.

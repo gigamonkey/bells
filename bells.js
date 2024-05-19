@@ -1,5 +1,17 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { calendar, summer, nextCalendar, getZero, getSeventh, getExt, setZero, setSeventh, setExt, toggleTeacher, isTeacher } from './calendar.js';
+import {
+  calendar,
+  summer,
+  nextCalendar,
+  getZero,
+  getSeventh,
+  getExt,
+  setZero,
+  setSeventh,
+  setExt,
+  toggleTeacher,
+  isTeacher,
+} from './calendar.js';
 import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
@@ -108,7 +120,7 @@ const togglePeriods = () => {
     const t = c.currentOrNextDay(n);
     const s = c.schedule(t);
 
-    s.actualPeriods().forEach(p => {
+    s.actualPeriods().forEach((p) => {
       const tr = $('<tr>');
       tr.append(td(p.name));
       tr.append(td(timestring(parseTime(p.start, t))));

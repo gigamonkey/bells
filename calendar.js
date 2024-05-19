@@ -1,7 +1,18 @@
 import calendars from './calendars.json';
-import { datestring, parseDate, parseTime, daysBetween, noon, includesWeekend } from './datetime.js';
+import {
+  datestring,
+  parseDate,
+  parseTime,
+  daysBetween,
+  noon,
+  includesWeekend,
+} from './datetime.js';
 
-const DEFAULT_EXTRA_PERIODS = Array.from({length:7}, () => ({ zero: false, seventh: false, ext: false }));
+const DEFAULT_EXTRA_PERIODS = Array.from({ length: 7 }, () => ({
+  zero: false,
+  seventh: false,
+  ext: false,
+}));
 
 let extraPeriods = JSON.parse(localStorage.getItem('extraPeriods'));
 let otherData = JSON.parse(localStorage.getItem('otherData')) || {};
@@ -132,10 +143,10 @@ class Calendar {
       d in this.schedules && d >= this.firstDay
         ? this.schedules[d]
         : t.getDay() === 1
-        ? this.schedules['default'].LATE_START
-        : this.schedules['default'].NORMAL,
+          ? this.schedules['default'].LATE_START
+          : this.schedules['default'].NORMAL,
       this.extraPeriods,
-      t
+      t,
     );
   }
 
@@ -214,7 +225,6 @@ class Calendar {
   }
 
   schoolDaysLeft(t, s) {
-
     const end = this.endOfYear();
     const d = new Date(t);
 
@@ -298,7 +308,7 @@ class Schedule {
     // a teacher. Then we trim "nonSchool" periods from the ends of the day.
     // This is for periods like Lunch and Carnival when they're at the end of
     // the day (assuming you don't have 7th or Ext) and you could go home.
-    const base = this.periods.filter(p => this.hasPeriod(p));
+    const base = this.periods.filter((p) => this.hasPeriod(p));
 
     while (base[0].nonSchool) base.shift();
     while (base[base.length - 1].nonSchool) base.pop();
@@ -357,15 +367,31 @@ class Schedule {
       const last = this.lastPeriod(t);
 
       if (first.isAfter(t)) {
-        return new Interval('Before school', this.calendar.previousSchoolDayEnd(t), first.startTime(t), false);
+        return new Interval(
+          'Before school',
+          this.calendar.previousSchoolDayEnd(t),
+          first.startTime(t),
+          false,
+        );
       } else if (last.isBefore(t)) {
-        return new Interval('After school', last.endTime(t), this.calendar.nextSchoolDayStart(t), false);
+        return new Interval(
+          'After school',
+          last.endTime(t),
+          this.calendar.nextSchoolDayStart(t),
+          false,
+        );
       } else {
         for (let p = first; p !== null; p = p.next) {
           if (p.contains(t)) {
             return p.toInterval(t);
           } else if (p.isBefore(t) && p.next.isAfter(t)) {
-            return new Interval(`Passing to ${p.next.name}`, p.endTime(t), p.next.startTime(t), true, true);
+            return new Interval(
+              `Passing to ${p.next.name}`,
+              p.endTime(t),
+              p.next.startTime(t),
+              true,
+              true,
+            );
           }
         }
       }
@@ -465,4 +491,16 @@ class Interval {
   }
 }
 
-export { calendar, summer, nextCalendar, getZero, getSeventh, getExt, setZero, setSeventh, setExt, toggleTeacher, isTeacher };
+export {
+  calendar,
+  summer,
+  nextCalendar,
+  getZero,
+  getSeventh,
+  getExt,
+  setZero,
+  setSeventh,
+  setExt,
+  toggleTeacher,
+  isTeacher,
+};
