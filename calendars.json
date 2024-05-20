@@ -166,6 +166,19 @@
         { "name": "Lunch", "start": "12:40", "end": "13:20", "nonSchool": true },
         { "name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32", "teachers": true }
       ],
+      "2024-05-20": [
+        { "name": "Pastries in cafeteria", "start": "8:03", "end": "8:33", "teachers": true },
+        { "name": "Staff meeting in Library", "start": "8:35", "end": "9:33", "teachers": true },
+        { "name": "Period 1", "start": "10:00", "end": "10:43" },
+        { "name": "Period 2", "start": "10:49", "end": "11:37" },
+        { "name": "Period 3", "start": "11:43", "end": "12:26" },
+        { "name": "Lunch", "start": "12:26", "end": "13:06" },
+        { "name": "Period 4", "start": "13:12", "end": "13:55" },
+        { "name": "Period 5", "start": "14:01", "end": "14:44" },
+        { "name": "Period 6", "start": "14:50", "end": "15:33" },
+        { "name": "Period 7", "start": "15:39", "end": "16:22" },
+        { "name": "Period Ext", "start": "15:39", "end": "17:09" }
+      ],
       "2024-05-24": [
         { "name": "Period 0", "start": "7:26", "end": "8:24" },
         { "name": "Period 1", "start": "8:30", "end": "9:12" },
