@@ -292,14 +292,14 @@ class Schedule {
   constructor(calendar, periods, extraPeriods, t) {
     this.calendar = calendar;
     this.periods = periods.map((x) => new Period(x.name, x.start, x.end, x.teachers, x.nonSchool));
-    this.periods.forEach((p, i, ps) => {
+    this.extraPeriods = extraPeriods;
+    this.t = t;
+    this.isTeacher = otherData?.isTeacher;
+    this.actualPeriods().forEach((p, i, ps) => {
       if (i < ps.length - 1) {
         p.next = ps[i + 1];
       }
     });
-    this.extraPeriods = extraPeriods;
-    this.t = t;
-    this.isTeacher = otherData?.isTeacher;
   }
 
   actualPeriods() {

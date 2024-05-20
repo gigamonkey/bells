@@ -175,7 +175,7 @@
         { "name": "Lunch", "start": "11:36", "end": "12:16" },
         { "name": "Period 5", "start": "12:22", "end": "13:04" },
         { "name": "Period 6", "start": "13:10", "end": "13:49" },
-        { "name": "Carnival", "start": "13:52", "end": "15:42", "nonSchool": true },
+        { "name": "Carnival", "start": "13:52", "end": "15:42" },
         { "name": "Period 7", "start": "15:48", "end": "16:30" },
         { "name": "Period Ext", "start": "15:48", "end": "17:09" }
       ],
