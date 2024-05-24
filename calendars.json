@@ -188,7 +188,12 @@
         { "name": "Lunch", "start": "11:36", "end": "12:16" },
         { "name": "Period 5", "start": "12:22", "end": "13:04" },
         { "name": "Period 6", "start": "13:10", "end": "13:49" },
-        { "name": "Carnival", "start": "13:52", "end": "15:42" },
+        { "name": "M building release", "start": "13:49", "end": "13:51" },
+        { "name": "C building release", "start": "13:51", "end": "13:53" },
+        { "name": "G building release", "start": "13:53", "end": "13:55" },
+        { "name": "H building release", "start": "13:55", "end": "13:57" },
+        { "name": "Remaining buildings release", "start": "13:57", "end": "13:59" },
+        { "name": "Carnival", "start": "13:59", "end": "15:42" },
         { "name": "Period 7", "start": "15:48", "end": "16:30" },
         { "name": "Period Ext", "start": "15:48", "end": "17:09" }
       ],
