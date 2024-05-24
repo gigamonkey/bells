@@ -211,7 +211,7 @@ const updateProgress = (t, s) => {
 
   $('#left').innerHTML = time + ' ' + (togo ? 'to go' : 'done');
   updateProgressBar('periodbar', start, end, t);
-
+  updateDocumentTitle(hhmmss(togo ? end - t : t - start) + " | BHS bell schedule");
   if (duringSchool) {
     updateTodayProgress(t, s);
   } else {
@@ -277,7 +277,9 @@ const updateProgressBar = (id, start, end, t) => {
   bar.childNodes[0].style.width = done + '%';
   bar.childNodes[1].style.width = 100 - done + '%';
 };
-
+const updateDocumentTitle = (name) =>{
+  document.title = name;
+}
 const td = (text) => {
   const td = $('<td>');
   td.innerText = text;
