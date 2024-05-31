@@ -211,9 +211,10 @@
       ],
       "2024-05-31": [
         { "name": "Period 5 Final", "start": "8:30", "end": "10:30" },
-        { "name": "Period 6 Final", "start": "10:40", "end": "12:40" },
-        { "name": "Lunch", "start": "12:40", "end": "13:20", "nonSchool": true },
-        { "name": "Finals Prep / Make Up", "start": "13:26", "end": "14:32", "teachers": true }
+        { "name": "Period 6 Final", "start": "10:40", "end": "13:00" },
+        { "name": "Lunch", "start": "13:00", "end": "13:40", "nonSchool": true },
+        { "name": "Finals Prep / Make Up", "start": "13:40", "end": "14:25", "teachers": true },
+        { "name": "Teacher common prep", "start": "12:25", "end": "15:33", "teachers": true }
       ],
       "2024-06-03": [
         { "name": "Period 1", "start": "8:30", "end": "9:50" },
