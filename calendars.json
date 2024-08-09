@@ -31,8 +31,18 @@
           { "name": "Period Ext", "start": "15:39", "end": "17:09" }
         ]
       },
-      "2024-08-12": [{ "name": "PD", "start": "8:03", "end": "15:33", "teachers": true }],
-      "2024-08-13": [{ "name": "PD", "start": "8:30", "end": "15:33", "teachers": true }]
+      "2024-08-12": [
+        { "name": "Treats and beverages in Library", "start": "8:03", "end": "8:20", "teachers": true },
+        { "name": "Welcome Back", "start": "8:20", "end": "9:10", "teachers": true },
+        { "name": "Rotation Block #1", "start": "9:20", "end": "10:35", "teachers": true },
+        { "name": "Rotation Block #2", "start": "10:45", "end": "12:00", "teachers": true },
+        { "name": "Lunch", "start": "12:00", "end": "12:50", "teachers": true },
+        { "name": "Rotation Block #3", "start": "12:50", "end": "14:05", "teachers": true },
+        { "name": "Department meetings", "start": "14:15", "end": "15:33", "teachers": true }
+      ],
+      "2024-08-13": [
+        { "name": "Classroom setup", "start": "8:30", "end": "15:33", "teachers": true }
+      ]
     },
     "holidays": [
       "2024-09-02",
