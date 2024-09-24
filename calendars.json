@@ -54,6 +54,27 @@
         { "name": "Period 5", "start": "14:02", "end": "14:44" },
         { "name": "Period 6", "start": "14:50", "end": "15:33" },
         { "name": "Period 7", "start": "15:39", "end": "16:37" }
+      ],
+      "2024-09-26": [
+        { "name": "Period 0", "start": "7:26", "end": "8:24" },
+        { "name": "Period 1", "start": "8:30", "end": "9:28" },
+        { "name": "Period 2", "start": "9:34", "end": "10:37" },
+        { "name": "Period 3", "start": "10:43", "end": "11:41" },
+        { "name": "Lunch", "start": "11:41", "end": "12:21" },
+        { "name": "Period 4", "start": "12:27", "end": "13:25" },
+        { "name": "Period 5", "start": "13:31", "end": "14:29" },
+        { "name": "Period 6", "start": "14:35", "end": "15:33" },
+        { "name": "Period 7", "start": "15:39", "end": "16:37" },
+        { "name": "Period Ext", "start": "15:39", "end": "17:09" },
+        { "name": "Back to School Period 0", "start": "18:15", "end": "18:25", "teachers": true },
+        { "name": "Back to School Period 1", "start": "18:30", "end": "18:40", "teachers": true },
+        { "name": "Principal's announcement", "start": "18:45", "end": "18:50", "teachers": true },
+        { "name": "Back to School Period 2", "start": "18:50", "end": "19:00", "teachers": true },
+        { "name": "Back to School Period 3", "start": "19:05", "end": "19:15", "teachers": true },
+        { "name": "Back to School Period 4", "start": "19:20", "end": "19:30", "teachers": true },
+        { "name": "Back to School Period 5", "start": "19:35", "end": "19:45", "teachers": true },
+        { "name": "Back to School Period 6", "start": "19:50", "end": "20:00", "teachers": true },
+        { "name": "Back to School Period 7", "start": "20:05", "end": "20:15", "teachers": true }
       ]
     },
     "holidays": [
