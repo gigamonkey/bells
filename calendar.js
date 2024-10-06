@@ -1,12 +1,5 @@
 import calendars from './calendars.json';
-import {
-  datestring,
-  parseDate,
-  parseTime,
-  daysBetween,
-  noon,
-  includesWeekend,
-} from './datetime.js';
+import { datestring, parseDate, parseTime, daysBetween, noon, includesWeekend } from './datetime.js';
 
 const DEFAULT_EXTRA_PERIODS = Array.from({ length: 7 }, () => ({
   zero: false,
@@ -104,6 +97,7 @@ class Calendar {
   lastDay;
   schedules;
   holidays;
+  teacherWorkDays;
   breakNames;
 
   constructor(data, extraPeriods) {
@@ -111,6 +105,7 @@ class Calendar {
     this.lastDay = data.lastDay;
     this.schedules = data.schedules;
     this.holidays = data.holidays;
+    this.teacherWorkDays = data.teacherWorkDays ?? [];
     this.breakNames = data.breakNames;
     this.extraPeriods = extraPeriods;
   }
@@ -155,7 +150,11 @@ class Calendar {
   }
 
   isHoliday(t) {
-    return this.holidays.indexOf(datestring(t)) !== -1;
+    console.log(`Checking is holiday ${datestring(t)}`);
+    return (
+      this.holidays.indexOf(datestring(t)) !== -1 &&
+      !(isTeacher() && this.teacherWorkDays.indexOf(datestring(t)) !== -1)
+    );
   }
 
   nextHoliday(t) {
@@ -367,31 +366,15 @@ class Schedule {
       const last = this.lastPeriod(t);
 
       if (first.isAfter(t)) {
-        return new Interval(
-          'Before school',
-          this.calendar.previousSchoolDayEnd(t),
-          first.startTime(t),
-          false,
-        );
+        return new Interval('Before school', this.calendar.previousSchoolDayEnd(t), first.startTime(t), false);
       } else if (last.isBefore(t)) {
-        return new Interval(
-          'After school',
-          last.endTime(t),
-          this.calendar.nextSchoolDayStart(t),
-          false,
-        );
+        return new Interval('After school', last.endTime(t), this.calendar.nextSchoolDayStart(t), false);
       } else {
         for (let p = first; p !== null; p = p.next) {
           if (p.contains(t)) {
             return p.toInterval(t);
           } else if (p.isBefore(t) && p.next.isAfter(t)) {
-            return new Interval(
-              `Passing to ${p.next.name}`,
-              p.endTime(t),
-              p.next.startTime(t),
-              true,
-              true,
-            );
+            return new Interval(`Passing to ${p.next.name}`, p.endTime(t), p.next.startTime(t), true, true);
           }
         }
       }

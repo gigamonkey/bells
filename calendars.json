@@ -75,6 +75,13 @@
         { "name": "Back to School Period 5", "start": "19:35", "end": "19:45", "teachers": true },
         { "name": "Back to School Period 6", "start": "19:50", "end": "20:00", "teachers": true },
         { "name": "Back to School Period 7", "start": "20:05", "end": "20:15", "teachers": true }
+      ],
+      "2024-10-07": [
+        { "name": "Opening and Welcome in the Library (All)", "start": "8:03", "end": "8:40", "teachers": true },
+        { "name": "Rotation #1", "start": "8:50", "end": "10:05", "teachers": true },
+        { "name": "Rotation #2", "start": "10:15", "end": "11:30", "teachers": true },
+        { "name": "Lunch", "start": "11:30", "end": "12:15", "teachers": true },
+        { "name": "Rotation #3 (Target Solutions)", "start": "12:15", "end": "15:33", "teachers": true }
       ]
     },
     "holidays": [
@@ -109,6 +116,9 @@
       "2025-04-04",
       "2025-05-16",
       "2025-05-26"
+    ],
+    "teacherWorkDays": [
+      "2024-10-07"
     ],
     "breakNames": {
       "2024-11-25": "Thanksgiving break",

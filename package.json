@@ -1,0 +1,8 @@
+{
+  "type": "module",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "esbuild": "0.23.0",
+    "temporal-polyfill": "^0.2.5"
+  }
+}

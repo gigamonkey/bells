@@ -70,11 +70,7 @@ const icon = (name) => {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
   svg.classList.add('bi');
-  use.setAttributeNS(
-    'http://www.w3.org/1999/xlink',
-    'xlink:href',
-    `/img/bootstrap-icons.svg#${name}`,
-  );
+  use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `/img/bootstrap-icons.svg#${name}`);
   svg.append(use);
   return svg;
 };
