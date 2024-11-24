@@ -82,6 +82,27 @@
         { "name": "Rotation #2", "start": "10:15", "end": "11:30", "teachers": true },
         { "name": "Lunch", "start": "11:30", "end": "12:15", "teachers": true },
         { "name": "Rotation #3 (Target Solutions)", "start": "12:15", "end": "15:33", "teachers": true }
+      ],
+      "2024-12-18": [
+        {"name": "Period 1 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 2 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"},
+        {"name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true}
+      ],
+      "2024-12-19": [
+        {"name": "Period 3 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 4 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"},
+        {"name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true}
+      ],
+      "2024-12-20": [
+        {"name": "Period 5 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 6 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"},
+        {"name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true}
       ]
     },
     "holidays": [
