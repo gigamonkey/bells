@@ -14,7 +14,7 @@ watch:
 	./node_modules/.bin/esbuild bells.js --watch --sourcemap --bundle --format=esm --outfile=out.js
 
 pretty:
-	prettier -w --print-width 120 *.js
+	npx prettier -w --print-width 120 *.js
 	tidy -i -q -w 80 -m *.html
 
 lint:
