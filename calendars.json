@@ -195,7 +195,13 @@
         {"name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true}
       ],
       "2025-01-27": [
-        { "name": "All-day PD", "start": "8:30", "end": "15:33", "teachers": true }
+        { "name": "Community breakfast in Cafeteria", "start": "8:00", "end": "8:30", "teachers": true },
+        { "name": "Welcome in Library", "start": "8:34", "end": "9:10", "teachers": true },
+        { "name": "Session #1 Rotation", "start": "9:20", "end": "10:45", "teachers": true },
+        { "name": "Session #2 Rotation", "start": "10:55", "end": "12:20", "teachers": true },
+        { "name": "Lunch", "start": "12:20", "end": "13:10", "teachers": true },
+        { "name": "Session #3 (Departments)", "start": "13:30", "end": "14:20", "teachers": true },
+        { "name": "Session #4 (Protecting undocumented students)", "start": "14:30", "end": "15:30", "teachers": true }
       ]
     },
     "holidays": [
