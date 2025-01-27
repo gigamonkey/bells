@@ -309,6 +309,10 @@ class Schedule {
     // the day (assuming you don't have 7th or Ext) and you could go home.
     const base = this.periods.filter((p) => this.hasPeriod(p));
 
+    if (base.length == 0) {
+      return base;
+    }
+
     while (base[0].nonSchool) base.shift();
     while (base[base.length - 1].nonSchool) base.pop();
 
