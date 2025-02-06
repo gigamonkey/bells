@@ -150,7 +150,6 @@ class Calendar {
   }
 
   isHoliday(t) {
-    console.log(`Checking is holiday ${datestring(t)}`);
     return (
       this.holidays.indexOf(datestring(t)) !== -1 &&
       !(isTeacher() && this.teacherWorkDays.indexOf(datestring(t)) !== -1)
