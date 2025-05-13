@@ -218,6 +218,36 @@
         { "name": "Open House Rotation 1", "start": "18:30", "end": "18:55", "teachers": true },
         { "name": "Open House Rotation 2", "start": "19:00", "end": "19:25", "teachers": true },
         { "name": "Open House Rotation 3", "start": "19:30", "end": "19:55", "teachers": true }
+      ],
+      "2025-06-02": [
+        { "name": "Period 1 Final", "start": "8:30", "end": "10:30" },
+        { "name": "Period 2 Final", "start": "10:40", "end": "12:40" },
+        { "name": "Lunch", "start": "12:40", "end": "13:20", "nonSchool": true },
+        { "name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25", "teachers": true },
+        { "name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true }
+      ],
+      "2025-06-03": [
+        { "name": "Period 3 Final", "start": "8:30", "end": "10:30" },
+        { "name": "Period 4 Final", "start": "10:40", "end": "12:40" },
+        { "name": "Lunch", "start": "12:40", "end": "13:20", "nonSchool": true },
+        { "name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25", "teachers": true },
+        { "name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true }
+      ],
+      "2025-06-04": [
+        { "name": "Period 5 Final", "start": "8:30", "end": "10:30" },
+        { "name": "Period 6 Final", "start": "10:40", "end": "12:40" },
+        { "name": "Lunch", "start": "12:40", "end": "13:20", "nonSchool": true },
+        { "name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25", "teachers": true },
+        { "name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true }
+      ],
+      "2025-06-05": [
+        { "name": "Period 1", "start": "8:30", "end": "9:12" },
+        { "name": "Period 2", "start": "9:18", "end": "10:00" },
+        { "name": "Period 3", "start": "10:06", "end": "10:48" },
+        { "name": "Period 4", "start": "10:54", "end": "11:36" },
+        { "name": "Lunch", "start": "11:36", "end": "12:16" },
+        { "name": "Period 5", "start": "12:22", "end": "13:04" },
+        { "name": "Period 5", "start": "13:10", "end": "13:52" }
       ]
     },
     "holidays": [

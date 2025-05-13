@@ -1,4 +1,4 @@
-import calendars from './calendars.json';
+import calendars from './calendars.json' with { type: "json" };
 import { datestring, parseDate, parseTime, daysBetween, noon, includesWeekend } from './datetime.js';
 
 const DEFAULT_EXTRA_PERIODS = Array.from({ length: 7 }, () => ({
