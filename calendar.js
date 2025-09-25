@@ -1,4 +1,4 @@
-import calendars from './calendars.json';
+import calendars from './calendars.json' with { type: 'json' };
 import { datestring, parseDate, parseTime, daysBetween, noon, includesWeekend } from './datetime.js';
 
 const DEFAULT_EXTRA_PERIODS = Array.from({ length: 7 }, () => ({
@@ -307,6 +307,10 @@ class Schedule {
     // This is for periods like Lunch and Carnival when they're at the end of
     // the day (assuming you don't have 7th or Ext) and you could go home.
     const base = this.periods.filter((p) => this.hasPeriod(p));
+
+    if (base.length == 0) {
+      return base;
+    }
 
     while (base[0].nonSchool) base.shift();
     while (base[base.length - 1].nonSchool) base.pop();

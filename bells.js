@@ -25,7 +25,7 @@ const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
 };
 
-//setOffset(2024, 12, 18, 8, 30, 55 );
+// setOffset(2025, 8, 27, 8, 45, 55);
 
 // Always use this to get the "current" time to ease testing.
 const now = () => {
@@ -238,9 +238,9 @@ const updateCountdown = (t, cal, s) => {
   const millis = cal.schoolMillisLeft(t);
   const hours = millis / (1000 * 60 * 60);
   const calendarDays = cal.calendarDaysLeft(t, s);
-  const classDays = Math.max(0, left - (3 + 2)); // three days of exams plus two chaos days
-  const examDays = Math.max(0, Math.min(3, left - 2));
-  const chaosDays = Math.max(0, Math.min(2, left));
+  const classDays = Math.max(0, left - (3 + 1)); // three days of exams plus one chaos day
+  const examDays = Math.max(0, Math.min(3, left - 1));
+  const chaosDays = Math.max(0, Math.min(1, left));
   const countingToday = inSchool ? ' counting today' : '';
 
   $('#countdown').replaceChildren();
