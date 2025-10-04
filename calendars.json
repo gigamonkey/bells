@@ -68,7 +68,17 @@
         { "name": "Period 5", "start": "14:02", "end": "14:44" },
         { "name": "Period 6", "start": "14:50", "end": "15:33" },
         { "name": "Period 7", "start": "15:39", "end": "16:37" }
+      ],
+      "2025-10-06": [
+        { "name": "All Staff Arrives at BHS Cafeteria", "start": "8:03", "end": "8:25", "teachers": true },
+        { "name": "Rotation Block #1", "start": "8:35", "end": "9:50", "teachers": true },
+        { "name": "Rotation Block #2", "start": "10:00", "end": "11:15", "teachers": true },
+        { "name": "Rotation Block #3", "start": "11:25", "end": "12:25", "teachers": true },
+        { "name": "Lunch", "start": "12:25", "end": "13:25", "teachers": true },
+        { "name": "Rotation Block #4", "start": "13:25", "end": "14:25", "teachers": true },
+        { "name": "Learning communities", "start": "14:45", "end": "15:33", "teachers": true }
       ]
+
     },
     "holidays": [
       "2025-09-01",
