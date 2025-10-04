@@ -243,6 +243,11 @@ const updateCountdown = (t, cal, s) => {
   const chaosDays = Math.max(0, Math.min(1, left));
   const countingToday = inSchool ? ' counting today' : '';
 
+  const totalMillis = cal.totalMillisInYear();
+  const done = totalMillis - millis;
+
+  $('#small-countdown > p').innerText = `${Math.round(100 * done / totalMillis)}%`;
+
   $('#countdown').replaceChildren();
   if (left <= 30) {
     if (cal.isLastDay(t)) {

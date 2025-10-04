@@ -236,6 +236,10 @@ class Calendar {
     return c;
   }
 
+  totalMillisInYear() {
+    return this.schoolMillisLeft(this.startOfYear());
+  }
+
   schoolMillisLeft(t) {
     const eoy = this.endOfYear().getTime();
 
