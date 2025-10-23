@@ -246,7 +246,19 @@ const updateCountdown = (t, cal, s) => {
   const totalMillis = cal.totalMillisInYear();
   const done = totalMillis - millis;
 
-  $('#small-countdown > p').innerText = `${Math.round(100 * done / totalMillis)}%`;
+  const smallCountdown = $('#small-countdown > p');
+
+  smallCountdown.innerText = `${Math.round(100 * done / totalMillis)}%`;
+
+  smallCountdown.onclick = (e) => {
+    e.target.classList.add('clicked');
+  };
+
+  smallCountdown.ontransitionend = (e) => {
+    setTimeout(() => e.target.classList.remove('clicked'), 100);
+    //e.target.classList.remove('clicked');
+  };
+
 
   $('#countdown').replaceChildren();
   if (left <= 30) {

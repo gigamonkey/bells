@@ -86,7 +86,22 @@ h1 {
     font-size: 10px;
     text-align: right;
     opacity: 0.5;
+    transition: all 0.5s ease-out;
   }
+
+  > p.clicked {
+    font-size: 64px;
+    padding: 0;
+    margin: 0;
+  }
+
+  /*
+  > p:hover {
+    font-size: 64px;
+    padding: 0;
+    margin: 0;
+  }
+*/
 }
 
 #countdown > p {
