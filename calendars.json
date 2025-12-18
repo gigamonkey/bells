@@ -98,6 +98,27 @@
         { "name": "Lunch", "start": "12:25", "end": "13:25", "teachers": true },
         { "name": "Rotation Block #4", "start": "13:25", "end": "14:25", "teachers": true },
         { "name": "Learning communities", "start": "14:45", "end": "15:33", "teachers": true }
+      ],
+      "2025-12-17": [
+        {"name": "Period 1 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 2 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"},
+        {"name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true}
+      ],
+      "2025-12-18": [
+        {"name": "Period 3 Final", "start": "8:30", "end": "10:45"},
+        {"name": "Period 4 Final", "start": "10:55", "end": "12:55"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:35", "end": "14:40"},
+        {"name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true}
+      ],
+      "2025-12-19": [
+        {"name": "Period 5 Final", "start": "8:30", "end": "10:30"},
+        {"name": "Period 6 Final", "start": "10:40", "end": "12:40"},
+        {"name": "Lunch", "start": "12:40", "end": "13:20"},
+        {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"},
+        {"name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true}
       ]
     },
     "holidays": [
