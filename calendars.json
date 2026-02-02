@@ -111,7 +111,7 @@
         {"name": "Period 4 Final", "start": "10:55", "end": "12:55"},
         {"name": "Lunch", "start": "12:40", "end": "13:20"},
         {"name": "Finals Prep / Make Up", "start": "13:35", "end": "14:40"},
-        {"name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true}
+        {"name": "Teacher Common Prep", "start": "14:40", "end": "15:33", "teachers": true}
       ],
       "2025-12-19": [
         {"name": "Period 5 Final", "start": "8:30", "end": "10:30"},
@@ -119,6 +119,29 @@
         {"name": "Lunch", "start": "12:40", "end": "13:20"},
         {"name": "Finals Prep / Make Up", "start": "13:20", "end": "14:25"},
         {"name": "Teacher Common Prep", "start": "14:25", "end": "15:33", "teachers": true}
+      ],
+      "2026-01-26": [
+        { "name": "Rotation Block #1", "start": "8:15", "end": "9:45", "teachers": true },
+        { "name": "Rotation Block #2", "start": "9:55", "end": "11:25", "teachers": true },
+        { "name": "Lunch", "start": "11:25", "end": "12:25", "teachers": true },
+        { "name": "Rotation Block #3", "start": "12:30", "end": "13:55", "teachers": true },
+        { "name": "Rotation Block #4", "start": "14:05", "end": "15:33", "teachers": true }
+      ],
+      "2026-02-05": [
+        { "name": "Period 0", "start": "7:26", "end": "8:24" },
+        { "name": "Period 1", "start": "8:30", "end": "9:28" },
+        { "name": "Period 2", "start": "9:34", "end": "10:37" },
+        { "name": "Period 3", "start": "10:43", "end": "11:41" },
+        { "name": "Lunch", "start": "11:41", "end": "12:21" },
+        { "name": "Period 4", "start": "12:27", "end": "13:25" },
+        { "name": "Period 5", "start": "13:31", "end": "14:29" },
+        { "name": "Period 6", "start": "14:35", "end": "15:33" },
+        { "name": "Period 7", "start": "15:39", "end": "16:37" },
+        { "name": "Period Ext", "start": "15:39", "end": "17:09" },
+        { "name": "Food Trucks", "start": "16:30", "end": "18:00", "teachers": true },
+        { "name": "Open House Rotation 1", "start": "18:00", "end": "18:25", "teachers": true },
+        { "name": "Open House Rotation 2", "start": "18:30", "end": "19:55", "teachers": true },
+        { "name": "Open House Rotation 3", "start": "19:00", "end": "19:25", "teachers": true }
       ]
     },
     "holidays": [
