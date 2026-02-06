@@ -140,7 +140,7 @@
         { "name": "Period Ext", "start": "15:39", "end": "17:09" },
         { "name": "Food Trucks", "start": "16:30", "end": "18:00", "teachers": true },
         { "name": "Open House Rotation 1", "start": "18:00", "end": "18:25", "teachers": true },
-        { "name": "Open House Rotation 2", "start": "18:30", "end": "19:55", "teachers": true },
+        { "name": "Open House Rotation 2", "start": "18:30", "end": "18:55", "teachers": true },
         { "name": "Open House Rotation 3", "start": "19:00", "end": "19:25", "teachers": true }
       ]
     },
