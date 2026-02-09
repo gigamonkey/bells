@@ -248,22 +248,19 @@ const updateCountdown = (t, cal, s) => {
 
   const smallCountdown = $('#small-countdown > p');
 
-  if (smallCountdown.classList.contains('clicked')) {
-    smallCountdown.innerText = `${((100 * done) / totalMillis).toPrecision(6)}%`;
-  } else {
-    smallCountdown.innerText = `${Math.round((100 * done) / totalMillis)}%`;
-  }
-
-  smallCountdown.onclick = (e) => {
-    e.target.classList.add('clicked');
-    smallCountdown.innerText = `${((100 * done) / totalMillis).toPrecision(6)}%`;
+  const displaySmallCountdown = () => {
+    if (smallCountdown.classList.contains('clicked')) {
+      smallCountdown.innerText = `${((100 * done) / totalMillis).toPrecision(7)}%`;
+    } else {
+      smallCountdown.innerText = `${Math.round((100 * done) / totalMillis)}%`;
+    }
   };
 
-  smallCountdown.ontransitionend = (e) => {
-    setTimeout(() => {
-      e.target.classList.remove('clicked');
-      smallCountdown.innerText = `${Math.round((100 * done) / totalMillis)}%`;
-    }, 100);
+  displaySmallCountdown();
+
+  smallCountdown.onclick = (e) => {
+    e.target.classList.toggle('clicked');
+    displaySmallCountdown();
   };
 
   $('#countdown').replaceChildren();
