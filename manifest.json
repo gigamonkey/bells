@@ -1,0 +1,19 @@
+{
+  "name": "BHS Bell Schedule",
+  "short_name": "Bells",
+  "display": "standalone",
+  "background_color": "white",
+  "icons": [
+    {
+      "src": "icons/bells-ico-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "icons/bells-ico-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": "/index.html"
+}

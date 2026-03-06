@@ -23,3 +23,6 @@ lint:
 
 publish:
 	./publish.sh $(files)
+
+serve:
+	npx http-server -o 
