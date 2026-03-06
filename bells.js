@@ -252,7 +252,9 @@ const updateCountdown = (t, cal, s) => {
     if (smallCountdown.classList.contains('clicked')) {
       smallCountdown.innerText = `${((100 * done) / totalMillis).toPrecision(7)}%`;
     } else {
-      smallCountdown.innerText = `${Math.round((100 * done) / totalMillis)}%`;
+      const percent = Math.round((100 * done) / totalMillis);
+      const nice = percent === 69 ? ' Nice!' : '';
+      smallCountdown.innerText = `${percent}%${nice}`;
     }
   };
 
