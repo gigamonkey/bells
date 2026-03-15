@@ -1,8 +1,6 @@
 import { Temporal } from '@js-temporal/polyfill';
 import {
   getBellSchedule,
-  getLibCalendarAt,
-  getNextLibCalendar,
   getZero,
   getSeventh,
   getExt,
@@ -57,16 +55,9 @@ const toMillis = (instant) => instant.epochMilliseconds;
 const durationToMillis = (duration) => duration.total({ unit: 'milliseconds' });
 
 /**
- * Convert a Temporal.PlainTime to a Date on the same day as `dateObj`.
+ * Convert a Temporal.Instant to a Date.
  */
-const plainTimeToDate = (plainTime, dateObj) => {
-  const d = new Date(dateObj);
-  d.setHours(plainTime.hour);
-  d.setMinutes(plainTime.minute);
-  d.setSeconds(plainTime.second);
-  d.setMilliseconds(0);
-  return d;
-};
+const toDate = (instant) => new Date(instant.epochMilliseconds);
 
 let togo = true;
 
@@ -142,52 +133,16 @@ const togglePeriods = () => {
   } else {
     table.replaceChildren();
 
-    const n = now();
-    const instant = toInstant(n);
+    const instant = toInstant(now());
+    const bellSchedule = getBellSchedule();
 
-    // Find the calendar covering now, or the next one.
-    let cal = getLibCalendarAt(instant);
-    if (!cal) {
-      cal = getNextLibCalendar(instant);
-    }
-
-    if (cal) {
-      // Determine the relevant date: today if it's a school day and school
-      // hasn't ended yet; otherwise the next school day.
-      let date;
-      if (cal.isInCalendar(instant)) {
-        const currentDate = instant.toZonedDateTime(cal.timezone).toPlainDate();
-        if (cal.isSchoolDay(currentDate)) {
-          const sched = cal.schedule(currentDate);
-          const endOfDay = sched.endOfDay(currentDate, cal.timezone);
-          if (Temporal.Instant.compare(instant, endOfDay) < 0) {
-            date = currentDate;
-          } else {
-            // After school today — find next school day.
-            const next = cal.nextSchoolDayStart(instant);
-            date = next.toZonedDateTime(cal.timezone).toPlainDate();
-          }
-        } else {
-          const next = cal.nextSchoolDayStart(instant);
-          date = next.toZonedDateTime(cal.timezone).toPlainDate();
-        }
-      } else {
-        // Before this calendar starts.
-        date = cal.firstDay;
-      }
-
-      const sched = cal.schedule(date);
-      // Use date as a Date object for plainTimeToDate conversion.
-      const dateObj = new Date(date.year, date.month - 1, date.day, 12, 0, 0, 0);
-
-      sched.actualPeriods().forEach((p) => {
-        const tr = $('<tr>');
-        tr.append(td(p.name));
-        tr.append(td(timestring(plainTimeToDate(p.start, dateObj))));
-        tr.append(td(timestring(plainTimeToDate(p.end, dateObj))));
-        table.append(tr);
-      });
-    }
+    bellSchedule.periodsForDate(instant).forEach(({ name, start, end }) => {
+      const tr = $('<tr>');
+      tr.append(td(name));
+      tr.append(td(timestring(toDate(start))));
+      tr.append(td(timestring(toDate(end))));
+      table.append(tr);
+    });
 
     table.style.display = 'table';
   }

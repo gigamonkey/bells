@@ -1,6 +1,5 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { BellSchedule } from '../lib/src/index.js';
-import { Calendar } from '../lib/src/calendar.js';
+import { BellSchedule } from '@peterseibel/bells';
 import rawCalendars from './calendars.json' with { type: 'json' };
 
 // Make Temporal available as a global so the lib (which uses it as a global
@@ -159,34 +158,6 @@ const getBellSchedule = () => {
   return _bellSchedule;
 };
 
-/**
- * Get a Calendar instance for the given instant, for internal use (e.g. schedule display).
- * Returns null if no calendar covers the instant.
- */
-const getLibCalendarAt = (instant) => {
-  const role = otherData?.isTeacher ? 'teacher' : 'student';
-  const includeTags = buildIncludeTags();
-  for (const data of adaptedCalendars) {
-    const cal = new Calendar(data, { role, includeTags });
-    if (cal.isInCalendar(instant)) return cal;
-  }
-  return null;
-};
-
-/**
- * Get the next Calendar (after the given instant), for internal use.
- */
-const getNextLibCalendar = (instant) => {
-  const role = otherData?.isTeacher ? 'teacher' : 'student';
-  const includeTags = buildIncludeTags();
-  return adaptedCalendars.reduce((best, data) => {
-    const cal = new Calendar(data, { role, includeTags });
-    if (Temporal.Instant.compare(cal.startOfYear(), instant) <= 0) return best;
-    if (!best || Temporal.Instant.compare(cal.startOfYear(), best.startOfYear()) < 0) return cal;
-    return best;
-  }, null);
-};
-
 const saveConfiguration = () => {
   localStorage.setItem('extraPeriods', JSON.stringify(extraPeriods));
   localStorage.setItem('otherData', JSON.stringify(otherData));
@@ -204,8 +175,6 @@ buildBellSchedule();
 
 export {
   getBellSchedule,
-  getLibCalendarAt,
-  getNextLibCalendar,
   getZero,
   getSeventh,
   getExt,
