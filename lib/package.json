@@ -2,6 +2,9 @@
   "name": "bells",
   "version": "0.1.0",
   "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
   "exports": {
     ".": "./src/index.js",
     "./validate": "./src/validate.js"
@@ -11,5 +14,8 @@
   },
   "peerDependencies": {
     "@js-temporal/polyfill": ">=0.4"
+  },
+  "devDependencies": {
+    "temporal-polyfill": "^0.3.2"
   }
 }
