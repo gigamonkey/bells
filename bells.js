@@ -13,7 +13,7 @@ import {
 import { timestring, hours, hhmmss, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
-const tz = Temporal.TimeZone.from('America/Los_Angeles');
+const tz = 'America/Los_Angeles';
 
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
