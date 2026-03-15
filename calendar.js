@@ -1,6 +1,11 @@
 import { Temporal } from '@js-temporal/polyfill';
 import { BellSchedule } from '@peterseibel/bells';
-import rawCalendars from './calendars.json' with { type: 'json' };
+import calendar20252026 from './calendars/2025-2026.json' with { type: 'json' };
+import calendar20242025 from './calendars/2024-2025.json' with { type: 'json' };
+import calendar20232024 from './calendars/2023-2024.json' with { type: 'json' };
+import calendar20222023 from './calendars/2022-2023.json' with { type: 'json' };
+
+const rawCalendars = [calendar20252026, calendar20242025, calendar20232024, calendar20222023];
 
 // Make Temporal available as a global so the lib (which uses it as a global
 // rather than importing it explicitly) works correctly when bundled.
