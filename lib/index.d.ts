@@ -77,6 +77,12 @@ export declare class BellSchedule {
 
   /** Start/end of summer, or null if the instant is within a school year. */
   summerBounds(instant?: Temporal.Instant): { start: Temporal.Instant | null; end: Temporal.Instant | null } | null;
+
+  /**
+   * Returns the active periods for the current or next school day.
+   * Each period has its start/end as Temporal.Instant values.
+   */
+  periodsForDate(instant?: Temporal.Instant): Array<{ name: string; start: Temporal.Instant; end: Temporal.Instant; tags: string[] }>;
 }
 
 export declare class Calendars {
