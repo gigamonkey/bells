@@ -9,7 +9,8 @@
  * Query parameters (all endpoints):
  *   role=student|teacher    default: student
  *   includeTags=zero,seventh,ext   optional periods to include (comma-separated)
- *   time=<ISO 8601 instant> override "now" for testing (e.g. 2026-01-15T10:30:00-08:00)
+ *   time=<ISO 8601 instant> instant to query (e.g. 2026-01-15T10:30:00-08:00); defaults to now
+ *   date=<YYYY-MM-DD>       date to query at the current time of day; shorthand for time=
  *
  * Environment:
  *   PORT            default: 3000
@@ -47,8 +48,18 @@ const parseOptions = (query) => {
   return { role, includeTags };
 };
 
+const TZ = 'America/Los_Angeles';
+
 const parseInstant = (query) => {
-  return query.time ? Temporal.Instant.from(query.time) : Temporal.Now.instant();
+  if (query.time) return Temporal.Instant.from(query.time);
+  if (query.date) {
+    const now = Temporal.Now.zonedDateTimeISO(TZ);
+    return Temporal.PlainDate.from(query.date)
+      .toPlainDateTime(now.toPlainTime())
+      .toZonedDateTime(TZ)
+      .toInstant();
+  }
+  return Temporal.Now.instant();
 };
 
 const durationToSeconds = (duration) => Math.round(duration.total({ unit: 'seconds' }));

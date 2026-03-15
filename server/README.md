@@ -26,19 +26,22 @@ All endpoints accept the following query parameters:
 |---|---|---|---|
 | `role` | `student`, `teacher` | `student` | Which schedule to use |
 | `includeTags` | `zero`, `seventh`, `ext` | _(none)_ | Optional periods to include, comma-separated |
-| `time` | ISO 8601 instant | now | Override the current time (useful for testing) |
+| `time` | ISO 8601 instant | now | Instant to query, e.g. `2026-01-15T10:30:00-08:00` |
+| `date` | YYYY-MM-DD | _(today)_ | Date to query at the current time of day; shorthand for `time=` when you only want to change the date |
+
+`time` and `date` are mutually exclusive; `time` takes precedence.
 
 ---
 
 ### `GET /api/current`
 
-Returns the current interval — the period, passing time, break, or before/after-school window that is active right now.
+Returns the interval active at the given instant — the period, passing time, break, or before/after-school window.
 
 **Response fields:**
 
 | Field | Type | Description |
 |---|---|---|
-| `interval` | object \| null | The current interval, or `null` if outside any tracked interval |
+| `interval` | object \| null | The active interval, or `null` if outside any tracked interval |
 | `interval.name` | string | e.g. `"Period 3"`, `"Lunch"`, `"Passing to Period 4"`, `"Winter Break!"` |
 | `interval.type` | string | `period`, `passing`, `before-school`, `after-school`, or `break` |
 | `interval.start` | string | ISO 8601 instant |
@@ -48,7 +51,7 @@ Returns the current interval — the period, passing time, break, or before/afte
 | `interval.duringSchool` | boolean | `true` if this interval falls within school hours |
 | `interval.tags` | string[] | Period tags, e.g. `["optional", "zero"]` |
 
-**Example:**
+**Example — current moment:**
 
 ```
 GET /api/current
@@ -69,32 +72,23 @@ GET /api/current
 }
 ```
 
-**Example (during a break):**
+**Example — specific instant:**
 
 ```
-GET /api/current
+GET /api/current?time=2026-03-17T10:30:00-07:00
 ```
 
-```json
-{
-  "interval": {
-    "name": "Long weekend!",
-    "type": "break",
-    "start": "2026-03-13T22:33:00Z",
-    "end": "2026-03-17T14:26:00Z",
-    "secondsLeft": 142608,
-    "secondsDone": 173772,
-    "duringSchool": false,
-    "tags": []
-  }
-}
+**Example — same time of day on a different date:**
+
+```
+GET /api/current?date=2026-04-01
 ```
 
 ---
 
 ### `GET /api/schedule`
 
-Returns the list of periods for the current school day (or the next school day if school is not in session today).
+Returns the list of periods for the school day containing the given instant, or the next school day if the instant falls outside school hours.
 
 **Response fields:**
 
@@ -106,7 +100,7 @@ Returns the list of periods for the current school day (or the next school day i
 | `periods[].end` | string | ISO 8601 instant |
 | `periods[].tags` | string[] | e.g. `["optional", "zero"]` |
 
-**Example:**
+**Example — today's schedule:**
 
 ```
 GET /api/schedule
@@ -126,7 +120,13 @@ GET /api/schedule
 }
 ```
 
-**Example with optional periods:**
+**Example — schedule for a specific date:**
+
+```
+GET /api/schedule?date=2026-04-06
+```
+
+**Example — schedule with optional periods:**
 
 ```
 GET /api/schedule?includeTags=zero,seventh
@@ -146,13 +146,13 @@ GET /api/schedule?includeTags=zero,seventh
 
 ### `GET /api/status`
 
-Returns a comprehensive snapshot: current interval, today's school day bounds, and year-level counters.
+Returns a comprehensive snapshot: the active interval, the school day bounds, and year-level counters.
 
 **Response fields:**
 
 | Field | Type | Description |
 |---|---|---|
-| `interval` | object \| null | Current interval (same shape as `/api/current`) |
+| `interval` | object \| null | Active interval (same shape as `/api/current`) |
 | `dayBounds` | object \| null | School day start/end, or `null` if not a school day |
 | `dayBounds.start` | string | ISO 8601 instant — first bell of the day |
 | `dayBounds.end` | string | ISO 8601 instant — last bell of the day |
@@ -192,14 +192,14 @@ GET /api/status
 }
 ```
 
----
-
-## Testing with a time override
-
-All endpoints accept a `time` query parameter to simulate a specific moment, which is useful for testing without waiting for the real clock.
+**Example — status as it would be at this time on a future date:**
 
 ```
-GET /api/current?time=2026-03-17T10:30:00-07:00
+GET /api/status?date=2026-06-01
+```
+
+**Example — teacher view at a specific instant:**
+
+```
 GET /api/status?time=2026-03-17T10:30:00-07:00&role=teacher
-GET /api/schedule?time=2026-03-17T10:30:00-07:00&includeTags=zero
 ```
