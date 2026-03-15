@@ -22,7 +22,7 @@ lint:
 
 
 serve:
-	node server.js
+	cd server && node index.js
 
 publish:
 	./publish.sh $(files)

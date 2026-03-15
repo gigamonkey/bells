@@ -14,11 +14,13 @@
  * Environment:
  *   PORT            default: 3000
  *   CALENDARS_PATH  path to calendars/ directory, default: <script dir>/calendars/
+ *                   (falls back to ../calendars/ relative to this file for dev)
  */
 
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { existsSync } from 'node:fs';
 import { Temporal } from '@js-temporal/polyfill';
 import { Calendars } from '@peterseibel/bells/calendars';
 
@@ -26,7 +28,14 @@ globalThis.Temporal = Temporal;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
-const CALENDARS_PATH = process.env.CALENDARS_PATH ?? join(__dirname, 'calendars') + '/';
+
+function defaultCalendarsPath() {
+  const local = join(__dirname, 'calendars');
+  if (existsSync(local)) return local + '/';
+  return join(__dirname, '..', 'calendars') + '/';
+}
+
+const CALENDARS_PATH = process.env.CALENDARS_PATH ?? defaultCalendarsPath();
 
 const calendars = new Calendars(CALENDARS_PATH);
 

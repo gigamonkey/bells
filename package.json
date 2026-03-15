@@ -1,9 +1,6 @@
 {
   "type": "module",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
+"dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
     "@peterseibel/bells": "^0.1.9",
     "cors": "^2.8.6",
