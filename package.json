@@ -1,7 +1,11 @@
 {
   "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "@js-temporal/polyfill": "^0.4.4",
+    "@peterseibel/bells": "^0.1.9",
     "cors": "^2.8.5",
     "esbuild": "0.23.0",
     "temporal-polyfill": "^0.2.5"

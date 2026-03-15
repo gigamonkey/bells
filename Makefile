@@ -21,5 +21,8 @@ lint:
 	npx eslint *.js
 
 
+serve:
+	node server.js
+
 publish:
 	./publish.sh $(files)
