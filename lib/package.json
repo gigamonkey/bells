@@ -1,12 +1,13 @@
 {
   "name": "@peterseibel/bells",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.js"
   },
   "exports": {
     ".": "./src/index.js",
+    "./calendars": "./src/calendars.js",
     "./validate": "./src/validate.js"
   },
   "bin": {
@@ -15,6 +16,7 @@
   "files": [
     "src/",
     "index.d.ts",
+    "calendars.d.ts",
     "validate.d.ts",
     "README.md"
   ],
