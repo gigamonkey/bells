@@ -1,8 +1,6 @@
 import { Temporal } from '@js-temporal/polyfill';
 import {
-  calendar,
-  summer,
-  nextCalendar,
+  getBellSchedule,
   getZero,
   getSeventh,
   getExt,
@@ -12,10 +10,10 @@ import {
   toggleTeacher,
   isTeacher,
 } from './calendar.js';
-import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
+import { timestring, hours, hhmmss, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 
-const tz = Temporal.TimeZone.from('America/Los_Angeles');
+const tz = 'America/Los_Angeles';
 
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
@@ -40,6 +38,26 @@ const now = () => {
   const delta = Math.abs(Temporal.Instant.from(otherTime).epochMilliseconds - instant);
   return new Date(instant - delta + offset);
 };
+
+/**
+ * Convert a Date to a Temporal.Instant.
+ */
+const toInstant = (date) => Temporal.Instant.fromEpochMilliseconds(date.getTime());
+
+/**
+ * Convert a Temporal.Instant to epoch milliseconds (number).
+ */
+const toMillis = (instant) => instant.epochMilliseconds;
+
+/**
+ * Convert a Temporal.Duration to milliseconds.
+ */
+const durationToMillis = (duration) => duration.total({ unit: 'milliseconds' });
+
+/**
+ * Convert a Temporal.Instant to a Date.
+ */
+const toDate = (instant) => new Date(instant.epochMilliseconds);
 
 let togo = true;
 
@@ -115,18 +133,17 @@ const togglePeriods = () => {
   } else {
     table.replaceChildren();
 
-    const n = now();
-    const c = calendar(n) || nextCalendar(n);
-    const t = c.currentOrNextDay(n);
-    const s = c.schedule(t);
+    const instant = toInstant(now());
+    const bellSchedule = getBellSchedule();
 
-    s.actualPeriods().forEach((p) => {
+    bellSchedule.periodsForDate(instant).forEach(({ name, start, end }) => {
       const tr = $('<tr>');
-      tr.append(td(p.name));
-      tr.append(td(timestring(parseTime(p.start, t))));
-      tr.append(td(timestring(parseTime(p.end, t))));
+      tr.append(td(name));
+      tr.append(td(timestring(toDate(start))));
+      tr.append(td(timestring(toDate(end))));
       table.append(tr);
     });
+
     table.style.display = 'table';
   }
 };
@@ -136,27 +153,38 @@ let timeoutID;
 const update = () => {
   if (timeoutID) clearTimeout(timeoutID);
   const t = now();
-  const c = calendar(t);
-  if (!c) {
-    summerCountdown(t);
+  const instant = toInstant(t);
+  const bellSchedule = getBellSchedule();
+
+  // summerBounds returns null when we are inside a school year; non-null during summer.
+  const summerInfo = bellSchedule.summerBounds(instant);
+  if (summerInfo !== null) {
+    summerCountdown(t, instant, bellSchedule);
   } else {
-    normalCountdown(t, c);
+    normalCountdown(t, instant, bellSchedule);
   }
   // We use setTimeout rather than setInterval so we can stay as synced as
   // possible with exactly when the second rolls over.
   timeoutID = setTimeout(update, 1000 - t.getMilliseconds());
 };
 
-const summerCountdown = (t) => {
-  const nextCal = nextCalendar(t);
-  if (nextCal) {
-    const start = nextCalendar(t).startOfYear();
-    const time = countdownText(start - t);
+const summerCountdown = (t, instant, bellSchedule) => {
+  let nextYearStart = null;
+  try {
+    nextYearStart = bellSchedule.nextYearStart(instant);
+  } catch (e) {
+    // No next year data.
+  }
+
+  if (nextYearStart) {
+    const startMillis = toMillis(nextYearStart);
+    const tMillis = t.getTime();
+    const time = countdownText(startMillis - tMillis);
     $('#untilSchool').replaceChildren(text(`${time} until school starts.`));
     $('#summer').style.display = 'block';
     $('#main').style.display = 'none';
     $('#noCalendar').style.display = 'none';
-    updateSummerProgress(t);
+    updateSummerProgress(instant, bellSchedule);
   } else {
     $('#noCalendar').style.display = 'block';
     $('#main').style.display = 'none';
@@ -165,10 +193,9 @@ const summerCountdown = (t) => {
   $('#container').style.background = 'rgba(255, 0, 128, 0.25)';
 };
 
-const normalCountdown = (t, c) => {
-  const s = c.schedule(t);
-  updateProgress(t, s);
-  updateCountdown(t, c, s);
+const normalCountdown = (t, instant, bellSchedule) => {
+  updateProgress(t, instant, bellSchedule);
+  updateCountdown(t, instant, bellSchedule);
 };
 
 const countdownText = (millis) => {
@@ -182,19 +209,31 @@ const countdownText = (millis) => {
   }
 };
 
-const updateProgress = (t, s) => {
+const updateProgress = (t, instant, bellSchedule) => {
   $('#noCalendar').style.display = 'none';
   $('#summer').style.display = 'none';
   $('#main').style.display = 'block';
-  const interval = s.currentInterval(t);
-  const { start, end, isPassingPeriod, duringSchool } = interval;
+  const interval = bellSchedule.currentInterval(instant);
+
+  if (!interval) {
+    // Shouldn't happen during normal school year, but handle gracefully.
+    return;
+  }
+
+  const startMillis = toMillis(interval.start);
+  const endMillis = toMillis(interval.end);
+  const tMillis = t.getTime();
+  const isPassingPeriod = interval.type === 'passing' || interval.type === 'break';
+  const { duringSchool } = interval;
 
   // Default to passing period.
   let color = 'rgba(64, 0, 64, 0.25)';
 
   const tenMinutes = 10 * 60 * 1000;
-  const inFirstTen = interval.done(t) < tenMinutes;
-  const inLastTen = interval.left(t) < tenMinutes;
+  const done = tMillis - startMillis;
+  const left = endMillis - tMillis;
+  const inFirstTen = done < tenMinutes;
+  const inLastTen = left < tenMinutes;
 
   if (!isPassingPeriod) {
     if (inFirstTen || inLastTen) {
@@ -205,46 +244,62 @@ const updateProgress = (t, s) => {
   }
 
   $('#container').style.background = color;
-  $('#period').replaceChildren(periodName(interval), periodTimes(interval));
 
-  const time = togo ? countdownText(interval.left(t)) : countdownText(interval.done(t));
+  // Build a plain object that periodName/periodTimes can use.
+  // They expect interval.name, interval.start (Date), interval.end (Date).
+  const intervalForDisplay = {
+    name: interval.name,
+    start: new Date(startMillis),
+    end: new Date(endMillis),
+  };
+  $('#period').replaceChildren(periodName(intervalForDisplay), periodTimes(intervalForDisplay));
+
+  const time = togo ? countdownText(left) : countdownText(done);
 
   $('#left').innerHTML = time + ' ' + (togo ? 'to go' : 'done');
-  updateProgressBar('periodbar', start, end, t);
+  updateProgressBar('periodbar', startMillis, endMillis, tMillis);
 
   if (duringSchool) {
-    updateTodayProgress(t, s);
+    updateTodayProgress(t, instant, bellSchedule);
   } else {
     $('#today').replaceChildren();
     $('#todaybar').replaceChildren();
   }
 };
 
-const updateTodayProgress = (t, s) => {
-  const start = s.startOfDay(t);
-  const end = s.endOfDay(t);
-  $('#today').innerHTML = hhmmss(togo ? end - t : t - start) + ' ' + (togo ? 'to go' : 'done');
-  updateProgressBar('todaybar', start, end, t);
+const updateTodayProgress = (t, instant, bellSchedule) => {
+  const bounds = bellSchedule.currentDayBounds(instant);
+  if (!bounds) return;
+  const startMillis = toMillis(bounds.start);
+  const endMillis = toMillis(bounds.end);
+  const tMillis = t.getTime();
+  $('#today').innerHTML = hhmmss(togo ? endMillis - tMillis : tMillis - startMillis) + ' ' + (togo ? 'to go' : 'done');
+  updateProgressBar('todaybar', startMillis, endMillis, tMillis);
 };
 
-const updateSummerProgress = (t) => {
-  const { start, end } = summer(t);
-  updateProgressBar('summerbar', start, end, t);
+const updateSummerProgress = (instant, bellSchedule) => {
+  const bounds = bellSchedule.summerBounds(instant);
+  if (!bounds) return;
+  const startMillis = bounds.start ? toMillis(bounds.start) : 0;
+  const endMillis = bounds.end ? toMillis(bounds.end) : 0;
+  const tMillis = instant.epochMilliseconds;
+  updateProgressBar('summerbar', startMillis, endMillis, tMillis);
 };
 
-const updateCountdown = (t, cal, s) => {
-  const inSchool = cal.duringSchool(t, s);
-  const left = cal.schoolDaysLeft(t, s);
-  const millis = cal.schoolMillisLeft(t);
-  const hours = millis / (1000 * 60 * 60);
-  const calendarDays = cal.calendarDaysLeft(t, s);
+const updateCountdown = (t, instant, bellSchedule) => {
+  const interval = bellSchedule.currentInterval(instant);
+  const inSchool = interval ? interval.duringSchool : false;
+  const left = bellSchedule.schoolDaysLeft(instant);
+  const millisLeft = durationToMillis(bellSchedule.schoolTimeLeft(instant));
+  const hoursLeft = millisLeft / (1000 * 60 * 60);
+  const calendarDays = bellSchedule.calendarDaysLeft(instant);
   const classDays = Math.max(0, left - (3 + 1)); // three days of exams plus one chaos day
   const examDays = Math.max(0, Math.min(3, left - 1));
   const chaosDays = Math.max(0, Math.min(1, left));
   const countingToday = inSchool ? ' counting today' : '';
 
-  const totalMillis = cal.totalMillisInYear();
-  const done = totalMillis - millis;
+  const totalMillis = durationToMillis(bellSchedule.totalSchoolTime(instant));
+  const done = totalMillis - millisLeft;
 
   const smallCountdown = $('#small-countdown > p');
 
@@ -265,9 +320,24 @@ const updateCountdown = (t, cal, s) => {
     displaySmallCountdown();
   };
 
+  // Determine if it's the last day of school.
+  const isLastDay = (() => {
+    const bounds = bellSchedule.currentDayBounds(instant);
+    if (!bounds) return false;
+    // It's the last day if today's end equals the end of the school year.
+    // We check by seeing if there are no more school days after today.
+    // schoolDaysLeft counts today if we're before/during school; after school it's 0.
+    // If left === 1 and we're in school, or left === 0 and we just finished,
+    // that's the last day. Simpler: check if bounds.end matches endOfYear.
+    // We can't get endOfYear directly from BellSchedule, so approximate:
+    // last day = when schoolDaysLeft would be 0 after end of today.
+    return left <= 1 && Temporal.Instant.compare(instant, bounds.end) < 0 &&
+      bellSchedule.schoolDaysLeft(bounds.end.add({ seconds: 1 })) === 0;
+  })();
+
   $('#countdown').replaceChildren();
   if (left <= 30) {
-    if (cal.isLastDay(t)) {
+    if (isLastDay) {
       $('#countdown').append($('<p>', 'Last day of school!'));
     } else {
       $('#countdown').append($('<p>', `${days(left, 'school')} left in the year${countingToday}`));
@@ -278,8 +348,8 @@ const updateCountdown = (t, cal, s) => {
       $('#countdown').append($('<p>', days(chaosDays, 'bonus')));
       $('#countdown').append($('<p>', `${days(calendarDays, 'calendar')} until summer vacation!`));
     }
-    if (hours < 100) {
-      $('#countdown').append($('<p>', `${timeCountdown(millis)} to go.`));
+    if (hoursLeft < 100) {
+      $('#countdown').append($('<p>', `${timeCountdown(millisLeft)} to go.`));
     }
   } else {
   }
