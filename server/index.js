@@ -9,7 +9,8 @@
  * Query parameters (all endpoints):
  *   role=student|teacher    default: student
  *   includeTags=zero,seventh,ext   optional periods to include (comma-separated)
- *   time=<ISO 8601 instant> override "now" for testing (e.g. 2026-01-15T10:30:00-08:00)
+ *   time=<ISO 8601 instant> instant to query (e.g. 2026-01-15T10:30:00-08:00); defaults to now
+ *   date=<YYYY-MM-DD>       date to query at the current time of day; shorthand for time=
  *
  * Environment:
  *   PORT            default: 3000
@@ -17,10 +18,11 @@
  *                   (falls back to ../calendars/ relative to this file for dev)
  */
 
-import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { existsSync } from 'node:fs';
+import express from 'express';
+import cors from 'cors';
 import { Temporal } from '@js-temporal/polyfill';
 import { Calendars } from '@peterseibel/bells/calendars';
 
@@ -29,33 +31,40 @@ globalThis.Temporal = Temporal;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 
-function defaultCalendarsPath() {
+const defaultCalendarsPath = () => {
   const local = join(__dirname, 'calendars');
   if (existsSync(local)) return local + '/';
   return join(__dirname, '..', 'calendars') + '/';
-}
+};
 
 const CALENDARS_PATH = process.env.CALENDARS_PATH ?? defaultCalendarsPath();
 
 const calendars = new Calendars(CALENDARS_PATH);
 
-function parseOptions(searchParams) {
-  const role = searchParams.get('role') || 'student';
-  const raw = searchParams.get('includeTags');
+const parseOptions = (query) => {
+  const role = query.role || 'student';
+  const raw = query.includeTags;
   const includeTags = raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [];
   return { role, includeTags };
-}
+};
 
-function parseInstant(searchParams) {
-  const raw = searchParams.get('time');
-  return raw ? Temporal.Instant.from(raw) : Temporal.Now.instant();
-}
+const TZ = 'America/Los_Angeles';
 
-function durationToSeconds(duration) {
-  return Math.round(duration.total({ unit: 'seconds' }));
-}
+const parseInstant = (query) => {
+  if (query.time) return Temporal.Instant.from(query.time);
+  if (query.date) {
+    const now = Temporal.Now.zonedDateTimeISO(TZ);
+    return Temporal.PlainDate.from(query.date)
+      .toPlainDateTime(now.toPlainTime())
+      .toZonedDateTime(TZ)
+      .toInstant();
+  }
+  return Temporal.Now.instant();
+};
 
-function serializeInterval(interval, now) {
+const durationToSeconds = (duration) => Math.round(duration.total({ unit: 'seconds' }));
+
+const serializeInterval = (interval, now) => {
   if (!interval) return null;
   return {
     name: interval.name,
@@ -67,36 +76,36 @@ function serializeInterval(interval, now) {
     duringSchool: interval.duringSchool,
     tags: interval.tags,
   };
-}
+};
 
-async function handleCurrent(url) {
-  const options = parseOptions(url.searchParams);
-  const instant = parseInstant(url.searchParams);
+const handleCurrent = async (req, res) => {
+  const options = parseOptions(req.query);
+  const instant = parseInstant(req.query);
   const schedule = await calendars.current(options);
-  return { interval: serializeInterval(schedule.currentInterval(instant), instant) };
-}
+  res.json({ interval: serializeInterval(schedule.currentInterval(instant), instant) });
+};
 
-async function handleSchedule(url) {
-  const options = parseOptions(url.searchParams);
-  const instant = parseInstant(url.searchParams);
+const handleSchedule = async (req, res) => {
+  const options = parseOptions(req.query);
+  const instant = parseInstant(req.query);
   const schedule = await calendars.current(options);
   const periods = schedule.periodsForDate(instant);
-  return {
+  res.json({
     periods: periods.map((p) => ({
       name: p.name,
       start: p.start.toString(),
       end: p.end.toString(),
       tags: p.tags,
     })),
-  };
-}
+  });
+};
 
-async function handleStatus(url) {
-  const options = parseOptions(url.searchParams);
-  const instant = parseInstant(url.searchParams);
+const handleStatus = async (req, res) => {
+  const options = parseOptions(req.query);
+  const instant = parseInstant(req.query);
   const schedule = await calendars.current(options);
   const dayBounds = schedule.currentDayBounds(instant);
-  return {
+  res.json({
     interval: serializeInterval(schedule.currentInterval(instant), instant),
     dayBounds: dayBounds
       ? { start: dayBounds.start.toString(), end: dayBounds.end.toString() }
@@ -106,53 +115,17 @@ async function handleStatus(url) {
     schoolTimeLeftSeconds: durationToSeconds(schedule.schoolTimeLeft(instant)),
     schoolTimeDoneSeconds: durationToSeconds(schedule.schoolTimeDone(instant)),
     totalSchoolTimeSeconds: durationToSeconds(schedule.totalSchoolTime(instant)),
-  };
-}
-
-const routes = {
-  '/api/current': handleCurrent,
-  '/api/schedule': handleSchedule,
-  '/api/status': handleStatus,
+  });
 };
 
-const server = createServer(async (req, res) => {
-  const url = new URL(req.url, 'http://localhost');
+const app = express();
+app.use(cors());
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+app.get('/api/current', handleCurrent);
+app.get('/api/schedule', handleSchedule);
+app.get('/api/status', handleStatus);
 
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204);
-    res.end();
-    return;
-  }
-
-  if (req.method !== 'GET') {
-    res.writeHead(405, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Method not allowed' }));
-    return;
-  }
-
-  const handler = routes[url.pathname];
-  if (!handler) {
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Not found', endpoints: Object.keys(routes) }));
-    return;
-  }
-
-  try {
-    const result = await handler(url);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(result));
-  } catch (err) {
-    console.error(`${req.method} ${req.url}:`, err.message);
-    res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: err.message }));
-  }
-});
-
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Bells API server on http://localhost:${PORT}`);
   console.log(`Calendars: ${CALENDARS_PATH}`);
 });
