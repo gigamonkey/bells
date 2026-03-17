@@ -34,7 +34,7 @@ const PORT = process.env.PORT || 3000;
 const defaultCalendarsPath = () => {
   const local = join(__dirname, 'calendars');
   if (existsSync(local)) return local + '/';
-  return join(__dirname, '..', 'calendars') + '/';
+  return join(__dirname, '..', 'bhs-calendars') + '/';
 };
 
 const CALENDARS_PATH = process.env.CALENDARS_PATH ?? defaultCalendarsPath();
