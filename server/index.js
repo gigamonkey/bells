@@ -34,6 +34,8 @@ const PORT = process.env.PORT || 3000;
 const defaultCalendarsPath = () => {
   const local = join(__dirname, 'calendars');
   if (existsSync(local)) return local + '/';
+  const pkg = join(__dirname, 'node_modules', '@peterseibel', 'bhs-calendars');
+  if (existsSync(pkg)) return pkg + '/';
   return join(__dirname, '..', 'bhs-calendars') + '/';
 };
 
