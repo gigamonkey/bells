@@ -9,7 +9,9 @@ const calendars = [calendar20252026, calendar20242025, calendar20232024, calenda
 
 // Make Temporal available as a global so the lib (which uses it as a global
 // rather than importing it explicitly) works correctly when bundled.
-globalThis.Temporal = Temporal;
+if (!globalThis.Temporal) {
+  globalThis.Temporal = Temporal;
+}
 
 const DEFAULT_EXTRA_PERIODS = Array.from({ length: 7 }, () => ({
   zero: false,
