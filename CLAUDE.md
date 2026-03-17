@@ -49,4 +49,3 @@ ES modules bundled by esbuild. The entry point is `bells.js`; `out.js` is the co
 
 - Timezone: always converts to `America/Los_Angeles` regardless of browser locale
 - The `school-days.js` file in the repo root is a standalone untracked script (not part of the app bundle)
-- `calendars.json` in the repo root is superseded by `calendars/` and no longer used

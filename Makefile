@@ -3,7 +3,6 @@ files += style.css
 files += out.js
 files += out.js.map
 files += bells-qr.png
-files += calendars.json
 
 all: pretty lint
 
