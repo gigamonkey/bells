@@ -4,7 +4,7 @@
 
 ##  Medium
 
-- [ ] Create a node server that serves a web API that provides a REST API equivalent to the @peterseibel/bells API. The server will be deployed with calendar files.
+- [x] Create a node server that serves a web API that provides a REST API equivalent to the @peterseibel/bells API. The server will be deployed with calendar files.
 
 ## Large
 
