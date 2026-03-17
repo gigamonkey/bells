@@ -14,6 +14,7 @@ make watch    # esbuild in watch mode for development
 make pretty   # Format JS with prettier, HTML with tidy
 make lint     # ESLint validation
 make all      # pretty + lint (default)
+make serve    # Start the REST API server (server/index.js on port 3000)
 make publish  # Deploy to ~/web/www.gigamonkeys.com/misc/bhs/
 ```
 
@@ -29,6 +30,7 @@ ES modules bundled by esbuild. The entry point is `bells.js`; `out.js` is the co
 - `datetime.js` — Lightweight display utilities only (formatting, countdown strings); date/time logic lives in the library
 - `dom.js` — Thin DOM helpers (`$`, `$$`, element creation)
 - `calendars/` — Per-year JSON files (`2022-2023.json` … `2025-2026.json`) in `@peterseibel/bells` format; imported individually by `calendar.js`
+- `server/` — Express REST API server (`server/index.js`) wrapping `@peterseibel/bells` for HTTP access; has its own `package.json`. Endpoints: `GET /api/current`, `/api/schedule`, `/api/status`. All endpoints accept `role`, `includeTags`, `time`, and `date` query params. `PORT` and `CALENDARS_PATH` env vars configure the server.
 
 **`@peterseibel/bells` library (`lib/`):** Published to npm. Handles all schedule logic: time parsing, schedule selection, overlap validation. Key exports:
 - `BellSchedule` — main class; `periodsForDate(instant)` returns periods for a given moment

@@ -10,7 +10,11 @@
         {
           "name": "Period 0",
           "start": "7:26",
-          "end": "8:24"
+          "end": "8:24",
+          "tags": [
+            "optional",
+            "zero"
+          ]
         },
         {
           "name": "Period 1",
@@ -176,7 +180,11 @@
       {
         "name": "Period 0",
         "start": "7:26",
-        "end": "8:24"
+        "end": "8:24",
+        "tags": [
+          "optional",
+          "zero"
+        ]
       },
       {
         "name": "Period 1",
@@ -232,7 +240,11 @@
       {
         "name": "Period 0",
         "start": "7:26",
-        "end": "8:24"
+        "end": "8:24",
+        "tags": [
+          "optional",
+          "zero"
+        ]
       },
       {
         "name": "Period 1",
@@ -357,7 +369,10 @@
         "name": "Lunch",
         "start": "12:40",
         "end": "13:20",
-        "nonSchool": true
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
       },
       {
         "name": "Finals Prep / Make Up",
@@ -381,7 +396,10 @@
         "name": "Lunch",
         "start": "12:40",
         "end": "13:20",
-        "nonSchool": true
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
       },
       {
         "name": "Finals Prep / Make Up",
@@ -405,7 +423,10 @@
         "name": "Lunch",
         "start": "12:40",
         "end": "13:20",
-        "nonSchool": true
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
       },
       {
         "name": "Finals Prep / Make Up",
@@ -485,7 +506,11 @@
       {
         "name": "Period 0",
         "start": "7:26",
-        "end": "8:24"
+        "end": "8:24",
+        "tags": [
+          "optional",
+          "zero"
+        ]
       },
       {
         "name": "Period 1",
@@ -586,7 +611,10 @@
         "name": "Lunch",
         "start": "12:40",
         "end": "13:20",
-        "nonSchool": true
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
       },
       {
         "name": "Finals Prep / Make Up",
@@ -610,7 +638,10 @@
         "name": "Lunch",
         "start": "12:40",
         "end": "13:20",
-        "nonSchool": true
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
       },
       {
         "name": "Finals Prep / Make Up",
@@ -634,7 +665,10 @@
         "name": "Lunch",
         "start": "13:00",
         "end": "13:40",
-        "nonSchool": true
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
       },
       {
         "name": "Finals Prep / Make Up",
@@ -669,7 +703,10 @@
         "name": "Lunch",
         "start": "12:42",
         "end": "13:22",
-        "nonSchool": true
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
       },
       {
         "name": "Teacher Common Prep",
@@ -698,7 +735,10 @@
         "name": "Lunch",
         "start": "12:42",
         "end": "13:22",
-        "nonSchool": true
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
       },
       {
         "name": "Teacher Check Out",
@@ -743,7 +783,7 @@
   "breakNames": {
     "2023-11-20": "Thanksgiving break",
     "2023-12-25": "Winter break",
-    "2024-02-16": "Presidents’ Day Weekend",
+    "2024-02-16": "Presidents\u2019 Day Weekend",
     "2024-04-01": "Spring break"
   }
 }

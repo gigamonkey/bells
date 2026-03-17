@@ -5,13 +5,11 @@ import calendar20242025 from './calendars/2024-2025.json' with { type: 'json' };
 import calendar20232024 from './calendars/2023-2024.json' with { type: 'json' };
 import calendar20222023 from './calendars/2022-2023.json' with { type: 'json' };
 
-const rawCalendars = [calendar20252026, calendar20242025, calendar20232024, calendar20222023];
+const calendars = [calendar20252026, calendar20242025, calendar20232024, calendar20222023];
 
 // Make Temporal available as a global so the lib (which uses it as a global
 // rather than importing it explicitly) works correctly when bundled.
 globalThis.Temporal = Temporal;
-
-const TIMEZONE = 'America/Los_Angeles';
 
 const DEFAULT_EXTRA_PERIODS = Array.from({ length: 7 }, () => ({
   zero: false,
@@ -58,70 +56,6 @@ const toggleTeacher = (e) => {
 };
 
 /**
- * Convert the old period format (using period names and nonSchool flag) to the
- * new library format (using tags arrays).
- *
- * - "Period 0" → tags: ['optional', 'zero']
- * - "Period 7" → tags: ['optional', 'seventh']
- * - "Period Ext" → tags: ['optional', 'ext']
- * - nonSchool: true → tags: ['optional', 'nonschool']
- *   (nonschool is always present in includeTags so these periods are always
- *   included by hasPeriod but are trimmed from the ends of actualPeriods)
- */
-const adaptPeriods = (periods) => {
-  return periods.map((p) => {
-    const adapted = { ...p };
-    const tags = [];
-
-    if (p.name === 'Period 0') {
-      tags.push('optional', 'zero');
-    } else if (p.name === 'Period 7') {
-      tags.push('optional', 'seventh');
-    } else if (p.name === 'Period Ext') {
-      tags.push('optional', 'ext');
-    } else if (p.nonSchool) {
-      tags.push('optional', 'nonschool');
-    }
-
-    if (tags.length > 0) {
-      adapted.tags = tags;
-    }
-    delete adapted.nonSchool;
-    return adapted;
-  });
-};
-
-/**
- * Convert the old calendars.json format to what the library expects:
- * - Add timezone
- * - Convert period names/nonSchool to tags
- */
-const adaptCalendarData = (data) => {
-  const adapted = { ...data, timezone: TIMEZONE };
-
-  const adaptScheduleEntry = (entry) => {
-    if (Array.isArray(entry)) {
-      return adaptPeriods(entry);
-    }
-    // It's an object with NORMAL/LATE_START keys
-    const result = {};
-    for (const [key, val] of Object.entries(entry)) {
-      result[key] = Array.isArray(val) ? adaptPeriods(val) : val;
-    }
-    return result;
-  };
-
-  adapted.schedules = {};
-  for (const [key, val] of Object.entries(data.schedules)) {
-    adapted.schedules[key] = adaptScheduleEntry(val);
-  }
-
-  return adapted;
-};
-
-const adaptedCalendars = rawCalendars.map(adaptCalendarData);
-
-/**
  * Build includeTags from extraPeriods config:
  * Maps day-of-week (1=Mon..7=Sun) to an array of tag strings for
  * optional periods that are enabled on that day.
@@ -152,7 +86,7 @@ let _bellSchedule = null;
 const buildBellSchedule = () => {
   const role = otherData?.isTeacher ? 'teacher' : 'student';
   const includeTags = buildIncludeTags();
-  _bellSchedule = new BellSchedule(adaptedCalendars, { role, includeTags });
+  _bellSchedule = new BellSchedule(calendars, { role, includeTags });
 };
 
 /**
