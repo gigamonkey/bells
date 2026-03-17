@@ -10,10 +10,8 @@ import {
   toggleTeacher,
   isTeacher,
 } from './calendar.js';
-import { timestring, hours, hhmmss, timeCountdown } from './datetime.js';
+import { timestring, hhmmss, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
-
-const tz = 'America/Los_Angeles';
 
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
@@ -34,7 +32,7 @@ const now = () => {
   // Temporal throughout.
   const instant = Temporal.Now.instant().epochMilliseconds;
   const localTime = Temporal.Now.plainDateTimeISO();
-  const otherTime = localTime.toZonedDateTime(tz);
+  const otherTime = localTime.toZonedDateTime(getBellSchedule().timezone);
   const delta = Math.abs(Temporal.Instant.from(otherTime).epochMilliseconds - instant);
   return new Date(instant - delta + offset);
 };
@@ -53,11 +51,6 @@ const toMillis = (instant) => instant.epochMilliseconds;
  * Convert a Temporal.Duration to milliseconds.
  */
 const durationToMillis = (duration) => duration.total({ unit: 'milliseconds' });
-
-/**
- * Convert a Temporal.Instant to a Date.
- */
-const toDate = (instant) => new Date(instant.epochMilliseconds);
 
 let togo = true;
 
@@ -136,11 +129,12 @@ const togglePeriods = () => {
     const instant = toInstant(now());
     const bellSchedule = getBellSchedule();
 
+    const { timezone } = bellSchedule;
     bellSchedule.periodsForDate(instant).forEach(({ name, start, end }) => {
       const tr = $('<tr>');
       tr.append(td(name));
-      tr.append(td(timestring(toDate(start))));
-      tr.append(td(timestring(toDate(end))));
+      tr.append(td(timestring(start, timezone)));
+      tr.append(td(timestring(end, timezone)));
       table.append(tr);
     });
 
@@ -159,7 +153,7 @@ const update = () => {
   // summerBounds returns null when we are inside a school year; non-null during summer.
   const summerInfo = bellSchedule.summerBounds(instant);
   if (summerInfo !== null) {
-    summerCountdown(t, instant, bellSchedule);
+    summerCountdown(instant, bellSchedule);
   } else {
     normalCountdown(t, instant, bellSchedule);
   }
@@ -168,7 +162,7 @@ const update = () => {
   timeoutID = setTimeout(update, 1000 - t.getMilliseconds());
 };
 
-const summerCountdown = (t, instant, bellSchedule) => {
+const summerCountdown = (instant, bellSchedule) => {
   let nextYearStart = null;
   try {
     nextYearStart = bellSchedule.nextYearStart(instant);
@@ -177,9 +171,7 @@ const summerCountdown = (t, instant, bellSchedule) => {
   }
 
   if (nextYearStart) {
-    const startMillis = toMillis(nextYearStart);
-    const tMillis = t.getTime();
-    const time = countdownText(startMillis - tMillis);
+    const time = countdownText(instant.until(nextYearStart));
     $('#untilSchool').replaceChildren(text(`${time} until school starts.`));
     $('#summer').style.display = 'block';
     $('#main').style.display = 'none';
@@ -198,14 +190,14 @@ const normalCountdown = (t, instant, bellSchedule) => {
   updateCountdown(t, instant, bellSchedule);
 };
 
-const countdownText = (millis) => {
-  const h = hours(millis);
-  if (h < 24) {
-    return hhmmss(millis);
+const countdownText = (duration) => {
+  const { hours, minutes, seconds } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds' });
+  if (hours < 24) {
+    return hhmmss(duration);
   } else {
-    const days = Math.floor(h / 24);
-    const hh = millis - days * 24 * 60 * 60 * 1000;
-    return `${days} day${days === 1 ? '' : 's'}, ${hhmmss(hh)}`;
+    const daysCount = Math.floor(hours / 24);
+    const remainder = Temporal.Duration.from({ hours: hours % 24, minutes, seconds });
+    return `${daysCount} day${daysCount === 1 ? '' : 's'}, ${hhmmss(remainder)}`;
   }
 };
 
@@ -245,16 +237,9 @@ const updateProgress = (t, instant, bellSchedule) => {
 
   $('#container').style.background = color;
 
-  // Build a plain object that periodName/periodTimes can use.
-  // They expect interval.name, interval.start (Date), interval.end (Date).
-  const intervalForDisplay = {
-    name: interval.name,
-    start: new Date(startMillis),
-    end: new Date(endMillis),
-  };
-  $('#period').replaceChildren(periodName(intervalForDisplay), periodTimes(intervalForDisplay));
+  $('#period').replaceChildren(periodName(interval), periodTimes(interval, bellSchedule.timezone));
 
-  const time = togo ? countdownText(left) : countdownText(done);
+  const time = togo ? countdownText(interval.left(instant)) : countdownText(interval.done(instant));
 
   $('#left').innerHTML = time + ' ' + (togo ? 'to go' : 'done');
   updateProgressBar('periodbar', startMillis, endMillis, tMillis);
@@ -273,7 +258,7 @@ const updateTodayProgress = (t, instant, bellSchedule) => {
   const startMillis = toMillis(bounds.start);
   const endMillis = toMillis(bounds.end);
   const tMillis = t.getTime();
-  $('#today').innerHTML = hhmmss(togo ? endMillis - tMillis : tMillis - startMillis) + ' ' + (togo ? 'to go' : 'done');
+  $('#today').innerHTML = hhmmss(togo ? instant.until(bounds.end) : bounds.start.until(instant)) + ' ' + (togo ? 'to go' : 'done');
   updateProgressBar('todaybar', startMillis, endMillis, tMillis);
 };
 
@@ -290,7 +275,8 @@ const updateCountdown = (t, instant, bellSchedule) => {
   const interval = bellSchedule.currentInterval(instant);
   const inSchool = interval ? interval.duringSchool : false;
   const left = bellSchedule.schoolDaysLeft(instant);
-  const millisLeft = durationToMillis(bellSchedule.schoolTimeLeft(instant));
+  const schoolTimeLeft = bellSchedule.schoolTimeLeft(instant);
+  const millisLeft = durationToMillis(schoolTimeLeft);
   const hoursLeft = millisLeft / (1000 * 60 * 60);
   const calendarDays = bellSchedule.calendarDaysLeft(instant);
   const classDays = Math.max(0, left - (3 + 1)); // three days of exams plus one chaos day
@@ -349,7 +335,7 @@ const updateCountdown = (t, instant, bellSchedule) => {
       $('#countdown').append($('<p>', `${days(calendarDays, 'calendar')} until summer vacation!`));
     }
     if (hoursLeft < 100) {
-      $('#countdown').append($('<p>', `${timeCountdown(millisLeft)} to go.`));
+      $('#countdown').append($('<p>', `${timeCountdown(schoolTimeLeft)} to go.`));
     }
   } else {
   }
@@ -382,9 +368,9 @@ const periodName = (p) => {
   return d;
 };
 
-const periodTimes = (p) => {
+const periodTimes = (p, timezone) => {
   const d = $('<p>');
-  d.innerHTML = timestring(p.start) + '–' + timestring(p.end);
+  d.innerHTML = timestring(p.start, timezone) + '–' + timestring(p.end, timezone);
   return d;
 };
 

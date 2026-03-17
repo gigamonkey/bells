@@ -1,6 +1,6 @@
 {
   "name": "@peterseibel/bells",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.js"
@@ -27,6 +27,6 @@
     "temporal-polyfill": "^0.3.2"
   },
   "dependencies": {
-    "@peterseibel/bells": "^0.1.6"
+    "@peterseibel/bells": "^0.1.10"
   }
 }
