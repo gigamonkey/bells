@@ -6,10 +6,13 @@ files += bells-qr.png
 
 all: pretty lint
 
-build:
+version.js:
+	echo "export const version = \"$$(./version.sh)\";" > version.js
+
+build: version.js
 	./node_modules/.bin/esbuild bells.js --sourcemap --bundle --format=esm --outfile=out.js
 
-watch:
+watch: version.js
 	./node_modules/.bin/esbuild bells.js --watch --sourcemap --bundle --format=esm --outfile=out.js
 
 pretty:

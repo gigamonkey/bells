@@ -1,4 +1,5 @@
 import { Temporal } from '@js-temporal/polyfill';
+import { version } from './version.js';
 import {
   getBellSchedule,
   getZero,
@@ -374,6 +375,11 @@ const periodTimes = (p, timezone) => {
   return d;
 };
 
+const versionEl = $('#version > p');
+versionEl.innerText = version;
+versionEl.onclick = (e) => {
+  e.target.classList.toggle('clicked');
+};
 setupConfigPanel();
 $('#left').onclick = () => {
   togo = !togo;
