@@ -7,7 +7,7 @@ html {
 body {
   display: flex;
   flex-direction: column;
-  height: 95vh;
+  height: 95dvh;
 }
 
 h1 {
@@ -19,12 +19,14 @@ h1 {
 #container {
   display: flex;
   flex-direction: column;
-    flex: 1;
-    font-size: 36px;
-    width: 80vw;
-    margin: auto;
-    text-align: center;
-    color: rgba(64, 64, 128, 1);
+  flex: 1;
+  font-size: 36px;
+  width: 80vw;
+  margin: auto;
+  text-align: center;
+  color: rgba(64, 64, 128, 1);
+  padding: 20px;
+  padding-top: 10px;
 }
 
 #configuration, #main, #summer {
@@ -110,9 +112,10 @@ h1 {
 
 .bar {
     height: 20px;
-    padding: 0
+    padding: 0;
     margin: 0;
     font-size: 20px;
+    padding-bottom: 30px;
 }
 
 .bar span {
@@ -143,4 +146,14 @@ span.togo {
 
 #summerbar {
   margin-top: 12px;
+}
+
+.remove {
+  all: unset;
+}
+
+.a-tag {
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
 }
