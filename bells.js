@@ -43,6 +43,10 @@ const now = () => {
 
 let togo = true;
 
+// To handle local PWA install state
+let installPrompt = null;
+
+
 const setupConfigPanel = () => {
   $('#apple').onclick = toggleTeacher;
   $('#qr').onclick = toggleQR;
@@ -316,10 +320,62 @@ const periodTimes = (p) => {
   return d;
 };
 
+const registerServiceWorker = async () => {
+  if (!('serviceWorker' in navigator)) return;
+
+  try {
+    await navigator.serviceWorker.register('./sw.js');
+    console.log("Registered SW")
+  } catch (error) {
+    console.error('Could not register service worker', error);
+  }
+};
+
+const handleLocalInstallSetup = () => {
+
+  console.log("Checking if app is installed")
+
+  const installArea = $(".local-install");
+  const installButton = $(".local-install > button")
+
+  if (!installArea || !installButton) return;
+
+  const disableInAppInstallPrompt = () => {
+    installPrompt = null;
+    installArea.setAttribute("hidden", "");
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installPrompt = event;
+    installArea.removeAttribute("hidden");
+  });
+
+  window.addEventListener("appinstalled", () => {
+    disableInAppInstallPrompt();
+  });
+
+  installButton.addEventListener("click", async () => {
+    if (!installPrompt) return;
+    const result = await installPrompt.prompt();
+    console.log(`Install prompt was: ${result.outcome}`);
+    disableInAppInstallPrompt();
+  });
+
+};
+
 setupConfigPanel();
 $('#left').onclick = () => {
   togo = !togo;
   update();
 };
+
+registerServiceWorker();
 addProgressBars();
 update();
+
+if (document.readyState === 'loading') {
+  window.addEventListener("DOMContentLoaded", () => handleLocalInstallSetup());
+} else {
+  handleLocalInstallSetup();
+}

@@ -1,19 +1,35 @@
 {
+  "id": "./",
   "name": "BHS Bell Schedule",
   "short_name": "Bells",
+  "description": "Live Berkeley High bell schedule with countdowns, daily periods, and school-year progress. \n\n Installing this app means it will be on your home screen, and behave like any other app you've downloaded",
+  "lang": "en-US",
+  "dir": "ltr",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "start_url": "./",
   "background_color": "white",
+  "theme_color": "white",
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "icons": [
     {
-      "src": "icons/bells-ico-512.png",
+      "src": "images/icons/bells-ico-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/bells-ico-192.png",
+      "src": "images/icons/bells-ico-192.png",
       "type": "image/png",
       "sizes": "192x192"
     }
-  ],
-  "start_url": "/index.html"
+  ]
 }
