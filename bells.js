@@ -165,8 +165,20 @@ const renderSchedule = () => {
   dateLabel.style.display = 'inline-block';
   dateLabel.style.width = '150px';
   dateLabel.style.textAlign = 'center';
-  const dow = scheduleDate.toLocaleString('en-US', { weekday: 'short' });
-  dateLabel.innerText = `${dow} ${scheduleDate.month}/${scheduleDate.day}/${scheduleDate.year}`;
+  const today = Temporal.Now.plainDateISO(bellSchedule.timezone);
+  const isToday = Temporal.PlainDate.compare(scheduleDate, today) === 0;
+  if (isToday) {
+    dateLabel.innerText = 'Today';
+  } else {
+    const dow = scheduleDate.toLocaleString('en-US', { weekday: 'short' });
+    dateLabel.innerText = `${dow} ${scheduleDate.month}/${scheduleDate.day}/${scheduleDate.year}`;
+    dateLabel.style.cursor = 'pointer';
+    dateLabel.onclick = (e) => {
+      e.stopPropagation();
+      scheduleDate = bellSchedule.isSchoolDay(today) ? today : bellSchedule.nextSchoolDay(today);
+      renderSchedule();
+    };
+  }
 
   headerCell.append(leftArrow, dateLabel, rightArrow);
   headerRow.append(headerCell);

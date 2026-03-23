@@ -166,7 +166,8 @@ span.togo {
   background: rgba(0, 0, 0, 0.4);
   z-index: 100;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 15vh;
 }
 
 .popup-overlay.active {
@@ -208,6 +209,10 @@ span.togo {
 
 #periods td:first-child {
   min-width: 140px;
+}
+
+#popup-qr .popup {
+  padding: 30px;
 }
 
 .popup #qr-code {
