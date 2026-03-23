@@ -120,25 +120,69 @@ const toggleConfig = () => {
   table.style.display = table.style.display === 'table' ? 'none' : 'table';
 };
 
+let scheduleDate = null;
+
+const renderSchedule = () => {
+  const table = $('#periods');
+  table.replaceChildren();
+
+  const bellSchedule = getBellSchedule();
+  const { timezone } = bellSchedule;
+
+  // Date header row with navigation arrows
+  const headerRow = $('<tr>');
+  const headerCell = $('<td>');
+  headerCell.colSpan = 3;
+  headerCell.style.textAlign = 'center';
+  headerCell.style.padding = '4px';
+
+  const leftArrow = $('<span>');
+  leftArrow.innerText = '\u25C0';
+  leftArrow.style.cursor = 'pointer';
+  leftArrow.style.padding = '0 12px';
+  leftArrow.onclick = (e) => {
+    e.stopPropagation();
+    scheduleDate = bellSchedule.previousSchoolDay(scheduleDate);
+    renderSchedule();
+  };
+
+  const rightArrow = $('<span>');
+  rightArrow.innerText = '\u25B6';
+  rightArrow.style.cursor = 'pointer';
+  rightArrow.style.padding = '0 12px';
+  rightArrow.onclick = (e) => {
+    e.stopPropagation();
+    scheduleDate = bellSchedule.nextSchoolDay(scheduleDate);
+    renderSchedule();
+  };
+
+  const dateLabel = $('<span>');
+  const dow = scheduleDate.toLocaleString('en-US', { weekday: 'short' });
+  dateLabel.innerText = `${dow} ${scheduleDate.month}/${scheduleDate.day}/${scheduleDate.year}`;
+
+  headerCell.append(leftArrow, dateLabel, rightArrow);
+  headerRow.append(headerCell);
+  table.append(headerRow);
+
+  // Period rows
+  bellSchedule.scheduleFor(scheduleDate).forEach(({ name, start, end }) => {
+    const tr = $('<tr>');
+    tr.append(td(name));
+    tr.append(td(timestring(start, timezone)));
+    tr.append(td(timestring(end, timezone)));
+    table.append(tr);
+  });
+};
+
 const togglePeriods = () => {
   const table = $('#periods');
   if (table.style.display === 'table') {
     table.style.display = 'none';
   } else {
-    table.replaceChildren();
-
-    const instant = toInstant(now());
     const bellSchedule = getBellSchedule();
-
-    const { timezone } = bellSchedule;
-    bellSchedule.periodsForDate(instant).forEach(({ name, start, end }) => {
-      const tr = $('<tr>');
-      tr.append(td(name));
-      tr.append(td(timestring(start, timezone)));
-      tr.append(td(timestring(end, timezone)));
-      table.append(tr);
-    });
-
+    const today = Temporal.Now.plainDateISO(bellSchedule.timezone);
+    scheduleDate = bellSchedule.isSchoolDay(today) ? today : bellSchedule.nextSchoolDay(today);
+    renderSchedule();
     table.style.display = 'table';
   }
 };
