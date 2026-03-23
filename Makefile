@@ -4,7 +4,7 @@ files += manifest.json
 files += sw.js
 files += out.js
 files += out.js.map
-files += bells-qr.png
+files += images/bells-qr.png
 files += calendars.json
 files += icons
 
