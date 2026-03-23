@@ -162,6 +162,9 @@ const renderSchedule = () => {
   };
 
   const dateLabel = $('<span>');
+  dateLabel.style.display = 'inline-block';
+  dateLabel.style.width = '150px';
+  dateLabel.style.textAlign = 'center';
   const dow = scheduleDate.toLocaleString('en-US', { weekday: 'short' });
   dateLabel.innerText = `${dow} ${scheduleDate.month}/${scheduleDate.day}/${scheduleDate.year}`;
 
