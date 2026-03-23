@@ -23,6 +23,12 @@ lint:
 	npx eslint *.js
 
 
+release-lib:
+	cd lib && npm version patch --no-git-tag-version
+	git add lib/package.json lib/package-lock.json
+	git commit -m "v$$(node -p "require('./lib/package.json').version")"
+	git tag "v$$(node -p "require('./lib/package.json').version")"
+
 serve:
 	cd server && node index.js
 
