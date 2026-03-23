@@ -1,8 +1,7 @@
 import { Temporal } from '@js-temporal/polyfill';
+import { version } from './version.js';
 import {
-  calendar,
-  summer,
-  nextCalendar,
+  getBellSchedule,
   getZero,
   getSeventh,
   getExt,
@@ -12,10 +11,8 @@ import {
   toggleTeacher,
   isTeacher,
 } from './calendar.js';
-import { timestring, hours, hhmmss, parseTime, timeCountdown } from './datetime.js';
+import { timestring, hhmmss, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
-
-const tz = Temporal.TimeZone.from('America/Los_Angeles');
 
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
@@ -36,16 +33,37 @@ const now = () => {
   // Temporal throughout.
   const instant = Temporal.Now.instant().epochMilliseconds;
   const localTime = Temporal.Now.plainDateTimeISO();
-  const otherTime = localTime.toZonedDateTime(tz);
+  const otherTime = localTime.toZonedDateTime(getBellSchedule().timezone);
   const delta = Math.abs(Temporal.Instant.from(otherTime).epochMilliseconds - instant);
   return new Date(instant - delta + offset);
 };
 
+/**
+ * Convert a Date to a Temporal.Instant.
+ */
+const toInstant = (date) => Temporal.Instant.fromEpochMilliseconds(date.getTime());
+
+/**
+ * Convert a Temporal.Instant to epoch milliseconds (number).
+ */
+const toMillis = (instant) => instant.epochMilliseconds;
+
+/**
+ * Convert a Temporal.Duration to milliseconds.
+ */
+const durationToMillis = (duration) => duration.total({ unit: 'milliseconds' });
+
 let togo = true;
 
-// To handle local PWA install state
+/** 
+ * To handle local PWA install state
+*/
 let installPrompt = null;
 
+/**
+ * Keep track of online state
+*/
+let onlineState = {lan: true, network: true};
 
 const setupConfigPanel = () => {
   $('#apple').onclick = toggleTeacher;
@@ -119,18 +137,18 @@ const togglePeriods = () => {
   } else {
     table.replaceChildren();
 
-    const n = now();
-    const c = calendar(n) || nextCalendar(n);
-    const t = c.currentOrNextDay(n);
-    const s = c.schedule(t);
+    const instant = toInstant(now());
+    const bellSchedule = getBellSchedule();
 
-    s.actualPeriods().forEach((p) => {
+    const { timezone } = bellSchedule;
+    bellSchedule.periodsForDate(instant).forEach(({ name, start, end }) => {
       const tr = $('<tr>');
-      tr.append(td(p.name));
-      tr.append(td(timestring(parseTime(p.start, t))));
-      tr.append(td(timestring(parseTime(p.end, t))));
+      tr.append(td(name));
+      tr.append(td(timestring(start, timezone)));
+      tr.append(td(timestring(end, timezone)));
       table.append(tr);
     });
+
     table.style.display = 'table';
   }
 };
@@ -140,27 +158,36 @@ let timeoutID;
 const update = () => {
   if (timeoutID) clearTimeout(timeoutID);
   const t = now();
-  const c = calendar(t);
-  if (!c) {
-    summerCountdown(t);
+  const instant = toInstant(t);
+  const bellSchedule = getBellSchedule();
+
+  // summerBounds returns null when we are inside a school year; non-null during summer.
+  const summerInfo = bellSchedule.summerBounds(instant);
+  if (summerInfo !== null) {
+    summerCountdown(instant, bellSchedule);
   } else {
-    normalCountdown(t, c);
+    normalCountdown(t, instant, bellSchedule);
   }
   // We use setTimeout rather than setInterval so we can stay as synced as
   // possible with exactly when the second rolls over.
   timeoutID = setTimeout(update, 1000 - t.getMilliseconds());
 };
 
-const summerCountdown = (t) => {
-  const nextCal = nextCalendar(t);
-  if (nextCal) {
-    const start = nextCalendar(t).startOfYear();
-    const time = countdownText(start - t);
+const summerCountdown = (instant, bellSchedule) => {
+  let nextYearStart = null;
+  try {
+    nextYearStart = bellSchedule.nextYearStart(instant);
+  } catch (e) {
+    // No next year data.
+  }
+
+  if (nextYearStart) {
+    const time = countdownText(instant.until(nextYearStart));
     $('#untilSchool').replaceChildren(text(`${time} until school starts.`));
     $('#summer').style.display = 'block';
     $('#main').style.display = 'none';
     $('#noCalendar').style.display = 'none';
-    updateSummerProgress(t);
+    updateSummerProgress(instant, bellSchedule);
   } else {
     $('#noCalendar').style.display = 'block';
     $('#main').style.display = 'none';
@@ -169,36 +196,47 @@ const summerCountdown = (t) => {
   $('#container').style.background = 'rgba(255, 0, 128, 0.25)';
 };
 
-const normalCountdown = (t, c) => {
-  const s = c.schedule(t);
-  updateProgress(t, s);
-  updateCountdown(t, c, s);
+const normalCountdown = (t, instant, bellSchedule) => {
+  updateProgress(t, instant, bellSchedule);
+  updateCountdown(t, instant, bellSchedule);
 };
 
-const countdownText = (millis) => {
-  const h = hours(millis);
-  if (h < 24) {
-    return hhmmss(millis);
+const countdownText = (duration) => {
+  const { hours, minutes, seconds } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds' });
+  if (hours < 24) {
+    return hhmmss(duration);
   } else {
-    const days = Math.floor(h / 24);
-    const hh = millis - days * 24 * 60 * 60 * 1000;
-    return `${days} day${days === 1 ? '' : 's'}, ${hhmmss(hh)}`;
+    const daysCount = Math.floor(hours / 24);
+    const remainder = Temporal.Duration.from({ hours: hours % 24, minutes, seconds });
+    return `${daysCount} day${daysCount === 1 ? '' : 's'}, ${hhmmss(remainder)}`;
   }
 };
 
-const updateProgress = (t, s) => {
+const updateProgress = (t, instant, bellSchedule) => {
   $('#noCalendar').style.display = 'none';
   $('#summer').style.display = 'none';
   $('#main').style.display = 'block';
-  const interval = s.currentInterval(t);
-  const { start, end, isPassingPeriod, duringSchool } = interval;
+  const interval = bellSchedule.currentInterval(instant);
+
+  if (!interval) {
+    // Shouldn't happen during normal school year, but handle gracefully.
+    return;
+  }
+
+  const startMillis = toMillis(interval.start);
+  const endMillis = toMillis(interval.end);
+  const tMillis = t.getTime();
+  const isPassingPeriod = interval.type === 'passing' || interval.type === 'break';
+  const { duringSchool } = interval;
 
   // Default to passing period.
   let color = 'rgba(64, 0, 64, 0.25)';
 
   const tenMinutes = 10 * 60 * 1000;
-  const inFirstTen = interval.done(t) < tenMinutes;
-  const inLastTen = interval.left(t) < tenMinutes;
+  const done = tMillis - startMillis;
+  const left = endMillis - tMillis;
+  const inFirstTen = done < tenMinutes;
+  const inLastTen = left < tenMinutes;
 
   if (!isPassingPeriod) {
     if (inFirstTen || inLastTen) {
@@ -209,46 +247,56 @@ const updateProgress = (t, s) => {
   }
 
   $('#container').style.background = color;
-  $('#period').replaceChildren(periodName(interval), periodTimes(interval));
 
-  const time = togo ? countdownText(interval.left(t)) : countdownText(interval.done(t));
+  $('#period').replaceChildren(periodName(interval), periodTimes(interval, bellSchedule.timezone));
+
+  const time = togo ? countdownText(interval.left(instant)) : countdownText(interval.done(instant));
 
   $('#left').innerHTML = time + ' ' + (togo ? 'to go' : 'done');
-  updateProgressBar('periodbar', start, end, t);
+  updateProgressBar('periodbar', startMillis, endMillis, tMillis);
 
   if (duringSchool) {
-    updateTodayProgress(t, s);
+    updateTodayProgress(t, instant, bellSchedule);
   } else {
     $('#today').replaceChildren();
     $('#todaybar').replaceChildren();
   }
 };
 
-const updateTodayProgress = (t, s) => {
-  const start = s.startOfDay(t);
-  const end = s.endOfDay(t);
-  $('#today').innerHTML = hhmmss(togo ? end - t : t - start) + ' ' + (togo ? 'to go' : 'done');
-  updateProgressBar('todaybar', start, end, t);
+const updateTodayProgress = (t, instant, bellSchedule) => {
+  const bounds = bellSchedule.currentDayBounds(instant);
+  if (!bounds) return;
+  const startMillis = toMillis(bounds.start);
+  const endMillis = toMillis(bounds.end);
+  const tMillis = t.getTime();
+  $('#today').innerHTML = hhmmss(togo ? instant.until(bounds.end) : bounds.start.until(instant)) + ' ' + (togo ? 'to go' : 'done');
+  updateProgressBar('todaybar', startMillis, endMillis, tMillis);
 };
 
-const updateSummerProgress = (t) => {
-  const { start, end } = summer(t);
-  updateProgressBar('summerbar', start, end, t);
+const updateSummerProgress = (instant, bellSchedule) => {
+  const bounds = bellSchedule.summerBounds(instant);
+  if (!bounds) return;
+  const startMillis = bounds.start ? toMillis(bounds.start) : 0;
+  const endMillis = bounds.end ? toMillis(bounds.end) : 0;
+  const tMillis = instant.epochMilliseconds;
+  updateProgressBar('summerbar', startMillis, endMillis, tMillis);
 };
 
-const updateCountdown = (t, cal, s) => {
-  const inSchool = cal.duringSchool(t, s);
-  const left = cal.schoolDaysLeft(t, s);
-  const millis = cal.schoolMillisLeft(t);
-  const hours = millis / (1000 * 60 * 60);
-  const calendarDays = cal.calendarDaysLeft(t, s);
+const updateCountdown = (t, instant, bellSchedule) => {
+  const interval = bellSchedule.currentInterval(instant);
+  const inSchool = interval ? interval.duringSchool : false;
+  const left = bellSchedule.schoolDaysLeft(instant);
+  const schoolTimeLeft = bellSchedule.schoolTimeLeft(instant);
+  const millisLeft = durationToMillis(schoolTimeLeft);
+  const hoursLeft = millisLeft / (1000 * 60 * 60);
+  const calendarDays = bellSchedule.calendarDaysLeft(instant);
   const classDays = Math.max(0, left - (3 + 1)); // three days of exams plus one chaos day
   const examDays = Math.max(0, Math.min(3, left - 1));
   const chaosDays = Math.max(0, Math.min(1, left));
   const countingToday = inSchool ? ' counting today' : '';
 
-  const totalMillis = cal.totalMillisInYear();
-  const done = totalMillis - millis;
+  const totalMillis = durationToMillis(bellSchedule.totalSchoolTime(instant));
+  const done = totalMillis - millisLeft;
 
   const smallCountdown = $('#small-countdown > p');
 
@@ -256,7 +304,9 @@ const updateCountdown = (t, cal, s) => {
     if (smallCountdown.classList.contains('clicked')) {
       smallCountdown.innerText = `${((100 * done) / totalMillis).toPrecision(7)}%`;
     } else {
-      smallCountdown.innerText = `${Math.round((100 * done) / totalMillis)}%`;
+      const percent = Math.round((100 * done) / totalMillis);
+      const nice = percent === 69 ? ' Nice!' : '';
+      smallCountdown.innerText = `${percent}%${nice}`;
     }
   };
 
@@ -267,9 +317,24 @@ const updateCountdown = (t, cal, s) => {
     displaySmallCountdown();
   };
 
+  // Determine if it's the last day of school.
+  const isLastDay = (() => {
+    const bounds = bellSchedule.currentDayBounds(instant);
+    if (!bounds) return false;
+    // It's the last day if today's end equals the end of the school year.
+    // We check by seeing if there are no more school days after today.
+    // schoolDaysLeft counts today if we're before/during school; after school it's 0.
+    // If left === 1 and we're in school, or left === 0 and we just finished,
+    // that's the last day. Simpler: check if bounds.end matches endOfYear.
+    // We can't get endOfYear directly from BellSchedule, so approximate:
+    // last day = when schoolDaysLeft would be 0 after end of today.
+    return left <= 1 && Temporal.Instant.compare(instant, bounds.end) < 0 &&
+      bellSchedule.schoolDaysLeft(bounds.end.add({ seconds: 1 })) === 0;
+  })();
+
   $('#countdown').replaceChildren();
   if (left <= 30) {
-    if (cal.isLastDay(t)) {
+    if (isLastDay) {
       $('#countdown').append($('<p>', 'Last day of school!'));
     } else {
       $('#countdown').append($('<p>', `${days(left, 'school')} left in the year${countingToday}`));
@@ -280,8 +345,8 @@ const updateCountdown = (t, cal, s) => {
       $('#countdown').append($('<p>', days(chaosDays, 'bonus')));
       $('#countdown').append($('<p>', `${days(calendarDays, 'calendar')} until summer vacation!`));
     }
-    if (hours < 100) {
-      $('#countdown').append($('<p>', `${timeCountdown(millis)} to go.`));
+    if (hoursLeft < 100) {
+      $('#countdown').append($('<p>', `${timeCountdown(schoolTimeLeft)} to go.`));
     }
   } else {
   }
@@ -314,9 +379,9 @@ const periodName = (p) => {
   return d;
 };
 
-const periodTimes = (p) => {
+const periodTimes = (p, timezone) => {
   const d = $('<p>');
-  d.innerHTML = timestring(p.start) + '–' + timestring(p.end);
+  d.innerHTML = timestring(p.start, timezone) + '–' + timestring(p.end, timezone);
   return d;
 };
 
@@ -331,8 +396,6 @@ const registerServiceWorker = async () => {
 };
 
 const handleLocalInstallSetup = () => {
-
-  console.log("Checking if app is installed")
 
   const installArea = $(".local-install");
   const installButton = $(".local-install > button")
@@ -357,26 +420,46 @@ const handleLocalInstallSetup = () => {
   installButton.addEventListener("click", async () => {
     if (!installPrompt) return;
     const result = await installPrompt.prompt();
-    console.log(`Install prompt was: ${result.outcome}`);
     disableInAppInstallPrompt();
+    // console.log(`Install prompt was: ${result.outcome}`);
   });
 
 };
 
-const setupOnlineDisplay = () => {
-  window.addEventListener('load', () => {
-    const handleNetworkChange = () => {
-      console.log("Online status switch: ", navigator.onLine ? "online" : "offline");
-      if(navigator.onLine) $(".no-wifi").removeAttribute("hidden");
-      else $(".no-wifi").setAttribute("hidden", "");
-    };
+const setupOnlineDisplay = () => {    
 
-    handleNetworkChange();
-    window.addEventListener('online', handleNetworkChange);
-    window.addEventListener('offline', handleNetworkChange);
+  const updateOnlineNotification = () => {
+    if(onlineState.lan && onlineState.network) $(".no-wifi").setAttribute("hidden", "");
+    else $(".no-wifi").removeAttribute("hidden");
+  }
 
-  });
+  setInterval(async () => {
+    await fetch("./online-check.txt")
+      .then(async (res) => {
+        let content = await res.text()
+        onlineState.network = content === "online" && res.ok;
+      })
+      .catch(e => onlineState.network = false);
+    updateOnlineNotification();
+  }, 60_000)
+
+  const handleNetworkChange = () => {
+    console.log("Online status update: ", navigator.onLine ? "online" : "offline");
+    onlineState.lan = navigator.onLine;
+    updateOnlineNotification();
+  };
+
+  window.addEventListener('online', handleNetworkChange);
+  window.addEventListener('offline', handleNetworkChange);
+  handleNetworkChange();
+
 }
+
+const versionEl = $('#version > p');
+versionEl.innerText = version;
+versionEl.onclick = (e) => {
+  e.target.classList.toggle('clicked');
+};
 
 setupConfigPanel();
 $('#left').onclick = () => {

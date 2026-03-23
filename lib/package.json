@@ -1,0 +1,32 @@
+{
+  "name": "@peterseibel/bells",
+  "version": "0.1.10",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./calendars": "./src/calendars.js",
+    "./validate": "./src/validate.js"
+  },
+  "bin": {
+    "bells-validate": "src/bin/validate.js"
+  },
+  "files": [
+    "src/",
+    "index.d.ts",
+    "calendars.d.ts",
+    "validate.d.ts",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "@js-temporal/polyfill": ">=0.4"
+  },
+  "devDependencies": {
+    "temporal-polyfill": "^0.3.2"
+  },
+  "dependencies": {
+    "@peterseibel/bells": "^0.1.10"
+  }
+}

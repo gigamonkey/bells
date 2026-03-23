@@ -1,11 +1,13 @@
 {
   "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
     "@peterseibel/bells": "^0.1.10",
     "@peterseibel/bhs-calendars": "^1.0.0",
-    "cors": "^2.8.6",
-    "esbuild": "0.27.4",
-    "temporal-polyfill": "^0.3.2"
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
   }
 }
