@@ -22,7 +22,6 @@ pretty:
 lint:
 	npx eslint *.js
 
-
 release-lib:
 	cd lib && npm version patch --no-git-tag-version
 	git add lib/package.json lib/package-lock.json
