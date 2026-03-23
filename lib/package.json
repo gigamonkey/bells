@@ -1,6 +1,6 @@
 {
   "name": "@peterseibel/bells",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.js"
