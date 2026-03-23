@@ -167,7 +167,7 @@ span.togo {
   z-index: 100;
   justify-content: center;
   align-items: flex-start;
-  padding-top: 15vh;
+  padding-top: 10vh;
 }
 
 .popup-overlay.active {
