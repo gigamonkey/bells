@@ -65,7 +65,7 @@ const setupConfigPanel = () => {
 
   let day = 1;
 
-  const rows = $$('#configuration table tbody tr');
+  const rows = $$('#periods_config tbody tr');
   for (const node of rows) {
     const cells = node.querySelectorAll('td');
     const zero = cells[1].querySelector('input');
@@ -110,15 +110,20 @@ const barSpan = (width, color) => {
   return s;
 };
 
-const toggleQR = () => {
-  const div = $('#qr-code');
-  div.style.display = div.style.display === 'block' ? 'none' : 'block';
+const togglePopup = (id) => {
+  const overlay = $(`#${id}`);
+  overlay.classList.toggle('active');
 };
 
-const toggleConfig = () => {
-  const table = $('#periods_config');
-  table.style.display = table.style.display === 'table' ? 'none' : 'table';
+const closeAllPopups = () => {
+  for (const overlay of $$('.popup-overlay')) {
+    overlay.classList.remove('active');
+  }
 };
+
+const toggleQR = () => togglePopup('popup-qr');
+
+const toggleConfig = () => togglePopup('popup-config');
 
 let scheduleDate = null;
 
@@ -175,15 +180,15 @@ const renderSchedule = () => {
 };
 
 const togglePeriods = () => {
-  const table = $('#periods');
-  if (table.style.display === 'table') {
-    table.style.display = 'none';
+  const overlay = $('#popup-schedule');
+  if (overlay.classList.contains('active')) {
+    overlay.classList.remove('active');
   } else {
     const bellSchedule = getBellSchedule();
     const today = Temporal.Now.plainDateISO(bellSchedule.timezone);
     scheduleDate = bellSchedule.isSchoolDay(today) ? today : bellSchedule.nextSchoolDay(today);
     renderSchedule();
-    table.style.display = 'table';
+    overlay.classList.add('active');
   }
 };
 
@@ -425,6 +430,18 @@ versionEl.onclick = (e) => {
   e.target.classList.toggle('clicked');
 };
 setupConfigPanel();
+
+// Close popups via close button or clicking the backdrop
+for (const overlay of $$('.popup-overlay')) {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+  overlay.querySelector('.popup-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    overlay.classList.remove('active');
+  });
+}
+
 $('#left').onclick = () => {
   togo = !togo;
   update();
