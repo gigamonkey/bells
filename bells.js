@@ -55,9 +55,15 @@ const durationToMillis = (duration) => duration.total({ unit: 'milliseconds' });
 
 let togo = true;
 
-// To handle local PWA install state
+/** 
+ * To handle local PWA install state
+*/
 let installPrompt = null;
 
+/**
+ * Keep track of online state
+*/
+let onlineState = {lan: true, network: true};
 
 const setupConfigPanel = () => {
   $('#apple').onclick = toggleTeacher;
@@ -391,8 +397,6 @@ const registerServiceWorker = async () => {
 
 const handleLocalInstallSetup = () => {
 
-  console.log("Checking if app is installed")
-
   const installArea = $(".local-install");
   const installButton = $(".local-install > button")
 
@@ -416,83 +420,39 @@ const handleLocalInstallSetup = () => {
   installButton.addEventListener("click", async () => {
     if (!installPrompt) return;
     const result = await installPrompt.prompt();
-    console.log(`Install prompt was: ${result.outcome}`);
     disableInAppInstallPrompt();
+    // console.log(`Install prompt was: ${result.outcome}`);
   });
 
 };
 
-const setupOnlineDisplay = () => {
-  window.addEventListener('load', () => {
-    const handleNetworkChange = () => {
-      console.log("Online status switch: ", navigator.onLine ? "online" : "offline");
-      if(navigator.onLine) $(".no-wifi").removeAttribute("hidden");
-      else $(".no-wifi").setAttribute("hidden", "");
-    };
+const setupOnlineDisplay = () => {    
 
-    handleNetworkChange();
-    window.addEventListener('online', handleNetworkChange);
-    window.addEventListener('offline', handleNetworkChange);
-
-  });
-}
-
-const registerServiceWorker = async () => {
-  if (!('serviceWorker' in navigator)) return;
-  try {
-    await navigator.serviceWorker.register('./sw.js');
-    console.log("Registered SW")
-  } catch (error) {
-    console.error('Could not register service worker', error);
-  }
-};
-
-const handleLocalInstallSetup = () => {
-
-  console.log("Checking if app is installed")
-
-  const installArea = $(".local-install");
-  const installButton = $(".local-install > button")
-
-  if (!installArea || !installButton) return;
-
-  const disableInAppInstallPrompt = () => {
-    installPrompt = null;
-    installArea.setAttribute("hidden", "");
+  const updateOnlineNotification = () => {
+    if(onlineState.lan && onlineState.network) $(".no-wifi").setAttribute("hidden", "");
+    else $(".no-wifi").removeAttribute("hidden");
   }
 
-  window.addEventListener("beforeinstallprompt", (event) => {
-    event.preventDefault();
-    installPrompt = event;
-    installArea.removeAttribute("hidden");
-  });
+  setInterval(async () => {
+    await fetch("./online-check.txt")
+      .then(async (res) => {
+        let content = await res.text()
+        onlineState.network = content === "online" && res.ok;
+      })
+      .catch(e => onlineState.network = false);
+    updateOnlineNotification();
+  }, 60_000)
 
-  window.addEventListener("appinstalled", () => {
-    disableInAppInstallPrompt();
-  });
+  const handleNetworkChange = () => {
+    console.log("Online status update: ", navigator.onLine ? "online" : "offline");
+    onlineState.lan = navigator.onLine;
+    updateOnlineNotification();
+  };
 
-  installButton.addEventListener("click", async () => {
-    if (!installPrompt) return;
-    const result = await installPrompt.prompt();
-    console.log(`Install prompt was: ${result.outcome}`);
-    disableInAppInstallPrompt();
-  });
+  window.addEventListener('online', handleNetworkChange);
+  window.addEventListener('offline', handleNetworkChange);
+  handleNetworkChange();
 
-};
-
-const setupOnlineDisplay = () => {
-  window.addEventListener('load', () => {
-    const handleNetworkChange = () => {
-      console.log("Online status switch: ", navigator.onLine ? "online" : "offline");
-      if(navigator.onLine) $(".no-wifi").removeAttribute("hidden");
-      else $(".no-wifi").setAttribute("hidden", "");
-    };
-
-    handleNetworkChange();
-    window.addEventListener('online', handleNetworkChange);
-    window.addEventListener('offline', handleNetworkChange);
-
-  });
 }
 
 const versionEl = $('#version > p');
