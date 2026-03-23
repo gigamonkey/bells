@@ -7,11 +7,11 @@ const files = [
   './out.js',
   './calendars.json',
   './manifest.json',
-  './bells-qr.png',
+  './images/bells-qr.png',
   './images/GitHub-Mark-32px.png',
-  './icons/bells-ico.svg',
-  './icons/bells-ico-192.png',
-  './icons/bells-ico-512.png',
+  './images/icons/bells-ico.svg',
+  './images/icons/bells-ico-192.png',
+  './images/icons/bells-ico-512.png',
 ];
 
 async function setupNewCache() {
@@ -58,8 +58,8 @@ async function handleCachedFetch(event) {
         try {
             const networkResponse = await fetch(request);
             if (networkResponse.ok) {
-            const cache = await caches.open(cache_name);
-            cache.put(request, networkResponse.clone());
+                const cache = await caches.open(cache_name);
+                cache.put(request, networkResponse.clone());
             }
             return networkResponse;
         } catch {

@@ -322,7 +322,6 @@ const periodTimes = (p) => {
 
 const registerServiceWorker = async () => {
   if (!('serviceWorker' in navigator)) return;
-
   try {
     await navigator.serviceWorker.register('./sw.js');
     console.log("Registered SW")
@@ -364,6 +363,21 @@ const handleLocalInstallSetup = () => {
 
 };
 
+const setupOnlineDisplay = () => {
+  window.addEventListener('load', () => {
+    const handleNetworkChange = () => {
+      console.log("Online status switch: ", navigator.onLine ? "online" : "offline");
+      if(navigator.onLine) $(".no-wifi").removeAttribute("hidden");
+      else $(".no-wifi").setAttribute("hidden", "");
+    };
+
+    handleNetworkChange();
+    window.addEventListener('online', handleNetworkChange);
+    window.addEventListener('offline', handleNetworkChange);
+
+  });
+}
+
 setupConfigPanel();
 $('#left').onclick = () => {
   togo = !togo;
@@ -375,7 +389,11 @@ addProgressBars();
 update();
 
 if (document.readyState === 'loading') {
-  window.addEventListener("DOMContentLoaded", () => handleLocalInstallSetup());
+  window.addEventListener("DOMContentLoaded", () => {
+    handleLocalInstallSetup()
+    setupOnlineDisplay();
+  });
 } else {
   handleLocalInstallSetup();
+  setupOnlineDisplay();
 }
