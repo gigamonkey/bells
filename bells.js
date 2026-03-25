@@ -213,6 +213,13 @@ const update = () => {
   if (timeoutID) clearTimeout(timeoutID);
   const t = now();
   const instant = toInstant(t);
+
+  // Auto reload the page if it's been open more than a day.
+  if (Temporal.Instant.compare(instant, reloadAt) >= 0) {
+    location.reload();
+    return;
+  }
+
   const bellSchedule = getBellSchedule();
 
   // summerBounds returns null when we are inside a school year; non-null during summer.
@@ -222,6 +229,7 @@ const update = () => {
   } else {
     normalCountdown(t, instant, bellSchedule);
   }
+
   // We use setTimeout rather than setInterval so we can stay as synced as
   // possible with exactly when the second rolls over.
   timeoutID = setTimeout(update, 1000 - t.getMilliseconds());
@@ -462,4 +470,8 @@ $('#left').onclick = () => {
   update();
 };
 addProgressBars();
+
+// Auto-refresh if the page has been open for more than 24 hours.
+const reloadAt = toInstant(now()).add({ hours: 24 });
+
 update();
