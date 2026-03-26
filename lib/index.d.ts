@@ -69,6 +69,9 @@ export declare class BellSchedule {
   /** Total school time between two instants (only counts school-in-session time). */
   schoolTimeBetween(start: Temporal.Instant, end: Temporal.Instant): Temporal.Duration;
 
+  /** Count school days between two plain dates (inclusive of both endpoints). */
+  schoolDaysBetween(start: Temporal.PlainDate, end: Temporal.PlainDate): number;
+
   /** Number of school days remaining (including today if still in progress). */
   schoolDaysLeft(instant?: Temporal.Instant): number;
 
