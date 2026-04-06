@@ -40,8 +40,52 @@
         <span id="apple"></span>
         <span id="dark">🌑</span>
       </div>
-      <table id="periods" style="display: none"></table>
-      <table id="periods_config" style="display: none">
+    </div>
+  </div>
+  <div id="summer" style="display:none">
+      <div class="display">
+        Summer vacation!
+      </div>
+      <div id="untilSchool" class="display"></div>
+      <div id="summerbar" class="bar"></div>
+    </div>
+    <div id="main">
+      <div id="period" class="display"></div>
+      <div id="left" class="display"></div>
+      <div id="periodbar" class="bar"></div>
+      <div id="today" class="display"></div>
+      <div id="todaybar" class="bar"></div>
+      <div id="countdown"></div>
+    </div>
+    <div id="bottom-bar">
+      <div id="version">
+        <p></p>
+      </div>
+      <div id="small-countdown">
+        <p>-</p>
+      </div>
+    </div>
+    <div id="noCalendar" style="display:none">
+      <div class="display">
+        Ran out of calendar data.
+      </div>
+    </div>
+  </div>
+  <div id="countdown-link">
+    <a href="https://www.gigamonkeys.com/misc/countdown">Custom generic
+    countdown</a> | <a href="https://github.com/gigamonkey/bells"><img src=
+    "GitHub-Mark-32px.png"> https://github.com/gigamonkey/bells</a>
+  </div>
+  <div id="popup-schedule" class="popup-overlay">
+    <div class="popup">
+      <span class="popup-close">&times;</span>
+      <table id="periods"></table>
+    </div>
+  </div>
+  <div id="popup-config" class="popup-overlay">
+    <div class="popup">
+      <span class="popup-close">&times;</span>
+      <table id="periods_config">
         <thead>
           <tr>
             <th>Day</th>
@@ -84,34 +128,11 @@
         </tbody>
       </table>
     </div>
-    <div id="qr-code" style="display:none"><img src="images/bells-qr.png"></div>
-    <div id="summer" style="display:none">
-      <div class="display">
-        Summer vacation!
-      </div>
-      <div id="untilSchool" class="display"></div>
-      <div id="summerbar" class="bar"></div>
-    </div>
-    <div id="main">
-      <div id="period" class="display"></div>
-      <div id="left" class="display"></div>
-      <div id="periodbar" class="bar"></div>
-      <div id="today" class="display"></div>
-      <div id="todaybar" class="bar"></div>
-      <div id="countdown"></div>
-    </div>
-    <div id="bottom-bar">
-      <div id="version">
-        <p></p>
-      </div>
-      <div id="small-countdown">
-        <p>-</p>
-      </div>
-    </div>
-    <div id="noCalendar" style="display:none">
-      <div class="display">
-        Ran out of calendar data.
-      </div>
+  </div>
+  <div id="popup-qr" class="popup-overlay">
+    <div class="popup">
+      <span class="popup-close">&times;</span>
+      <div id="qr-code"><img src="images/bells-qr.png"></div>
     </div>
   </div>
   <div id="countdown-link">
