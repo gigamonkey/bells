@@ -149,7 +149,7 @@ const renderSchedule = () => {
   const headerCell = $('<td>');
   headerCell.colSpan = 3;
   headerCell.style.textAlign = 'center';
-  headerCell.style.padding = '4px';
+  headerCell.style.paddingBottom = '30px';
 
   const leftArrow = $('<span>');
   leftArrow.innerText = '\u25C0';

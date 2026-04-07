@@ -105,7 +105,7 @@ h1 {
 }
 
 #version {
-  padding-left: .5em;
+  padding-left: -10px;
 }
 
 #version > p {
@@ -113,7 +113,7 @@ h1 {
 }
 
 #small-countdown {
-  padding-right: .5em;
+  padding-right: -10px;
 }
 
 #small-countdown > p {
@@ -216,6 +216,10 @@ span.togo {
 
 #periods_config > thead > tr {
   height: 50px;
+}
+
+#periods > tr > td {
+  height: 25px;
 }
 
 #popup-schedule .popup {
