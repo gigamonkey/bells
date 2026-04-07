@@ -25,6 +25,12 @@ pretty:
 lint:
 	npx eslint *.js
 
+release-lib:
+	cd lib && npm version patch --no-git-tag-version
+	git add lib/package.json lib/package-lock.json
+	git commit -m "v$$(node -p "require('./lib/package.json').version")"
+	git tag "v$$(node -p "require('./lib/package.json').version")"
+	git push --follow-tags
 
 serve:
 	cd server && node index.js
@@ -32,6 +38,6 @@ serve:
 publish:
 	./publish.sh $(files)
 
-serve:
+live:
 	npx live-server
 # 	npx http-server

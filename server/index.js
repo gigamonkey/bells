@@ -2,9 +2,12 @@
  * Bells REST API server — wraps @peterseibel/bells for HTTP access.
  *
  * Endpoints:
- *   GET /api/current  — current interval (period, passing, break, etc.)
- *   GET /api/schedule — periods for the current (or next) school day
- *   GET /api/status   — full status: interval + day bounds + year counters
+ *   GET /api/current            — current interval (period, passing, break, etc.)
+ *   GET /api/schedule           — periods for the current (or next) school day
+ *   GET /api/schedule/for       — periods for a specific date
+ *   GET /api/schedule/next      — next school day and its periods
+ *   GET /api/schedule/previous  — previous school day and its periods
+ *   GET /api/status             — full status: interval + day bounds + year counters
  *
  * Query parameters (all endpoints):
  *   role=student|teacher    default: student
@@ -64,6 +67,12 @@ const parseInstant = (query) => {
   return Temporal.Now.instant();
 };
 
+const parseDate = (query) => {
+  if (query.date) return Temporal.PlainDate.from(query.date);
+  if (query.time) return Temporal.Instant.from(query.time).toZonedDateTimeISO(TZ).toPlainDate();
+  return Temporal.Now.plainDateISO(TZ);
+};
+
 const durationToSeconds = (duration) => Math.round(duration.total({ unit: 'seconds' }));
 
 const serializeInterval = (interval, now) => {
@@ -92,14 +101,7 @@ const handleSchedule = async (req, res) => {
   const instant = parseInstant(req.query);
   const schedule = await calendars.current(options);
   const periods = schedule.periodsForDate(instant);
-  res.json({
-    periods: periods.map((p) => ({
-      name: p.name,
-      start: p.start.toString(),
-      end: p.end.toString(),
-      tags: p.tags,
-    })),
-  });
+  res.json({ periods: serializePeriods(periods) });
 };
 
 const handleStatus = async (req, res) => {
@@ -120,11 +122,55 @@ const handleStatus = async (req, res) => {
   });
 };
 
+const serializePeriods = (periods) =>
+  periods.map((p) => ({
+    name: p.name,
+    start: p.start.toString(),
+    end: p.end.toString(),
+    tags: p.tags,
+  }));
+
+const handleScheduleFor = async (req, res) => {
+  const options = parseOptions(req.query);
+  const date = parseDate(req.query);
+  const schedule = await calendars.current(options);
+  res.json({
+    date: date.toString(),
+    isSchoolDay: schedule.isSchoolDay(date),
+    periods: serializePeriods(schedule.scheduleFor(date)),
+  });
+};
+
+const handleNextSchoolDay = async (req, res) => {
+  const options = parseOptions(req.query);
+  const date = parseDate(req.query);
+  const schedule = await calendars.current(options);
+  const next = schedule.nextSchoolDay(date);
+  res.json({
+    date: next.toString(),
+    periods: serializePeriods(schedule.scheduleFor(next)),
+  });
+};
+
+const handlePreviousSchoolDay = async (req, res) => {
+  const options = parseOptions(req.query);
+  const date = parseDate(req.query);
+  const schedule = await calendars.current(options);
+  const prev = schedule.previousSchoolDay(date);
+  res.json({
+    date: prev.toString(),
+    periods: serializePeriods(schedule.scheduleFor(prev)),
+  });
+};
+
 const app = express();
 app.use(cors());
 
 app.get('/api/current', handleCurrent);
 app.get('/api/schedule', handleSchedule);
+app.get('/api/schedule/for', handleScheduleFor);
+app.get('/api/schedule/next', handleNextSchoolDay);
+app.get('/api/schedule/previous', handlePreviousSchoolDay);
 app.get('/api/status', handleStatus);
 
 app.listen(PORT, () => {

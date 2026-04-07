@@ -5,7 +5,7 @@ html {
 body {
   display: flex;
   flex-direction: column;
-  height: 95dvh;
+  height: 95vh;
 }
 
 h1 {
@@ -17,14 +17,13 @@ h1 {
 #container {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  font-size: 36px;
-  width: 80vw;
-  margin: auto;
-  text-align: center;
-  color: rgba(64, 64, 128, 1);
-  padding: 20px;
-  padding-top: 10px;
+    flex: 1;
+    font-size: 36px;
+    width: 85vw;
+    margin: auto;
+    text-align: center;
+    color: rgba(64, 64, 128, 1);
+    padding: 0px 10px;
 }
 
 #configuration, #main, #summer {
@@ -49,23 +48,20 @@ h1 {
 #icons {
     display: flex;
     flex-direction: row;
-    gap: 3px;
+    gap: 4px;
     justify-content: right;
     align-items: center;
+    margin-right: -10px;
 }
 
-#qr {
-    width: 20px;
-}
 
 #icons svg {
     fill: rgba(64, 64, 128, 1);
-    width: 14px;
     height: 14px;
     padding: 0;
-    padding-top: 4px;
     margin: 0;
     font-size: 14px;
+    padding-top: 4px;
 }
 
 #configuration table {
@@ -109,7 +105,7 @@ h1 {
 }
 
 #version {
-  padding-left: .5em;
+  padding-left: -10px;
 }
 
 #version > p {
@@ -117,7 +113,7 @@ h1 {
 }
 
 #small-countdown {
-  padding-right: .5em;
+  padding-right: -10px;
 }
 
 #small-countdown > p {
@@ -133,7 +129,6 @@ h1 {
     padding: 0;
     margin: 0;
     font-size: 20px;
-    padding-bottom: 30px;
 }
 
 .bar span {
@@ -166,6 +161,94 @@ span.togo {
   margin-top: 12px;
 }
 
+.popup-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 25dvh;
+}
+
+.popup-overlay.active {
+  display: flex;
+}
+
+.popup {
+  background: white;
+  border-radius: 8px;
+  padding: 40px 20px 20px;
+  position: relative;
+  /* max-width: 90vw;/ */
+  width: 40dvw;
+  max-height: 80vh;
+  overflow: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.popup-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 30px;
+  cursor: pointer;
+  color: rgba(64, 64, 128, 1);
+  line-height: 1;
+}
+
+.popup > #periods,
+.popup > #periods_config {
+  display: table;
+  margin: 10px auto;
+  padding: 20px 0px 20px 20px;
+  width: 100%;
+}
+
+#periods_config > thead {
+  text-align: left;
+  border-bottom: 2px solid rgb(160 160 160);
+}
+
+#periods_config > thead > tr {
+  height: 50px;
+}
+
+#periods > tr > td {
+  height: 25px;
+}
+
+#popup-schedule .popup {
+  width: 80vw;
+  max-width: 400px;
+  user-select: none;
+}
+
+#periods td:first-child {
+  min-width: 140px;
+}
+
+#popup-qr .popup {
+  padding: 10px;
+  aspect-ratio: 1;
+}
+
+#qr-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+#qr {
+  transform: scale(87%);
+}
+
 .remove {
   all: unset;
 }
@@ -176,6 +259,11 @@ span.togo {
   cursor: pointer;
 }
 
+#apple {
+  cursor: pointer;
+  user-select: none;
+  transform: scale(95%); 
+}
 
 
 /* Extra logic to make fonts local - Taken directly form fonts.google.com */
@@ -240,5 +328,6 @@ span.togo {
   src: url("./fonts/S6u9w4BMUTPHh50XSwiPGQ.woff2") format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+
 
 /* --- */

@@ -75,7 +75,7 @@ const setupConfigPanel = () => {
 
   let day = 1;
 
-  const rows = $$('#configuration table tbody tr');
+  const rows = $$('#periods_config tbody tr');
   for (const node of rows) {
     const cells = node.querySelectorAll('td');
     const zero = cells[1].querySelector('input');
@@ -120,36 +120,100 @@ const barSpan = (width, color) => {
   return s;
 };
 
-const toggleQR = () => {
-  const div = $('#qr-code');
-  div.style.display = div.style.display === 'block' ? 'none' : 'block';
+const togglePopup = (id) => {
+  const overlay = $(`#${id}`);
+  overlay.classList.toggle('active');
 };
 
-const toggleConfig = () => {
-  const table = $('#periods_config');
-  table.style.display = table.style.display === 'table' ? 'none' : 'table';
+const closeAllPopups = () => {
+  for (const overlay of $$('.popup-overlay')) {
+    overlay.classList.remove('active');
+  }
+};
+
+const toggleQR = () => togglePopup('popup-qr');
+
+const toggleConfig = () => togglePopup('popup-config');
+
+let scheduleDate = null;
+
+const renderSchedule = () => {
+  const table = $('#periods');
+  table.replaceChildren();
+
+  const bellSchedule = getBellSchedule();
+  const { timezone } = bellSchedule;
+
+  // Date header row with navigation arrows
+  const headerRow = $('<tr>');
+  const headerCell = $('<td>');
+  headerCell.colSpan = 3;
+  headerCell.style.textAlign = 'center';
+  headerCell.style.paddingBottom = '30px';
+
+  const leftArrow = $('<span>');
+  leftArrow.innerText = '\u25C0';
+  leftArrow.style.cursor = 'pointer';
+  leftArrow.style.padding = '0 12px';
+  leftArrow.onclick = (e) => {
+    e.stopPropagation();
+    scheduleDate = bellSchedule.previousSchoolDay(scheduleDate);
+    renderSchedule();
+  };
+
+  const rightArrow = $('<span>');
+  rightArrow.innerText = '\u25B6';
+  rightArrow.style.cursor = 'pointer';
+  rightArrow.style.padding = '0 12px';
+  rightArrow.onclick = (e) => {
+    e.stopPropagation();
+    scheduleDate = bellSchedule.nextSchoolDay(scheduleDate);
+    renderSchedule();
+  };
+
+  const dateLabel = $('<span>');
+  dateLabel.style.display = 'inline-block';
+  dateLabel.style.width = '150px';
+  dateLabel.style.textAlign = 'center';
+  const today = Temporal.Now.plainDateISO(bellSchedule.timezone);
+  const isToday = Temporal.PlainDate.compare(scheduleDate, today) === 0;
+  if (isToday) {
+    dateLabel.innerText = 'Today';
+  } else {
+    const dow = scheduleDate.toLocaleString('en-US', { weekday: 'short' });
+    dateLabel.innerText = `${dow} ${scheduleDate.month}/${scheduleDate.day}/${scheduleDate.year}`;
+    dateLabel.style.cursor = 'pointer';
+    dateLabel.onclick = (e) => {
+      e.stopPropagation();
+      scheduleDate = bellSchedule.isSchoolDay(today) ? today : bellSchedule.nextSchoolDay(today);
+      renderSchedule();
+    };
+  }
+
+  headerCell.append(leftArrow, dateLabel, rightArrow);
+  headerRow.append(headerCell);
+  table.append(headerRow);
+
+  // Period rows
+  bellSchedule.scheduleFor(scheduleDate).forEach(({ name, start, end }) => {
+    const tr = $('<tr>');
+    tr.append(td(name));
+    tr.append(td(timestring(start, timezone)));
+    tr.append(td(timestring(end, timezone)));
+    table.append(tr);
+  });
 };
 
 const togglePeriods = () => {
-  const table = $('#periods');
-  if (table.style.display === 'table') {
-    table.style.display = 'none';
+  const overlay = $('#popup-schedule');
+  if (overlay.classList.contains('active')) {
+    overlay.classList.remove('active');
   } else {
-    table.replaceChildren();
-
-    const instant = toInstant(now());
     const bellSchedule = getBellSchedule();
-
-    const { timezone } = bellSchedule;
-    bellSchedule.periodsForDate(instant).forEach(({ name, start, end }) => {
-      const tr = $('<tr>');
-      tr.append(td(name));
-      tr.append(td(timestring(start, timezone)));
-      tr.append(td(timestring(end, timezone)));
-      table.append(tr);
-    });
-
-    table.style.display = 'table';
+    const today = Temporal.Now.plainDateISO(bellSchedule.timezone);
+    scheduleDate = bellSchedule.isSchoolDay(today) ? today : bellSchedule.nextSchoolDay(today);
+    renderSchedule();
+    overlay.classList.add('active');
   }
 };
 
@@ -159,6 +223,13 @@ const update = () => {
   if (timeoutID) clearTimeout(timeoutID);
   const t = now();
   const instant = toInstant(t);
+
+  // Auto reload the page if it's been open more than a day.
+  if (Temporal.Instant.compare(instant, reloadAt) >= 0) {
+    location.reload();
+    return;
+  }
+
   const bellSchedule = getBellSchedule();
 
   // summerBounds returns null when we are inside a school year; non-null during summer.
@@ -168,6 +239,7 @@ const update = () => {
   } else {
     normalCountdown(t, instant, bellSchedule);
   }
+
   // We use setTimeout rather than setInterval so we can stay as synced as
   // possible with exactly when the second rolls over.
   timeoutID = setTimeout(update, 1000 - t.getMilliseconds());
@@ -462,6 +534,19 @@ versionEl.onclick = (e) => {
 };
 
 setupConfigPanel();
+
+// Close popups via close button or clicking the backdrop
+for (const overlay of $$('.popup-overlay')) {
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+  overlay.querySelector('.popup-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    overlay.classList.remove('active');
+  });
+}
+
 $('#left').onclick = () => {
   togo = !togo;
   update();
@@ -469,6 +554,10 @@ $('#left').onclick = () => {
 
 registerServiceWorker();
 addProgressBars();
+
+// Auto-refresh if the page has been open for more than 24 hours.
+const reloadAt = toInstant(now()).add({ hours: 24 });
+
 update();
 
 if (document.readyState === 'loading') {

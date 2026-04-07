@@ -4,7 +4,7 @@
     "": {
       "dependencies": {
         "@js-temporal/polyfill": "^0.5.1",
-        "@peterseibel/bells": "^0.1.10",
+        "@peterseibel/bells": "^0.1.12",
         "@peterseibel/bhs-calendars": "^1.0.0",
         "cors": "^2.8.6",
         "esbuild": "0.27.4",
@@ -67,7 +67,7 @@
 
     "@js-temporal/polyfill": ["@js-temporal/polyfill@0.5.1", "", { "dependencies": { "jsbi": "^4.3.0" } }, "sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ=="],
 
-    "@peterseibel/bells": ["@peterseibel/bells@0.1.10", "", { "dependencies": { "@peterseibel/bells": "^0.1.6" }, "peerDependencies": { "@js-temporal/polyfill": ">=0.4" }, "bin": { "bells-validate": "src/bin/validate.js" } }, "sha512-Lf4wKA9TQwxqJQgUKtzaVzrNjPSfvpi3GMYSJWvgP7oOKdQ/36rm1kocBNjIDgHWF58NiFfxHQR8SU0raL8I9w=="],
+    "@peterseibel/bells": ["@peterseibel/bells@0.1.12", "", { "dependencies": { "@peterseibel/bells": "^0.1.10" }, "peerDependencies": { "@js-temporal/polyfill": ">=0.4" }, "bin": { "bells-validate": "src/bin/validate.js" } }, "sha512-Z1HZCedMUJvDaPxCIhirHf+XdS3TZpBgrtOdp7FNtHkUedz9izC4uq2gCHz+q1/VcoejElxNl4kQYxAhfiIiBA=="],
 
     "@peterseibel/bhs-calendars": ["@peterseibel/bhs-calendars@1.0.0", "", {}, "sha512-rDOqyFYy3Txv58TMDMu26keSHhib/A1tTAmbqlaSSz1vrKunaQ8JZdw01uW9Ql0O6cLLqvTPhVEK3F4Nwk7Ckg=="],
 

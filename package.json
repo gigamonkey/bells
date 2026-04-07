@@ -1,8 +1,11 @@
 {
   "type": "module",
+  "scripts": {
+    "dev": "trap 'kill 0' EXIT; npx serve . -l 8081 & ./node_modules/.bin/esbuild bells.js --watch --sourcemap --bundle --format=esm --outfile=out.js"
+  },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
-    "@peterseibel/bells": "^0.1.10",
+    "@peterseibel/bells": "^0.1.12",
     "@peterseibel/bhs-calendars": "^1.0.0",
     "cors": "^2.8.6",
     "esbuild": "0.27.4",
