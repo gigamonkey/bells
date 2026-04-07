@@ -104,16 +104,8 @@ h1 {
   margin: 0;
 }
 
-#version {
-  padding-left: -10px;
-}
-
 #version > p {
   text-align: left;
-}
-
-#small-countdown {
-  padding-right: -10px;
 }
 
 #small-countdown > p {
@@ -185,6 +177,7 @@ span.togo {
   position: relative;
   /* max-width: 90vw;/ */
   width: 40dvw;
+  min-width: 320px;
   max-height: 80vh;
   overflow: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -234,7 +227,7 @@ span.togo {
 #popup-qr .popup {
   padding: 10px;
   aspect-ratio: 1;
-  min-width: 350px;
+  min-width: 320px;
 }
 
 #qr-code {
