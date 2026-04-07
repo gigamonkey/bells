@@ -38,6 +38,6 @@ serve:
 publish:
 	./publish.sh $(files)
 
-serve:
+live:
 	npx live-server
 # 	npx http-server

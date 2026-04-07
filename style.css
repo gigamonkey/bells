@@ -5,7 +5,7 @@ html {
 body {
   display: flex;
   flex-direction: column;
-  height: 95dvh;
+  height: 95vh;
 }
 
 h1 {
@@ -17,14 +17,13 @@ h1 {
 #container {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  font-size: 36px;
-  width: 80vw;
-  margin: auto;
-  text-align: center;
-  color: rgba(64, 64, 128, 1);
-  padding: 20px;
-  padding-top: 10px;
+    flex: 1;
+    font-size: 36px;
+    width: 85vw;
+    margin: auto;
+    text-align: center;
+    color: rgba(64, 64, 128, 1);
+    padding: 0px 10px;
 }
 
 #configuration, #main, #summer {
@@ -49,23 +48,20 @@ h1 {
 #icons {
     display: flex;
     flex-direction: row;
-    gap: 3px;
+    gap: 4px;
     justify-content: right;
     align-items: center;
+    margin-right: -10px;
 }
 
-#qr {
-    width: 20px;
-}
 
 #icons svg {
     fill: rgba(64, 64, 128, 1);
-    width: 14px;
     height: 14px;
     padding: 0;
-    padding-top: 4px;
     margin: 0;
     font-size: 14px;
+    padding-top: 4px;
 }
 
 #configuration table {
@@ -133,8 +129,6 @@ h1 {
     padding: 0;
     margin: 0;
     font-size: 20px;
-    padding-bottom: 30px;
-    height: 20px;
 }
 
 .bar span {
@@ -178,7 +172,7 @@ span.togo {
   z-index: 100;
   justify-content: center;
   align-items: flex-start;
-  padding-top: 10vh;
+  padding-top: 25dvh;
 }
 
 .popup-overlay.active {
@@ -190,7 +184,8 @@ span.togo {
   border-radius: 8px;
   padding: 40px 20px 20px;
   position: relative;
-  max-width: 90vw;
+  /* max-width: 90vw;/ */
+  width: 40dvw;
   max-height: 80vh;
   overflow: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -200,16 +195,27 @@ span.togo {
   position: absolute;
   top: 8px;
   right: 12px;
-  font-size: 24px;
+  font-size: 30px;
   cursor: pointer;
   color: rgba(64, 64, 128, 1);
   line-height: 1;
 }
 
-.popup #periods,
-.popup #periods_config {
+.popup > #periods,
+.popup > #periods_config {
   display: table;
-  margin: 0 auto;
+  margin: 10px auto;
+  padding: 20px 0px 20px 20px;
+  width: 100%;
+}
+
+#periods_config > thead {
+  text-align: left;
+  border-bottom: 2px solid rgb(160 160 160);
+}
+
+#periods_config > thead > tr {
+  height: 50px;
 }
 
 #popup-schedule .popup {
@@ -223,100 +229,37 @@ span.togo {
 }
 
 #popup-qr .popup {
-  padding: 30px;
+  padding: 10px;
+  aspect-ratio: 1;
 }
 
-.popup #qr-code {
-  display: block;
-}
-
-.popup-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
+#qr-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 100;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 10vh;
 }
 
-.popup-overlay.active {
-  display: flex;
+#qr {
+  transform: scale(87%);
 }
 
-.popup {
-  background: white;
-  border-radius: 8px;
-  padding: 40px 20px 20px;
-  position: relative;
-  max-width: 90vw;
-  max-height: 80vh;
-  overflow: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+.remove {
+  all: unset;
 }
 
-.popup-close {
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  font-size: 24px;
+.a-tag {
+  color: blue;
+  text-decoration: underline;
   cursor: pointer;
-  color: rgba(64, 64, 128, 1);
-  line-height: 1;
 }
 
-.popup #periods,
-.popup #periods_config {
-  display: table;
-  margin: 0 auto;
-}
-
-#popup-schedule .popup {
-  width: 80vw;
-  max-width: 400px;
+#apple {
+  cursor: pointer;
   user-select: none;
+  transform: scale(95%); 
 }
-
-#periods td:first-child {
-  min-width: 140px;
-}
-
-#popup-qr .popup {
-  padding: 30px;
-}
-
-.popup #qr-code {
-  display: block;
-}
-
-.remove {
-  all: unset;
-}
-
-.a-tag {
-  color: blue;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-
-
-/* Extra logic to make fonts local - Taken directly form fonts.google.com */
-
-.remove {
-  all: unset;
-}
-
-.a-tag {
-  color: blue;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 
 
 /* Extra logic to make fonts local - Taken directly form fonts.google.com */

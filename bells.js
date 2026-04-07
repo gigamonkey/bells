@@ -537,6 +537,7 @@ setupConfigPanel();
 
 // Close popups via close button or clicking the backdrop
 for (const overlay of $$('.popup-overlay')) {
+
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) overlay.classList.remove('active');
   });
