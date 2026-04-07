@@ -171,8 +171,7 @@ span.togo {
   background: rgba(0, 0, 0, 0.4);
   z-index: 100;
   justify-content: center;
-  align-items: flex-start;
-  padding-top: 25dvh;
+  align-items: center;
 }
 
 .popup-overlay.active {
@@ -235,6 +234,7 @@ span.togo {
 #popup-qr .popup {
   padding: 10px;
   aspect-ratio: 1;
+  min-width: 350px;
 }
 
 #qr-code {
