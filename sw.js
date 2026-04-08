@@ -1,4 +1,4 @@
-const cache_name = 'bells-v0.1'; // Update to force install a new cache
+const cache_name = 'bells-v0.2'; // Update to force install a new cache
 
 const files = [
   './',

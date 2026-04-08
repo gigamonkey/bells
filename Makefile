@@ -36,7 +36,7 @@ release-lib:
 serve:
 	cd server && node index.js
 
-publish:
+publish: build
 	./publish.sh $(files)
 
 live:
