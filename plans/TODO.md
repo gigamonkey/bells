@@ -1,11 +1,9 @@
 # TODO
 
-## Small
+BHS bell schedule web site and library
 
-## Medium
+## In progress
 
-## Large
-
-## Plans
+## Backlog
 
 ## Done
