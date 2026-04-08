@@ -7,18 +7,16 @@ files += out.js.map
 files += images/bells-qr.png
 files += icons
 
-ESBUILD := $(if $(wildcard ./node_modules/.bin/esbuild.exe),./node_modules/.bin/esbuild.exe,./node_modules/.bin/esbuild)
-
 all: pretty lint
 
 version.js:
 	echo "export const version = \"$$(./version.sh)\";" > version.js
 
 build: version.js
-	$(ESBUILD) bells.js --sourcemap --bundle --format=esm --outfile=out.js
+	npx esbuild bells.js --sourcemap --bundle --format=esm --outfile=out.js
 
 watch: version.js
-	$(ESBUILD) bells.js --watch --sourcemap --bundle --format=esm --outfile=out.js
+	npx esbuild bells.js --watch --sourcemap --bundle --format=esm --outfile=out.js
 
 pretty:
 	npx prettier -w --print-width 120 *.js
@@ -42,4 +40,4 @@ publish:
 
 live:
 	npx live-server
-# 	npx http-server
+#	npx http-server
