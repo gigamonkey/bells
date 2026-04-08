@@ -55,6 +55,16 @@ const durationToMillis = (duration) => duration.total({ unit: 'milliseconds' });
 
 let togo = true;
 
+/** 
+ * To handle local PWA install state
+*/
+let installPrompt = null;
+
+/**
+ * Keep track of online state
+*/
+let onlineState = {lan: true, network: true};
+
 const setupConfigPanel = () => {
   $('#apple').onclick = toggleTeacher;
   $('#qr').onclick = toggleQR;
@@ -139,7 +149,7 @@ const renderSchedule = () => {
   const headerCell = $('<td>');
   headerCell.colSpan = 3;
   headerCell.style.textAlign = 'center';
-  headerCell.style.padding = '4px';
+  headerCell.style.paddingBottom = '30px';
 
   const leftArrow = $('<span>');
   leftArrow.innerText = '\u25C0';
@@ -447,15 +457,87 @@ const periodTimes = (p, timezone) => {
   return d;
 };
 
+const registerServiceWorker = async () => {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    await navigator.serviceWorker.register('./sw.js');
+    console.log("Registered SW")
+  } catch (error) {
+    console.error('Could not register service worker', error);
+  }
+};
+
+const handleLocalInstallSetup = () => {
+
+  const installArea = $(".local-install");
+  const installButton = $(".local-install > button")
+
+  if (!installArea || !installButton) return;
+
+  const disableInAppInstallPrompt = () => {
+    installPrompt = null;
+    installArea.setAttribute("hidden", "");
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installPrompt = event;
+    installArea.removeAttribute("hidden");
+  });
+
+  window.addEventListener("appinstalled", () => {
+    disableInAppInstallPrompt();
+  });
+
+  installButton.addEventListener("click", async () => {
+    if (!installPrompt) return;
+    const result = await installPrompt.prompt();
+    disableInAppInstallPrompt();
+    // console.log(`Install prompt was: ${result.outcome}`);
+  });
+
+};
+
+const setupOnlineDisplay = () => {    
+
+  const updateOnlineNotification = () => {
+    if(onlineState.lan && onlineState.network) $(".no-wifi").setAttribute("hidden", "");
+    else $(".no-wifi").removeAttribute("hidden");
+  }
+
+  setInterval(async () => {
+    await fetch("./online-check.txt")
+      .then(async (res) => {
+        let content = await res.text()
+        onlineState.network = content === "online" && res.ok;
+      })
+      .catch(e => onlineState.network = false);
+    updateOnlineNotification();
+  }, 60_000)
+
+  const handleNetworkChange = () => {
+    console.log("Online status update: ", navigator.onLine ? "online" : "offline");
+    onlineState.lan = navigator.onLine;
+    updateOnlineNotification();
+  };
+
+  window.addEventListener('online', handleNetworkChange);
+  window.addEventListener('offline', handleNetworkChange);
+  handleNetworkChange();
+
+}
+
 const versionEl = $('#version > p');
 versionEl.innerText = version;
 versionEl.onclick = (e) => {
   e.target.classList.toggle('clicked');
 };
+
 setupConfigPanel();
 
 // Close popups via close button or clicking the backdrop
 for (const overlay of $$('.popup-overlay')) {
+
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) overlay.classList.remove('active');
   });
@@ -469,9 +551,21 @@ $('#left').onclick = () => {
   togo = !togo;
   update();
 };
+
+registerServiceWorker();
 addProgressBars();
 
 // Auto-refresh if the page has been open for more than 24 hours.
 const reloadAt = toInstant(now()).add({ hours: 24 });
 
 update();
+
+if (document.readyState === 'loading') {
+  window.addEventListener("DOMContentLoaded", () => {
+    handleLocalInstallSetup()
+    setupOnlineDisplay();
+  });
+} else {
+  handleLocalInstallSetup();
+  setupOnlineDisplay();
+}
