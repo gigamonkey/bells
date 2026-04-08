@@ -2,6 +2,7 @@ files := index.html
 files += fonts
 files += images
 files += manifest.json
+files += online-check.txt
 files += out.js
 files += out.js.map
 files += style.css
