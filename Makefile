@@ -1,10 +1,11 @@
-files := index.html
-files += style.css
+files += fonts
+files += images
 files += manifest.json
-files += sw.js
 files += out.js
 files += out.js.map
-files += images
+files += style.css
+files += sw.js
+files := index.html
 
 all: pretty lint
 
