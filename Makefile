@@ -40,5 +40,4 @@ publish: build
 	./publish.sh $(files)
 
 live:
-	npx live-server
-#	npx http-server
+	npx live-server --host=0.0.0.0
