@@ -323,4 +323,11 @@ span.togo {
 }
 
 
+@media (display-mode: standalone) {
+  .local-install,
+  .ios-install {
+    display: none !important;
+  }
+}
+
 /* --- */

@@ -467,11 +467,30 @@ const registerServiceWorker = async () => {
   }
 };
 
+const isStandalone = () =>
+  window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+const isIOSSafari = () => {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua) && !(/CriOS|FxiOS|Chrome/.test(ua));
+};
+
 const handleLocalInstallSetup = () => {
 
   const installArea = $(".local-install");
-  const installButton = $(".local-install > button")
+  const installButton = $(".local-install > button");
+  const iosInstallArea = $(".ios-install");
 
+  // Already running as an installed PWA — hide all install UI.
+  if (isStandalone()) return;
+
+  // iOS Safari: show manual install instructions.
+  if (isIOSSafari()) {
+    if (iosInstallArea) iosInstallArea.removeAttribute("hidden");
+    return;
+  }
+
+  // Chromium browsers: use beforeinstallprompt.
   if (!installArea || !installButton) return;
 
   const disableInAppInstallPrompt = () => {
