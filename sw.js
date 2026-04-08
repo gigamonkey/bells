@@ -1,0 +1,103 @@
+const cache_name = 'bells-v0.1'; // Update to force install a new cache
+
+const files = [
+  './',
+  './index.html',
+  './style.css',
+  './out.js',
+  './manifest.json',
+  './images/bells-qr.png',
+  './images/GitHub-Mark-32px.png',
+  './images/icons/bells-ico.svg',
+  './images/icons/bells-ico-192.png',
+  './images/icons/bells-ico-512.png',
+  './fonts/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2',
+  './fonts/S6u9w4BMUTPHh50XSwaPGR_p.woff2',
+  './fonts/S6u9w4BMUTPHh50XSwiPGQ.woff2',
+  './fonts/S6u9w4BMUTPHh7USSwaPGR_p.woff2',
+  './fonts/S6u9w4BMUTPHh7USSwiPGQ.woff2',
+];
+
+async function setupNewCache() {
+  const cache = await caches.open(cache_name);
+  await Promise.all(
+    files.map(async (asset) => {
+      try {
+        await cache.add(new Request(asset, { cache: 'reload' }));
+        console.log("Cache updated: " + asset)
+      } catch (error) {
+        console.warn('Failed to cache asset:', asset, error);
+      }
+    }),
+  );
+  await self.skipWaiting();
+}
+
+async function handleActivation(params) {
+  const keys = await caches.keys();
+  await Promise.all(keys.filter((key) => key !== cache_name).map((key) => caches.delete(key))); // Clear old caches
+  await self.clients.claim();
+}
+
+async function handleCachedFetch(event) {
+
+    let request = event.request;
+    const url = new URL(request.url);
+    const isSameOrigin = url.origin === self.location.origin;
+
+    // Purposefully circumvent the cache check to see if we're online
+    if(request.url.includes("online-check")) {
+      try {
+        let res = await fetch(request.url);
+        if(!res.ok) return new Response("offline");
+        return new Response("online");
+      } catch (error) {
+        return new Response("offline");
+      }
+    }
+
+    if (request.mode === 'navigate') {
+        try {
+          const networkResponse = await fetch(request);
+          const cache = await caches.open(cache_name);
+          // console.log("Cache hit on " + request.url)
+          cache.put(request, networkResponse.clone());
+          return networkResponse;
+        } catch {
+          console.warn("Cache miss on: " + request.url)
+          return (await caches.match('./index.html')) || (await caches.match('./'));
+        }
+    }
+
+    if (isSameOrigin) {
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) return cachedResponse;
+        try {
+            console.warn("Same origin miss on: " + request.url)
+            const networkResponse = await fetch(request);
+            if (networkResponse.ok) {
+                const cache = await caches.open(cache_name);
+                cache.put(request, networkResponse.clone());
+            }
+            return networkResponse;
+        } catch {
+            return Response.error();
+        }
+    }
+
+    return fetch(request);
+}
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(setupNewCache());
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(handleActivation());
+});
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET') return;
+  event.respondWith(handleCachedFetch(event));
+});
