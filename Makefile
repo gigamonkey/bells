@@ -4,8 +4,7 @@ files += manifest.json
 files += sw.js
 files += out.js
 files += out.js.map
-files += images/bells-qr.png
-files += icons
+files += images
 
 all: pretty lint
 
