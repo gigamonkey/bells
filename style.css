@@ -323,6 +323,21 @@ span.togo {
 }
 
 
+.ios-install-instructions {
+  text-align: left;
+  padding: 0 20px;
+}
+
+.ios-install-instructions h3 {
+  text-align: center;
+  color: rgba(64, 64, 128, 1);
+}
+
+.ios-install-instructions ol {
+  padding-left: 20px;
+  line-height: 1.8;
+}
+
 @media (display-mode: standalone) {
   .local-install,
   .ios-install {
