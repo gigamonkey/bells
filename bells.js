@@ -70,6 +70,8 @@ const setupConfigPanel = () => {
   $('#qr').onclick = toggleQR;
   $('#gear').onclick = toggleConfig;
   $('#sched').onclick = togglePeriods;
+  $('#reload-app').onclick = forceReload;
+  $('#reload-app-container').classList.toggle('visible', isStandalone());
 
   $('#apple').innerText = isTeacher() ? '🍎' : '✏️';
 
@@ -457,14 +459,62 @@ const periodTimes = (p, timezone) => {
   return d;
 };
 
+const showUpdateBanner = (waitingWorker) => {
+  const banner = $('#update-banner');
+  if (!banner) return;
+  banner.hidden = false;
+  banner.onclick = () => {
+    banner.textContent = 'Reloading…';
+    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+  };
+};
+
 const registerServiceWorker = async () => {
   if (!('serviceWorker' in navigator)) return;
   try {
-    await navigator.serviceWorker.register('./sw.js');
-    console.log("Registered SW")
+    const reg = await navigator.serviceWorker.register('./sw.js');
+    console.log('Registered SW');
+
+    // If a new worker is already waiting when we register, surface it.
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      showUpdateBanner(reg.waiting);
+    }
+
+    // Watch for future updates.
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+          showUpdateBanner(nw);
+        }
+      });
+    });
+
+    // Reload once the new worker takes control. Guard against the double-reload
+    // that can happen if the browser fires controllerchange during the initial
+    // install (when there was no previous controller).
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloading) return;
+      reloading = true;
+      location.reload();
+    });
   } catch (error) {
     console.error('Could not register service worker', error);
   }
+};
+
+const forceReload = async () => {
+  try {
+    const regs = await navigator.serviceWorker?.getRegistrations?.() ?? [];
+    await Promise.all(regs.map((r) => r.unregister()));
+    const keys = await caches?.keys?.() ?? [];
+    await Promise.all(keys.map((k) => caches.delete(k)));
+  } catch (error) {
+    console.warn('forceReload cleanup failed', error);
+  }
+  location.reload();
 };
 
 const isStandalone = () =>

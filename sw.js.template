@@ -1,4 +1,7 @@
-const cache_name = 'bells-v0.2'; // Update to force install a new cache
+// Generated from sw.js.template by the Makefile. The placeholder below is
+// replaced at build time with a content-derived hash so every deploy produces
+// a byte-different service worker and the browser installs a fresh one.
+const cache_name = '__CACHE_NAME__';
 
 const files = [
   './',
@@ -30,7 +33,10 @@ async function setupNewCache() {
       }
     }),
   );
-  await self.skipWaiting();
+  // Do NOT call skipWaiting here. On first install there is no old worker
+  // to skip past; on update we defer activation until the page asks for it
+  // (see the 'message' handler below), so the user can decide when to
+  // reload rather than having their session reset mid-use.
 }
 
 async function handleActivation(params) {
@@ -100,4 +106,11 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
   event.respondWith(handleCachedFetch(event));
+});
+
+// The page posts {type: 'SKIP_WAITING'} when the user accepts the update
+// prompt; this hands control to the new worker and triggers controllerchange
+// on all clients, which in turn reload.
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });

@@ -345,4 +345,47 @@ span.togo {
   }
 }
 
+#update-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 16px;
+  text-align: center;
+  background: rgba(64, 64, 128, 1);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 200;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#update-banner[hidden] {
+  display: none;
+}
+
+#reload-app-container {
+  display: none;
+  text-align: center;
+  margin-top: 16px;
+}
+
+#reload-app-container.visible {
+  display: block;
+}
+
+#reload-app {
+  font-size: 14px;
+  padding: 6px 14px;
+  color: rgba(64, 64, 128, 1);
+  background: white;
+  border: 1px solid rgba(64, 64, 128, 1);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#reload-app:hover {
+  background: rgba(64, 64, 128, 0.08);
+}
+
 /* --- */
