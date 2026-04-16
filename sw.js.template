@@ -33,10 +33,10 @@ async function setupNewCache() {
       }
     }),
   );
-  // Do NOT call skipWaiting here. On first install there is no old worker
-  // to skip past; on update we defer activation until the page asks for it
-  // (see the 'message' handler below), so the user can decide when to
-  // reload rather than having their session reset mid-use.
+  // Activate immediately so open PWAs auto-update. The page listens for
+  // 'controllerchange' and reloads, which this triggers via clients.claim()
+  // in the activate handler.
+  await self.skipWaiting();
 }
 
 async function handleActivation(params) {
@@ -106,11 +106,4 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
   event.respondWith(handleCachedFetch(event));
-});
-
-// The page posts {type: 'SKIP_WAITING'} when the user accepts the update
-// prompt; this hands control to the new worker and triggers controllerchange
-// on all clients, which in turn reload.
-self.addEventListener('message', (event) => {
-  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });

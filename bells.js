@@ -459,47 +459,22 @@ const periodTimes = (p, timezone) => {
   return d;
 };
 
-const showUpdateBanner = (waitingWorker) => {
-  const banner = $('#update-banner');
-  if (!banner) return;
-  banner.hidden = false;
-  banner.onclick = () => {
-    banner.textContent = 'Reloading…';
-    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-  };
-};
-
 const registerServiceWorker = async () => {
   if (!('serviceWorker' in navigator)) return;
+
+  // Capture controller state BEFORE register() so we can distinguish the
+  // first-ever install (no prior controller → controllerchange fires once
+  // but we shouldn't reload) from an update (existing controller replaced
+  // by a new one → reload to pick up the new bundle).
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return;
+    location.reload();
+  });
+
   try {
-    const reg = await navigator.serviceWorker.register('./sw.js');
+    await navigator.serviceWorker.register('./sw.js');
     console.log('Registered SW');
-
-    // If a new worker is already waiting when we register, surface it.
-    if (reg.waiting && navigator.serviceWorker.controller) {
-      showUpdateBanner(reg.waiting);
-    }
-
-    // Watch for future updates.
-    reg.addEventListener('updatefound', () => {
-      const nw = reg.installing;
-      if (!nw) return;
-      nw.addEventListener('statechange', () => {
-        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-          showUpdateBanner(nw);
-        }
-      });
-    });
-
-    // Reload once the new worker takes control. Guard against the double-reload
-    // that can happen if the browser fires controllerchange during the initial
-    // install (when there was no previous controller).
-    let reloading = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (reloading) return;
-      reloading = true;
-      location.reload();
-    });
   } catch (error) {
     console.error('Could not register service worker', error);
   }

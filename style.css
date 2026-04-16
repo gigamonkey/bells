@@ -345,25 +345,6 @@ span.togo {
   }
 }
 
-#update-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 10px 16px;
-  text-align: center;
-  background: rgba(64, 64, 128, 1);
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  z-index: 200;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-#update-banner[hidden] {
-  display: none;
-}
-
 #reload-app-container {
   display: none;
   text-align: center;
