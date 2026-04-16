@@ -30,8 +30,5 @@
   },
   "devDependencies": {
     "temporal-polyfill": "^0.3.2"
-  },
-  "dependencies": {
-    "@peterseibel/bells": "^0.1.10"
   }
 }
