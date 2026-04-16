@@ -1,7 +1,12 @@
 {
   "name": "@peterseibel/bhs-calendars",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gigamonkey/bells",
+    "directory": "bhs-calendars"
+  },
   "exports": {
     "./2022-2023": "./2022-2023.json",
     "./2023-2024": "./2023-2024.json",
