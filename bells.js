@@ -486,7 +486,15 @@ const handleLocalInstallSetup = () => {
 
   // iOS Safari: show manual install instructions.
   if (isIOSSafari()) {
-    if (iosInstallArea) iosInstallArea.removeAttribute("hidden");
+    if (iosInstallArea) {
+      iosInstallArea.removeAttribute("hidden");
+      const installLink = $(".ios-install-link");
+      if (installLink) {
+        installLink.addEventListener("click", () => {
+          $('#popup-ios-install').classList.add('active');
+        });
+      }
+    }
     return;
   }
 
