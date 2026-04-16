@@ -33,7 +33,7 @@ release-lib:
 	git tag "v$$(node -p "require('./lib/package.json').version")"
 	git push --follow-tags
 
-release-calendars:
+release-bhs-calendars:
 	cd bhs-calendars && npm version patch --no-git-tag-version
 	git add bhs-calendars/package.json
 	git commit -m "calendars-v$$(node -p "require('./bhs-calendars/package.json').version")"
