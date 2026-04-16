@@ -68,8 +68,8 @@
   </div>
   <div id="countdown-link">
     <span class="local-install" hidden>💾<button class="remove a-tag" href="https://www.gigamonkeys.com/misc/countdown">Install Locally</button> |</span>
-    <span class="ios-install" hidden>💾<span class="a-tag">Install: tap Share then "Add to Home Screen"</span> |</span>
-    <img style="padding-left: 3px; padding-right: 4px; margin-bottom: 2px;" src="images/GitHub-Mark-32px.png" alt="github-logo"><a href="https://github.com/gigamonkey/bells">View on Github</a> 
+    <span class="ios-install" hidden>💾<a class="ios-install-link a-tag">Install App</a> |</span>
+    <img style="padding-left: 3px; padding-right: 4px; margin-bottom: 2px;" src="images/GitHub-Mark-32px.png" alt="github-logo"><a href="https://github.com/gigamonkey/bells">View on Github</a>
     | ⏲️<a href="https://www.gigamonkeys.com/misc/countdown">Custom Countdown</a>
     <span class="no-wifi" hidden> | 📵 No Connection - Offline </span>
   </div>
@@ -130,6 +130,20 @@
     <div class="popup">
       <span class="popup-close">&times;</span>
       <div id="qr-code"><img src="./images/bells-qr.png"></div>
+    </div>
+  </div>
+  <div id="popup-ios-install" class="popup-overlay">
+    <div class="popup">
+      <span class="popup-close">&times;</span>
+      <div class="ios-install-instructions">
+        <h3>Install BHS Bells</h3>
+        <ol>
+          <li>Tap the <strong>...</strong> menu.</li>
+          <li>Tap the <strong>Share</strong> button</li>
+          <li>Scroll down and <strong>"Add to Home Screen"</strong></li>
+          <li>Tap <strong>"Add"</strong> at the top right</li>
+        </ol>
+      </div>
     </div>
   </div>
 </body>
