@@ -288,6 +288,7 @@ function fireAlarm(alarm, period, fireMs) {
     showBanner(describeAlarm(alarm, period, { short: true }), {
       repeatChime: true,
       speakText: alarm.speakText,
+      dedupKey: `alarm:${alarm.id}`,
     });
   }
   if (visible && fireMs && lastTickDateStr && 'serviceWorker' in navigator) {
@@ -310,14 +311,19 @@ function cancelSpeech() {
   try { speechSynthesis.cancel(); } catch {}
 }
 
-function showBanner(labelText, { repeatChime = false, speakText = '' } = {}) {
+function showBanner(labelText, { repeatChime = false, speakText = '', dedupKey = '' } = {}) {
   let stack = $('#alarm-banner-stack');
   if (!stack) {
     stack = document.createElement('div');
     stack.id = 'alarm-banner-stack';
     document.body.appendChild(stack);
   }
+  if (dedupKey) {
+    const existing = stack.querySelector(`[data-alarm-dedup="${CSS.escape(dedupKey)}"]`);
+    if (existing) return;
+  }
   const banner = document.createElement('div');
+  if (dedupKey) banner.dataset.alarmDedup = dedupKey;
   banner.className = 'alarm-banner';
   const label = document.createElement('span');
   label.className = 'alarm-banner-label';
@@ -331,7 +337,7 @@ function showBanner(labelText, { repeatChime = false, speakText = '' } = {}) {
       clearInterval(intervalId);
       intervalId = null;
     }
-    cancelSpeech();
+    if (!document.querySelector('.alarm-banner:not(.closing)')) cancelSpeech();
     banner.classList.add('closing');
     setTimeout(() => {
       banner.remove();
@@ -471,6 +477,7 @@ function renderAlarmList() {
       showBanner(describeAlarm(alarm) + ' (test)', {
         repeatChime: true,
         speakText: alarm.speakText,
+        dedupKey: `alarm:${alarm.id}`,
       });
     };
 
