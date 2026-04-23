@@ -75,7 +75,6 @@ const setupConfigPanel = () => {
   $('#gear').onclick = toggleConfig;
   $('#sched').onclick = togglePeriods;
   $('#reload-app').onclick = forceReload;
-  $('#reload-app-container').classList.toggle('visible', isStandalone());
   updateSwVersionDisplay();
 
   $('#apple').innerText = isTeacher() ? '🍎' : '✏️';
@@ -142,6 +141,7 @@ const toggleQR = () => togglePopup('popup-qr');
 
 const toggleConfig = () => {
   togglePopup('popup-config');
+  $('#reload-app-container').classList.toggle('visible', isStandalone());
   updateSwVersionDisplay();
 };
 
