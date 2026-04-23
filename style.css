@@ -376,4 +376,252 @@ span.togo {
   color: rgba(64, 64, 128, 0.6);
 }
 
+#bell-icon {
+  cursor: pointer;
+}
+
+#alarm-banner-stack {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.alarm-banner {
+  background: rgba(255, 200, 0, 0.95);
+  color: #222;
+  border-bottom: 2px solid rgba(200, 140, 0, 1);
+  padding: 14px 20px;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+  animation: alarm-slide-in 0.3s ease-out;
+}
+
+.alarm-banner.closing {
+  animation: alarm-slide-out 0.3s ease-in forwards;
+}
+
+.alarm-banner-close {
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+  padding: 0 8px;
+}
+
+@keyframes alarm-slide-in {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes alarm-slide-out {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-100%); opacity: 0; }
+}
+
+#container.alarm-pulse {
+  animation: alarm-pulse 0.6s ease-in-out 3;
+}
+
+@keyframes alarm-pulse {
+  0%, 100% { outline: 0 solid rgba(255, 200, 0, 0); outline-offset: 0; }
+  50% { outline: 6px solid rgba(255, 200, 0, 0.8); outline-offset: -6px; }
+}
+
+.alarm-title {
+  text-align: center;
+  color: rgba(64, 64, 128, 1);
+  margin: 0 0 12px;
+}
+
+#alarm-audio-warning {
+  display: none;
+  font-size: 12px;
+  color: #a66;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#alarm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.alarm-empty {
+  font-size: 14px;
+  color: rgba(64, 64, 128, 0.6);
+  text-align: center;
+  padding: 10px;
+}
+
+.alarm-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(64, 64, 128, 0.2);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.alarm-desc {
+  flex: 1;
+  color: rgba(64, 64, 128, 1);
+}
+
+.alarm-btn {
+  font-size: 12px;
+  padding: 4px 8px;
+  color: rgba(64, 64, 128, 1);
+  background: white;
+  border: 1px solid rgba(64, 64, 128, 1);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.alarm-btn:hover {
+  background: rgba(64, 64, 128, 0.08);
+}
+
+.alarm-save {
+  background: rgba(64, 64, 128, 1);
+  color: white;
+}
+
+.alarm-save:hover {
+  background: rgba(64, 64, 128, 0.85);
+}
+
+.alarm-list-actions {
+  text-align: center;
+  margin: 8px 0;
+}
+
+#alarm-editor {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(64, 64, 128, 0.3);
+  border-radius: 4px;
+  background: rgba(64, 64, 128, 0.04);
+}
+
+#alarm-editor h3 {
+  margin: 0 0 10px;
+  color: rgba(64, 64, 128, 1);
+  font-size: 16px;
+}
+
+.alarm-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.alarm-field > label {
+  width: 70px;
+  color: rgba(64, 64, 128, 1);
+}
+
+.alarm-field input[type="text"],
+.alarm-field select {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 14px;
+}
+
+.alarm-field-checks {
+  align-items: flex-start;
+}
+
+.alarm-checks-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.alarm-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.alarm-check-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.alarm-btn-small {
+  font-size: 11px;
+  padding: 2px 6px;
+  color: rgba(64, 64, 128, 1);
+  background: white;
+  border: 1px solid rgba(64, 64, 128, 0.6);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.alarm-btn-small:hover {
+  background: rgba(64, 64, 128, 0.08);
+}
+
+.alarm-check {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  color: rgba(64, 64, 128, 1);
+  width: auto;
+}
+
+.alarm-anchor {
+  display: inline-flex;
+  gap: 14px;
+}
+
+.alarm-radio {
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+}
+
+.alarm-recurring {
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+  margin-left: 8px;
+}
+
+.alarm-num {
+  width: 60px;
+  padding: 4px 6px;
+  font-size: 14px;
+}
+
+.alarm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.alarm-footnote {
+  font-size: 11px;
+  color: rgba(64, 64, 128, 0.6);
+  text-align: center;
+  margin-top: 10px;
+}
+
 /* --- */

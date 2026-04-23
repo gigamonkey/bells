@@ -13,6 +13,7 @@ import {
 } from './calendar.js';
 import { timestring, hhmmss, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
+import { setupAlarms, tickAlarms, updateTeacherModeVisibility } from './alarms.js';
 
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
@@ -66,7 +67,10 @@ let installPrompt = null;
 let onlineState = {lan: true, network: true};
 
 const setupConfigPanel = () => {
-  $('#apple').onclick = toggleTeacher;
+  $('#apple').onclick = (e) => {
+    toggleTeacher(e);
+    updateTeacherModeVisibility();
+  };
   $('#qr').onclick = toggleQR;
   $('#gear').onclick = toggleConfig;
   $('#sched').onclick = togglePeriods;
@@ -237,6 +241,8 @@ const update = () => {
   }
 
   const bellSchedule = getBellSchedule();
+
+  tickAlarms(instant);
 
   // summerBounds returns null when we are inside a school year; non-null during summer.
   const summerInfo = bellSchedule.summerBounds(instant);
@@ -602,6 +608,7 @@ versionEl.onclick = (e) => {
 };
 
 setupConfigPanel();
+setupAlarms(getBellSchedule);
 
 // Close popups via close button or clicking the backdrop
 for (const overlay of $$('.popup-overlay')) {
