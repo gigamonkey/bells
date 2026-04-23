@@ -280,7 +280,7 @@ function tickAlarms(instant) {
     fired.add(key);
     fireAlarm(f.alarm, f.period, fireMs);
     if (!f.alarm.recurring) {
-      f.alarm.enabled = false;
+      alarms = alarms.filter((a) => a.id !== f.alarm.id);
       saveAlarms();
       if (document.getElementById('popup-alarms')?.classList.contains('active')) {
         renderAlarmList();
