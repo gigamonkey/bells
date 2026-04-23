@@ -72,6 +72,7 @@ const setupConfigPanel = () => {
   $('#sched').onclick = togglePeriods;
   $('#reload-app').onclick = forceReload;
   $('#reload-app-container').classList.toggle('visible', isStandalone());
+  updateSwVersionDisplay();
 
   $('#apple').innerText = isTeacher() ? '🍎' : '✏️';
 
@@ -135,7 +136,10 @@ const closeAllPopups = () => {
 
 const toggleQR = () => togglePopup('popup-qr');
 
-const toggleConfig = () => togglePopup('popup-config');
+const toggleConfig = () => {
+  togglePopup('popup-config');
+  updateSwVersionDisplay();
+};
 
 let scheduleDate = null;
 
@@ -477,6 +481,18 @@ const registerServiceWorker = async () => {
     console.log('Registered SW');
   } catch (error) {
     console.error('Could not register service worker', error);
+  }
+};
+
+const updateSwVersionDisplay = async () => {
+  const el = $('#sw-version');
+  if (!el) return;
+  try {
+    const keys = (await caches?.keys?.()) ?? [];
+    const name = keys.find((k) => k.startsWith('bells-'));
+    el.textContent = name ?? '';
+  } catch {
+    el.textContent = '';
   }
 };
 

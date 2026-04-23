@@ -369,4 +369,11 @@ span.togo {
   background: rgba(64, 64, 128, 0.08);
 }
 
+#sw-version {
+  margin-top: 6px;
+  font-family: monospace;
+  font-size: 11px;
+  color: rgba(64, 64, 128, 0.6);
+}
+
 /* --- */
