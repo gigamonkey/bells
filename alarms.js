@@ -213,6 +213,14 @@ function computeFirings(date, bellSchedule) {
   const out = [];
   for (const alarm of alarms) {
     if (!alarm.enabled) continue;
+    if (alarm.anchor === 'from-now') {
+      if (!alarm.fromNowFireMs) continue;
+      const fireAt = Temporal.Instant.fromEpochMilliseconds(alarm.fromNowFireMs);
+      const fireDate = fireAt.toZonedDateTimeISO(bellSchedule.timezone).toPlainDate();
+      if (Temporal.PlainDate.compare(fireDate, date) !== 0) continue;
+      out.push({ alarm, period: { name: 'Timer' }, fireAt });
+      continue;
+    }
     for (const period of periods) {
       if (!periodMatchesScope(period, alarm)) continue;
       const fireAt = alarm.anchor === 'before-end'
@@ -422,11 +430,27 @@ function scopeDescription(alarm) {
 }
 
 function describeAlarm(alarm, period, { short = false } = {}) {
-  const off = formatOffset(alarm.offset);
-  const anchorText = alarm.anchor === 'before-end' ? 'before end of' : 'after start of';
-  const target = short && period ? period.name : scopeDescription(alarm);
-  const suffix = alarm.recurring ? '' : ' (once)';
-  const spec = `${off} ${anchorText} ${target}${suffix}`;
+  let spec;
+  if (alarm.anchor === 'from-now') {
+    if (alarm.fromNowFireMs) {
+      const offSec = alarm.offset || 0;
+      const dm = Math.floor(offSec / 60);
+      const ds = offSec % 60;
+      const duration = `${dm}:${String(ds).padStart(2, '0')}`;
+      const startD = new Date(alarm.fromNowFireMs - offSec * 1000);
+      const sh = String(startD.getHours()).padStart(2, '0');
+      const sm = String(startD.getMinutes()).padStart(2, '0');
+      spec = `${duration} timer started at ${sh}:${sm}`;
+    } else {
+      spec = 'timer';
+    }
+  } else {
+    const off = formatOffset(alarm.offset);
+    const anchorText = alarm.anchor === 'before-end' ? 'before end of' : 'after start of';
+    const target = short && period ? period.name : scopeDescription(alarm);
+    const suffix = alarm.recurring ? '' : ' (once)';
+    spec = `${off} ${anchorText} ${target}${suffix}`;
+  }
   const label = alarm.label && alarm.label.trim();
   return label ? `${label} (${spec})` : spec;
 }
@@ -512,7 +536,7 @@ function openEditor(existing) {
         scopeNames: [],
         label: '',
         speakText: '',
-        recurring: true,
+        recurring: false,
         enabled: true,
       };
 
@@ -549,7 +573,7 @@ function openEditor(existing) {
 
   const recurringCb = document.createElement('input');
   recurringCb.type = 'checkbox';
-  recurringCb.checked = draft.recurring !== false;
+  recurringCb.checked = !!draft.recurring;
   const recurringLbl = document.createElement('label');
   recurringLbl.className = 'alarm-recurring';
   recurringLbl.append(recurringCb, document.createTextNode(' Recurring'));
@@ -567,7 +591,11 @@ function openEditor(existing) {
   anchorWrap.className = 'alarm-anchor';
   const anchorRadios = [];
   const anchorGroup = `alarm-anchor-${draft.id}`;
-  for (const [v, t] of [['after-start', 'after start of period'], ['before-end', 'before end of period']]) {
+  for (const [v, t] of [
+    ['after-start', 'after start of period'],
+    ['before-end', 'before end of period'],
+    ['from-now', 'from now'],
+  ]) {
     const r = document.createElement('input');
     r.type = 'radio';
     r.name = anchorGroup;
@@ -622,6 +650,14 @@ function openEditor(existing) {
   nameWrap.append(nameLbl, checksCol);
   editor.appendChild(nameWrap);
 
+  const syncAnchorDependent = () => {
+    const fromNow = anchorRadios.find((r) => r.checked)?.value === 'from-now';
+    nameWrap.style.display = fromNow ? 'none' : '';
+    recurringLbl.style.display = fromNow ? 'none' : '';
+  };
+  for (const r of anchorRadios) r.addEventListener('change', syncAnchorDependent);
+  syncAnchorDependent();
+
   const labelInput = document.createElement('input');
   labelInput.type = 'text';
   labelInput.value = draft.label || '';
@@ -649,6 +685,12 @@ function openEditor(existing) {
     draft.recurring = recurringCb.checked;
     draft.label = labelInput.value;
     draft.speakText = speakInput.value;
+    if (draft.anchor === 'from-now') {
+      draft.fromNowFireMs = Date.now() + draft.offset * 1000;
+      draft.recurring = false;
+    } else {
+      delete draft.fromNowFireMs;
+    }
     if (isNew) alarms.push(draft);
     else {
       const i = alarms.findIndex((a) => a.id === draft.id);
@@ -656,7 +698,7 @@ function openEditor(existing) {
     }
     saveAlarms();
     renderAlarmList();
-    editor.style.display = 'none';
+    closeEditor();
     if (hasBackgroundSupport() && Notification.permission === 'default') {
       ensurePermissionAndReconcile();
     }
@@ -665,14 +707,18 @@ function openEditor(existing) {
   const cancel = document.createElement('button');
   cancel.className = 'alarm-btn';
   cancel.textContent = 'Cancel';
-  cancel.onclick = () => {
-    editor.style.display = 'none';
-  };
+  cancel.onclick = closeEditor;
 
   actions.append(save, cancel);
   editor.appendChild(actions);
 
   editor.style.display = 'block';
+  $('#alarm-add').style.display = 'none';
+}
+
+function closeEditor() {
+  $('#alarm-editor').style.display = 'none';
+  $('#alarm-add').style.display = '';
 }
 
 function setupAlarmPopup() {
@@ -682,7 +728,7 @@ function setupAlarmPopup() {
       ensureAudio();
       renderAlarmList();
       updatePermissionStatus();
-      $('#alarm-editor').style.display = 'none';
+      closeEditor();
     }
   };
 
