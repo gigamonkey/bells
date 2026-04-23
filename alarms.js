@@ -144,17 +144,16 @@ async function ensurePermissionAndReconcile() {
 function updatePermissionStatus() {
   if (!permissionStatusEl) return;
   if (!hasBackgroundSupport()) {
-    permissionStatusEl.textContent = 'Background alarms unsupported in this browser — alarms only fire while this page is open.';
-    permissionStatusEl.style.display = 'block';
+    permissionStatusEl.style.display = 'none';
     return;
   }
   const p = Notification.permission;
   if (p === 'granted') {
-    permissionStatusEl.textContent = 'Background alarms enabled.';
+    permissionStatusEl.textContent = 'On-screen notifications enabled for alarms fired while this window is hidden.';
   } else if (p === 'denied') {
-    permissionStatusEl.textContent = 'Notification permission denied — alarms only fire while this page is visible.';
+    permissionStatusEl.textContent = 'Notifications disabled — alarms will still chime, but no on-screen alert will appear when the window is hidden.';
   } else {
-    permissionStatusEl.textContent = 'Background alarms will be enabled when you save an alarm (requires notification permission).';
+    permissionStatusEl.textContent = 'Grant notification permission to see an on-screen alert when an alarm fires while the window is hidden. (Will ask when you save an alarm.)';
   }
   permissionStatusEl.style.display = 'block';
 }
@@ -284,8 +283,11 @@ function tickAlarms(instant) {
 }
 
 function fireAlarm(alarm, period, fireMs) {
-  showBanner(describeAlarm(alarm, period, { short: true }), { repeatChime: true });
-  if (fireMs && lastTickDateStr && 'serviceWorker' in navigator) {
+  const visible = document.visibilityState === 'visible';
+  if (visible) {
+    showBanner(describeAlarm(alarm, period, { short: true }), { repeatChime: true });
+  }
+  if (visible && fireMs && lastTickDateStr && 'serviceWorker' in navigator) {
     const tag = notificationTagFor(alarm.id, lastTickDateStr, fireMs);
     navigator.serviceWorker.controller?.postMessage({ type: 'alarm-fired', tag });
     cancelNotificationByTag(tag);
