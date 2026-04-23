@@ -6,16 +6,158 @@ const STORAGE_KEY = 'alarms';
 const FIRED_KEY = 'alarmsFired';
 const MAX_MISSED_MS = 60 * 1000;
 const CHIME_INTERVAL_MS = 15000;
+const NOTIF_TAG_PREFIX = 'alarm:';
+const NOTIF_SCHEDULE_SLOP_MS = 2000;
 
 let alarms = loadAlarms();
 let audioCtx = null;
 let audioWarningEl = null;
+let permissionStatusEl = null;
 let getBellScheduleFn = null;
 let previousInstant = null;
+let lastTickDateStr = null;
 let cachedFirings = null;
 let cachedDate = null;
 let cachedAlarmsVersion = 0;
 let alarmsVersion = 0;
+
+function hasBackgroundSupport() {
+  return (
+    typeof Notification !== 'undefined' &&
+    'showTrigger' in Notification.prototype &&
+    'serviceWorker' in navigator &&
+    'TimestampTrigger' in window
+  );
+}
+
+function notificationTagFor(alarmId, dateStr, fireMs) {
+  return `${NOTIF_TAG_PREFIX}${alarmId}:${dateStr}:${fireMs}`;
+}
+
+async function swRegistration() {
+  if (!('serviceWorker' in navigator)) return null;
+  try {
+    return await navigator.serviceWorker.ready;
+  } catch {
+    return null;
+  }
+}
+
+async function scheduleNotification(firing, dateStr) {
+  if (!hasBackgroundSupport()) return;
+  if (Notification.permission !== 'granted') return;
+  const reg = await swRegistration();
+  if (!reg) return;
+  const fireMs = firing.fireAt.epochMilliseconds;
+  if (fireMs <= Date.now() + NOTIF_SCHEDULE_SLOP_MS) return;
+  const tag = notificationTagFor(firing.alarm.id, dateStr, fireMs);
+  const title = 'Bell alarm';
+  const body = describeAlarm(firing.alarm, firing.period, { short: true });
+  try {
+    await reg.showNotification(title, {
+      tag,
+      body,
+      requireInteraction: true,
+      showTrigger: new TimestampTrigger(fireMs),
+      data: { tag, alarmId: firing.alarm.id, periodName: firing.period.name, fireMs },
+    });
+  } catch (e) {
+    console.warn('scheduleNotification failed', e);
+  }
+}
+
+async function existingScheduledTags() {
+  const reg = await swRegistration();
+  if (!reg) return new Map();
+  try {
+    const ns = await reg.getNotifications({ includeTriggered: false });
+    const map = new Map();
+    for (const n of ns) {
+      if (n.tag && n.tag.startsWith(NOTIF_TAG_PREFIX)) map.set(n.tag, n);
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+async function cancelNotificationByTag(tag) {
+  const reg = await swRegistration();
+  if (!reg) return;
+  try {
+    const ns = await reg.getNotifications({ tag });
+    for (const n of ns) n.close();
+  } catch {}
+}
+
+async function cancelAllAlarmNotifications() {
+  const existing = await existingScheduledTags();
+  for (const n of existing.values()) n.close();
+}
+
+async function reconcileNotifications() {
+  if (!hasBackgroundSupport()) return;
+  if (!isTeacher() || Notification.permission !== 'granted') {
+    await cancelAllAlarmNotifications();
+    return;
+  }
+  if (!getBellScheduleFn) return;
+  const bellSchedule = getBellScheduleFn();
+  const now = Temporal.Now.instant();
+  const date = now.toZonedDateTimeISO(bellSchedule.timezone).toPlainDate();
+  const dateStr = date.toString();
+  const firings = computeFirings(date, bellSchedule);
+  const wantedTags = new Set();
+  const wantedFirings = [];
+  for (const f of firings) {
+    const fireMs = f.fireAt.epochMilliseconds;
+    if (fireMs <= Date.now() + NOTIF_SCHEDULE_SLOP_MS) continue;
+    const tag = notificationTagFor(f.alarm.id, dateStr, fireMs);
+    wantedTags.add(tag);
+    wantedFirings.push({ firing: f, tag });
+  }
+  const existing = await existingScheduledTags();
+  for (const [tag, n] of existing) {
+    if (!wantedTags.has(tag)) n.close();
+  }
+  for (const { firing, tag } of wantedFirings) {
+    if (existing.has(tag)) continue;
+    await scheduleNotification(firing, dateStr);
+    void tag;
+  }
+}
+
+async function ensurePermissionAndReconcile() {
+  if (!hasBackgroundSupport()) {
+    updatePermissionStatus();
+    return;
+  }
+  if (Notification.permission === 'default') {
+    try {
+      await Notification.requestPermission();
+    } catch {}
+  }
+  updatePermissionStatus();
+  reconcileNotifications();
+}
+
+function updatePermissionStatus() {
+  if (!permissionStatusEl) return;
+  if (!hasBackgroundSupport()) {
+    permissionStatusEl.textContent = 'Background alarms unsupported in this browser — alarms only fire while this page is open.';
+    permissionStatusEl.style.display = 'block';
+    return;
+  }
+  const p = Notification.permission;
+  if (p === 'granted') {
+    permissionStatusEl.textContent = 'Background alarms enabled.';
+  } else if (p === 'denied') {
+    permissionStatusEl.textContent = 'Notification permission denied — alarms only fire while this page is visible.';
+  } else {
+    permissionStatusEl.textContent = 'Background alarms will be enabled when you save an alarm (requires notification permission).';
+  }
+  permissionStatusEl.style.display = 'block';
+}
 
 function loadAlarms() {
   try {
@@ -29,6 +171,7 @@ function loadAlarms() {
 function saveAlarms() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(alarms));
   alarmsVersion++;
+  reconcileNotifications();
 }
 
 function loadFiredKeys() {
@@ -111,6 +254,10 @@ function tickAlarms(instant) {
   if (!prev) return;
 
   const { firings, dateStr } = getFirings(bellSchedule, instant);
+  if (lastTickDateStr !== dateStr) {
+    lastTickDateStr = dateStr;
+    reconcileNotifications();
+  }
   const fired = firedKeysForDate(dateStr);
 
   for (const f of firings) {
@@ -124,7 +271,7 @@ function tickAlarms(instant) {
     if (fired.has(key)) continue;
     recordFired(dateStr, key);
     fired.add(key);
-    fireAlarm(f.alarm, f.period);
+    fireAlarm(f.alarm, f.period, fireMs);
     if (!f.alarm.recurring) {
       f.alarm.enabled = false;
       saveAlarms();
@@ -136,8 +283,13 @@ function tickAlarms(instant) {
   }
 }
 
-function fireAlarm(alarm, period) {
+function fireAlarm(alarm, period, fireMs) {
   showBanner(describeAlarm(alarm, period, { short: true }), { repeatChime: true });
+  if (fireMs && lastTickDateStr && 'serviceWorker' in navigator) {
+    const tag = notificationTagFor(alarm.id, lastTickDateStr, fireMs);
+    navigator.serviceWorker.controller?.postMessage({ type: 'alarm-fired', tag });
+    cancelNotificationByTag(tag);
+  }
 }
 
 function showBanner(labelText, { repeatChime = false } = {}) {
@@ -464,6 +616,9 @@ function openEditor(existing) {
     saveAlarms();
     renderAlarmList();
     editor.style.display = 'none';
+    if (hasBackgroundSupport() && Notification.permission === 'default') {
+      ensurePermissionAndReconcile();
+    }
   };
 
   const cancel = document.createElement('button');
@@ -485,6 +640,7 @@ function setupAlarmPopup() {
     if ($('#popup-alarms').classList.contains('active')) {
       ensureAudio();
       renderAlarmList();
+      updatePermissionStatus();
       $('#alarm-editor').style.display = 'none';
     }
   };
@@ -492,7 +648,9 @@ function setupAlarmPopup() {
   $('#alarm-add').onclick = () => openEditor(null);
 
   audioWarningEl = $('#alarm-audio-warning');
+  permissionStatusEl = $('#alarm-permission-status');
   updateAudioWarning();
+  updatePermissionStatus();
 
   document.addEventListener('click', () => {
     if (audioCtx && audioCtx.state === 'suspended') {
@@ -510,6 +668,9 @@ function updateTeacherModeVisibility() {
   if (icon) icon.style.display = isTeacher() ? '' : 'none';
   if (!isTeacher()) {
     $('#popup-alarms')?.classList.remove('active');
+    cancelAllAlarmNotifications();
+  } else {
+    reconcileNotifications();
   }
 }
 
@@ -517,6 +678,17 @@ function setupAlarms(getBellScheduleFnArg) {
   getBellScheduleFn = getBellScheduleFnArg;
   setupAlarmPopup();
   updateTeacherModeVisibility();
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (e) => {
+      const data = e.data || {};
+      if (data.type === 'alarm-notification-click') {
+        if (data.body) showBanner(data.body, { repeatChime: true });
+      }
+    });
+  }
+
+  reconcileNotifications();
 }
 
 export { setupAlarms, tickAlarms, updateTeacherModeVisibility };

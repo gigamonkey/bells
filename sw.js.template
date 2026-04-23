@@ -107,3 +107,36 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   event.respondWith(handleCachedFetch(event));
 });
+
+self.addEventListener('message', (event) => {
+  const data = event.data || {};
+  if (data.type === 'alarm-fired' && data.tag) {
+    event.waitUntil((async () => {
+      try {
+        const ns = await self.registration.getNotifications({ tag: data.tag });
+        for (const n of ns) n.close();
+      } catch {}
+    })());
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  const tag = event.notification.tag || '';
+  if (!tag.startsWith('alarm:')) return;
+  const body = event.notification.body;
+  event.notification.close();
+  event.waitUntil((async () => {
+    const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of allClients) {
+      if (client.url && new URL(client.url).origin === self.location.origin) {
+        try { await client.focus(); } catch {}
+        client.postMessage({ type: 'alarm-notification-click', body });
+        return;
+      }
+    }
+    try {
+      const c = await self.clients.openWindow('./');
+      if (c) c.postMessage({ type: 'alarm-notification-click', body });
+    } catch {}
+  })());
+});

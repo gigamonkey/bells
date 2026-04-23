@@ -451,6 +451,14 @@ span.togo {
   margin-bottom: 10px;
 }
 
+#alarm-permission-status {
+  display: none;
+  font-size: 12px;
+  color: rgba(64, 64, 128, 0.8);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
 #alarm-list {
   display: flex;
   flex-direction: column;
