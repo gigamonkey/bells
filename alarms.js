@@ -285,7 +285,10 @@ function tickAlarms(instant) {
 function fireAlarm(alarm, period, fireMs) {
   const visible = document.visibilityState === 'visible';
   if (visible) {
-    showBanner(describeAlarm(alarm, period, { short: true }), { repeatChime: true });
+    showBanner(describeAlarm(alarm, period, { short: true }), {
+      repeatChime: true,
+      speakText: alarm.speakText,
+    });
   }
   if (visible && fireMs && lastTickDateStr && 'serviceWorker' in navigator) {
     const tag = notificationTagFor(alarm.id, lastTickDateStr, fireMs);
@@ -294,7 +297,20 @@ function fireAlarm(alarm, period, fireMs) {
   }
 }
 
-function showBanner(labelText, { repeatChime = false } = {}) {
+function speak(text) {
+  if (!text || typeof speechSynthesis === 'undefined') return;
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(u);
+  } catch {}
+}
+
+function cancelSpeech() {
+  if (typeof speechSynthesis === 'undefined') return;
+  try { speechSynthesis.cancel(); } catch {}
+}
+
+function showBanner(labelText, { repeatChime = false, speakText = '' } = {}) {
   let stack = $('#alarm-banner-stack');
   if (!stack) {
     stack = document.createElement('div');
@@ -315,6 +331,7 @@ function showBanner(labelText, { repeatChime = false } = {}) {
       clearInterval(intervalId);
       intervalId = null;
     }
+    cancelSpeech();
     banner.classList.add('closing');
     setTimeout(() => {
       banner.remove();
@@ -327,9 +344,13 @@ function showBanner(labelText, { repeatChime = false } = {}) {
   banner.append(label, close);
   stack.appendChild(banner);
   document.getElementById('container')?.classList.add('alarm-pulse');
-  playChime();
+  const cue = () => {
+    playChime();
+    if (speakText) setTimeout(() => speak(speakText), 700);
+  };
+  cue();
   if (repeatChime) {
-    intervalId = setInterval(playChime, CHIME_INTERVAL_MS);
+    intervalId = setInterval(cue, CHIME_INTERVAL_MS);
   }
 }
 
@@ -447,7 +468,10 @@ function renderAlarmList() {
     testBtn.className = 'alarm-btn';
     testBtn.textContent = 'Test';
     testBtn.onclick = () => {
-      showBanner(describeAlarm(alarm) + ' (test)', { repeatChime: true });
+      showBanner(describeAlarm(alarm) + ' (test)', {
+        repeatChime: true,
+        speakText: alarm.speakText,
+      });
     };
 
     const editBtn = document.createElement('button');
@@ -480,6 +504,7 @@ function openEditor(existing) {
         anchor: 'before-end',
         scopeNames: [],
         label: '',
+        speakText: '',
         recurring: true,
         enabled: true,
       };
@@ -596,6 +621,12 @@ function openEditor(existing) {
   labelInput.placeholder = '(optional)';
   addField('Label', labelInput);
 
+  const speakInput = document.createElement('input');
+  speakInput.type = 'text';
+  speakInput.value = draft.speakText || '';
+  speakInput.placeholder = '(optional, spoken aloud after chime)';
+  addField('Speak', speakInput);
+
   const actions = document.createElement('div');
   actions.className = 'alarm-actions';
 
@@ -610,6 +641,7 @@ function openEditor(existing) {
     draft.scopeNames = nameCheckboxes.filter((c) => c.checked).map((c) => c.value);
     draft.recurring = recurringCb.checked;
     draft.label = labelInput.value;
+    draft.speakText = speakInput.value;
     if (isNew) alarms.push(draft);
     else {
       const i = alarms.findIndex((a) => a.id === draft.id);
