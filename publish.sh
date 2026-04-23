@@ -4,7 +4,6 @@ set -eou pipefail
 
 dir=$(basename "$(pwd)")
 sha=$(git log --pretty=tformat:%H -1);
-# Hacked from canonical publish.sh file to use custom webdir.
 webdir=~/web/www.gigamonkeys.com/misc/bhs/
 
 echo "Copying files to $webdir"
