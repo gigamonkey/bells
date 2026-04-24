@@ -451,7 +451,7 @@ function describeAlarm(alarm, period, { short = false } = {}) {
     const suffix = alarm.recurring ? '' : ' (once)';
     spec = `${off} ${anchorText} ${target}${suffix}`;
   }
-  const label = alarm.label && alarm.label.trim();
+  const label = (alarm.label && alarm.label.trim()) || (alarm.speakText && alarm.speakText.trim());
   return label ? `${label} (${spec})` : spec;
 }
 
