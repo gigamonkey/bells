@@ -23,24 +23,27 @@ Calendar data is an array of year objects, one per academic year:
     "firstDayTeachers": "2025-08-11",
     "lastDay": "2026-06-04",
     "schedules": {
-      "default": {
-        "NORMAL": [
-          { "name": "Period 0",   "start": "7:26",  "end": "8:24",  "tags": ["optional", "zero"] },
-          { "name": "Period 1",   "start": "8:30",  "end": "9:28" },
-          { "name": "Period 2",   "start": "9:34",  "end": "10:37" },
-          { "name": "Period 3",   "start": "10:43", "end": "11:41" },
-          { "name": "Lunch",      "start": "11:41", "end": "12:21" },
-          { "name": "Period 4",   "start": "12:27", "end": "1:25" },
-          { "name": "Period 5",   "start": "1:31",  "end": "2:29" },
-          { "name": "Period 6",   "start": "2:35",  "end": "3:33" },
-          { "name": "Period 7",   "start": "3:39",  "end": "4:37",  "tags": ["optional", "seventh"] },
-          { "name": "Period Ext", "start": "3:39",  "end": "5:09",  "tags": ["optional", "ext"] }
-        ],
-        "LATE_START": [
-          { "name": "Staff meeting", "start": "8:03", "end": "9:33", "teachers": true },
-          { "name": "Period 1",      "start": "10:00", "end": "10:43" }
-        ]
-      },
+      "NORMAL": [
+        { "name": "Period 0",   "start": "7:26",  "end": "8:24",  "tags": ["optional", "zero"] },
+        { "name": "Period 1",   "start": "8:30",  "end": "9:28" },
+        { "name": "Period 2",   "start": "9:34",  "end": "10:37" },
+        { "name": "Period 3",   "start": "10:43", "end": "11:41" },
+        { "name": "Lunch",      "start": "11:41", "end": "12:21" },
+        { "name": "Period 4",   "start": "12:27", "end": "1:25" },
+        { "name": "Period 5",   "start": "1:31",  "end": "2:29" },
+        { "name": "Period 6",   "start": "2:35",  "end": "3:33" },
+        { "name": "Period 7",   "start": "3:39",  "end": "4:37",  "tags": ["optional", "seventh"] },
+        { "name": "Period Ext", "start": "3:39",  "end": "5:09",  "tags": ["optional", "ext"] }
+      ],
+      "LATE_START": [
+        { "name": "Staff meeting", "start": "8:03", "end": "9:33", "teachers": true },
+        { "name": "Period 1",      "start": "10:00", "end": "10:43" }
+      ]
+    },
+    "weekdaySchedules": {
+      "monday": "LATE_START"
+    },
+    "dates": {
       "2025-08-13": [
         { "name": "Orientation", "start": "8:30", "end": "15:00" }
       ]
@@ -61,9 +64,9 @@ Calendar data is an array of year objects, one per academic year:
 - `firstDay` — first student day (`"YYYY-MM-DD"`)
 - `firstDayTeachers` — first teacher day, if different (optional)
 - `lastDay` — last day of school (`"YYYY-MM-DD"`)
-- `schedules.default.NORMAL` — default daily schedule
-- `schedules.default.LATE_START` — schedule used on Mondays
-- `schedules["YYYY-MM-DD"]` — schedule override for a specific date
+- `schedules` — map of schedule name to period list. `NORMAL` is required; any other names (e.g. `LATE_START`, `ASSEMBLY`) are user-defined.
+- `weekdaySchedules` — optional map of lowercase weekday name (`monday`–`friday`) to a schedule name in `schedules`. Weekdays not listed fall back to `NORMAL`.
+- `dates["YYYY-MM-DD"]` — schedule override for a specific date. The value is either a schedule name (string) from `schedules`, or an inline period array.
 - `holidays` — array of holiday date strings
 - `teacherWorkDays` — holiday dates that teachers still work
 - `breakNames` — map of date string to break name (used in `"Break!"` interval labels)
