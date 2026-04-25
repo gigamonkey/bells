@@ -5,8 +5,8 @@
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
-    "@peterseibel/bells": "^0.1.12",
-    "@peterseibel/bhs-calendars": "^1.1.1",
+    "@peterseibel/bells": "^0.2.0",
+    "@peterseibel/bhs-calendars": "^2.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1"
   }
