@@ -45,6 +45,14 @@ release-bhs-calendars:
 	git tag "calendars-v$$(node -p "require('./bhs-calendars/package.json').version")"
 	git push --follow-tags
 
+local-deps:
+	npm i ./lib
+	npm i ./bhs-calendars
+
+real-deps:
+	npm i @peterseibel/bells@latest
+	npm i @peterseibel/bhs-calendars@latest
+
 serve:
 	cd server && node index.js
 
