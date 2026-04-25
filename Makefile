@@ -8,6 +8,8 @@ files += out.js.map
 files += style.css
 files += sw.js
 
+VERSION := patch
+
 all: pretty lint
 
 version.js:
@@ -30,14 +32,14 @@ lint:
 	npx eslint *.js
 
 release-lib:
-	cd lib && npm version patch --no-git-tag-version
+	cd lib && npm version $(VERSION) --no-git-tag-version
 	git add lib/package.json lib/package-lock.json
 	git commit -m "v$$(node -p "require('./lib/package.json').version")"
 	git tag "v$$(node -p "require('./lib/package.json').version")"
 	git push --follow-tags
 
 release-bhs-calendars:
-	cd bhs-calendars && npm version patch --no-git-tag-version
+	cd bhs-calendars && npm version $(VERSION) --no-git-tag-version
 	git add bhs-calendars/package.json
 	git commit -m "calendars-v$$(node -p "require('./bhs-calendars/package.json').version")"
 	git tag "calendars-v$$(node -p "require('./bhs-calendars/package.json').version")"
