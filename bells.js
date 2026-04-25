@@ -158,13 +158,11 @@ const renderSchedule = () => {
   const headerRow = $('<tr>');
   const headerCell = $('<td>');
   headerCell.colSpan = 3;
-  headerCell.style.textAlign = 'center';
-  headerCell.style.paddingBottom = '30px';
+  headerCell.className = 'schedule-header';
 
   const leftArrow = $('<span>');
   leftArrow.innerText = '\u25C0';
-  leftArrow.style.cursor = 'pointer';
-  leftArrow.style.padding = '0 12px';
+  leftArrow.className = 'schedule-nav-arrow';
   leftArrow.onclick = (e) => {
     e.stopPropagation();
     scheduleDate = bellSchedule.previousSchoolDay(scheduleDate);
@@ -173,8 +171,7 @@ const renderSchedule = () => {
 
   const rightArrow = $('<span>');
   rightArrow.innerText = '\u25B6';
-  rightArrow.style.cursor = 'pointer';
-  rightArrow.style.padding = '0 12px';
+  rightArrow.className = 'schedule-nav-arrow';
   rightArrow.onclick = (e) => {
     e.stopPropagation();
     scheduleDate = bellSchedule.nextSchoolDay(scheduleDate);
@@ -182,9 +179,7 @@ const renderSchedule = () => {
   };
 
   const dateLabel = $('<span>');
-  dateLabel.style.display = 'inline-block';
-  dateLabel.style.width = '150px';
-  dateLabel.style.textAlign = 'center';
+  dateLabel.className = 'schedule-date-label';
   const today = Temporal.Now.plainDateISO(bellSchedule.timezone);
   const isToday = Temporal.PlainDate.compare(scheduleDate, today) === 0;
   if (isToday) {
@@ -192,17 +187,44 @@ const renderSchedule = () => {
   } else {
     const dow = scheduleDate.toLocaleString('en-US', { weekday: 'short' });
     dateLabel.innerText = `${dow} ${scheduleDate.month}/${scheduleDate.day}/${scheduleDate.year}`;
-    dateLabel.style.cursor = 'pointer';
-    dateLabel.onclick = (e) => {
-      e.stopPropagation();
-      scheduleDate = bellSchedule.isSchoolDay(today) ? today : bellSchedule.nextSchoolDay(today);
-      renderSchedule();
-    };
   }
 
-  headerCell.append(leftArrow, dateLabel, rightArrow);
+  const datePicker = $('<input>');
+  datePicker.type = 'date';
+  datePicker.value = scheduleDate.toString();
+  datePicker.className = 'schedule-date-picker';
+  datePicker.onchange = (e) => {
+    e.stopPropagation();
+    if (datePicker.value) {
+      scheduleDate = Temporal.PlainDate.from(datePicker.value);
+      renderSchedule();
+    }
+  };
+  dateLabel.onclick = (e) => {
+    e.stopPropagation();
+    if (typeof datePicker.showPicker === 'function') {
+      datePicker.showPicker();
+    } else {
+      datePicker.focus();
+      datePicker.click();
+    }
+  };
+
+  headerCell.append(leftArrow, dateLabel, datePicker, rightArrow);
   headerRow.append(headerCell);
   table.append(headerRow);
+
+  // Schedule name row
+  const scheduleName = bellSchedule.scheduleNameFor(scheduleDate);
+  if (scheduleName) {
+    const nameRow = $('<tr>');
+    const nameCell = $('<td>');
+    nameCell.colSpan = 3;
+    nameCell.className = 'schedule-name';
+    nameCell.innerText = scheduleName.replace(/_/g, ' ');
+    nameRow.append(nameCell);
+    table.append(nameRow);
+  }
 
   // Period rows
   bellSchedule.scheduleFor(scheduleDate).forEach(({ name, start, end }) => {
