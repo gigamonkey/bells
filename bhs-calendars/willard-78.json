@@ -1,0 +1,119 @@
+{
+  "year": "2025-2026",
+  "firstDayTeachers": "2025-08-11",
+  "firstDay": "2025-08-13",
+  "lastDay": "2026-06-04",
+  "timezone": "America/Los_Angeles",
+  "schedules": {
+    "NORMAL": [
+      {
+        "name": "Period 0",
+        "start": "7:45",
+        "end": "8:30",
+        "tags": ["optional", "zero"]
+      },
+      { "name": "Advisory", "start": "8:45",  "end": "9:07" },
+      { "name": "Period 1", "start": "9:11",  "end": "9:58" },
+      { "name": "Period 2", "start": "10:02", "end": "10:49" },
+      { "name": "Break",    "start": "10:49", "end": "10:55" },
+      { "name": "Period 3", "start": "10:59", "end": "11:46" },
+      { "name": "Period 4", "start": "11:50", "end": "12:37" },
+      { "name": "Lunch",    "start": "12:37", "end": "13:09" },
+      { "name": "Period 5", "start": "13:13", "end": "14:00" },
+      { "name": "Period 6", "start": "14:04", "end": "14:51" }
+    ],
+    "WEDNESDAY": [
+      {
+        "name": "Period 0",
+        "start": "7:45",
+        "end": "8:30",
+        "tags": ["optional", "zero"]
+      },
+      { "name": "Period 1", "start": "8:45",  "end": "9:34" },
+      { "name": "Period 2", "start": "9:38",  "end": "10:21" },
+      { "name": "Period 3", "start": "10:25", "end": "11:08" },
+      { "name": "Period 4", "start": "11:12", "end": "11:55" },
+      { "name": "Lunch",    "start": "11:55", "end": "12:26" },
+      { "name": "Period 5", "start": "12:30", "end": "13:13" },
+      { "name": "Period 6", "start": "13:17", "end": "14:00" }
+    ],
+    "THURSDAY": [
+      {
+        "name": "Period 0",
+        "start": "7:45",
+        "end": "8:30",
+        "tags": ["optional", "zero"]
+      },
+      { "name": "Advisory", "start": "8:45",  "end": "9:16" },
+      { "name": "Period 1", "start": "9:20",  "end": "10:55" },
+      { "name": "Break",    "start": "10:55", "end": "11:01" },
+      { "name": "Period 3", "start": "11:05", "end": "12:40" },
+      { "name": "Lunch",    "start": "12:40", "end": "13:12" },
+      { "name": "Period 5", "start": "13:16", "end": "14:51" }
+    ],
+    "FRIDAY": [
+      {
+        "name": "Period 0",
+        "start": "7:45",
+        "end": "8:30",
+        "tags": ["optional", "zero"]
+      },
+      { "name": "Advisory", "start": "8:45",  "end": "9:16" },
+      { "name": "Period 2", "start": "9:20",  "end": "10:55" },
+      { "name": "Break",    "start": "10:55", "end": "11:01" },
+      { "name": "Period 4", "start": "11:05", "end": "12:40" },
+      { "name": "Lunch",    "start": "12:40", "end": "13:12" },
+      { "name": "Period 6", "start": "13:16", "end": "14:51" }
+    ]
+  },
+  "weekdaySchedules": {
+    "wednesday": "WEDNESDAY",
+    "thursday": "THURSDAY",
+    "friday": "FRIDAY"
+  },
+  "dates": {},
+  "holidays": [
+    "2025-09-01",
+    "2025-10-06",
+    "2025-10-13",
+    "2025-10-31",
+    "2025-11-11",
+    "2025-11-24",
+    "2025-11-25",
+    "2025-11-26",
+    "2025-11-27",
+    "2025-11-28",
+    "2025-12-22",
+    "2025-12-23",
+    "2025-12-24",
+    "2025-12-25",
+    "2025-12-26",
+    "2025-12-29",
+    "2025-12-30",
+    "2025-12-31",
+    "2026-01-01",
+    "2026-01-02",
+    "2026-01-19",
+    "2026-01-26",
+    "2026-02-13",
+    "2026-02-16",
+    "2026-03-16",
+    "2026-03-30",
+    "2026-03-31",
+    "2026-04-01",
+    "2026-04-02",
+    "2026-04-03",
+    "2026-05-15",
+    "2026-05-25"
+  ],
+  "teacherWorkDays": [
+    "2025-10-06",
+    "2026-01-26"
+  ],
+  "breakNames": {
+    "2025-11-24": "Thanksgiving break",
+    "2025-12-22": "Winter break",
+    "2026-02-13": "Presidents’ Day Weekend",
+    "2026-03-30": "Spring break"
+  }
+}
