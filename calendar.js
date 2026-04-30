@@ -51,6 +51,11 @@ const getSelectedCalendarId = () => {
   return DEFAULT_CALENDAR_ID;
 };
 
+const getSelectedCalendarName = () => {
+  const entry = registry.get(getSelectedCalendarId()) ?? registry.get(DEFAULT_CALENDAR_ID);
+  return entry?.name ?? '';
+};
+
 const setSelectedCalendar = (id) => {
   if (!registry.has(id)) return;
   localStorage.setItem('selectedCalendar', id);
@@ -172,6 +177,7 @@ export {
   getBellSchedule,
   getCalendars,
   getSelectedCalendarId,
+  getSelectedCalendarName,
   setSelectedCalendar,
   getActiveOptionalTags,
   getZero,

@@ -4,6 +4,7 @@ import {
   getBellSchedule,
   getCalendars,
   getSelectedCalendarId,
+  getSelectedCalendarName,
   setSelectedCalendar,
   getActiveOptionalTags,
   getZero,
@@ -95,7 +96,10 @@ const setupConfigPanel = () => {
   calendarSelect.onchange = () => {
     setSelectedCalendar(calendarSelect.value);
     updateOptionalPeriodVisibility();
+    updateTitle();
   };
+
+  updateTitle();
 
   let day = 1;
 
@@ -127,6 +131,13 @@ const setupConfigPanel = () => {
   }
 
   updateOptionalPeriodVisibility();
+};
+
+/**
+ * Set the page heading to the active calendar's display name.
+ */
+const updateTitle = () => {
+  $('#title').innerText = getSelectedCalendarName();
 };
 
 /**
