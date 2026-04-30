@@ -202,6 +202,23 @@ span.togo {
   width: 100%;
 }
 
+#calendar-select-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px 0 20px;
+}
+
+#calendar-select-row label {
+  font-weight: bold;
+}
+
+#calendar-select-row select {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 14px;
+}
+
 #periods_config > thead {
   text-align: left;
   border-bottom: 2px solid rgb(160 160 160);

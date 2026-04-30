@@ -1,6 +1,6 @@
 {
   "name": "@peterseibel/bhs-calendars",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "repository": {
     "type": "git",
@@ -8,15 +8,33 @@
     "directory": "bhs-calendars"
   },
   "exports": {
+    ".": "./index.js",
     "./2022-2023": "./2022-2023.json",
     "./2023-2024": "./2023-2024.json",
     "./2024-2025": "./2024-2025.json",
-    "./2025-2026": "./2025-2026.json"
+    "./2025-2026": "./2025-2026.json",
+    "./2026-2027": "./2026-2027.json",
+    "./king-6": "./king-6.json",
+    "./king-7": "./king-7.json",
+    "./king-8": "./king-8.json",
+    "./longfellow-6": "./longfellow-6.json",
+    "./longfellow-78": "./longfellow-78.json",
+    "./willard-6": "./willard-6.json",
+    "./willard-78": "./willard-78.json"
   },
   "files": [
+    "index.js",
     "2022-2023.json",
     "2023-2024.json",
     "2024-2025.json",
-    "2025-2026.json"
+    "2025-2026.json",
+    "2026-2027.json",
+    "king-6.json",
+    "king-7.json",
+    "king-8.json",
+    "longfellow-6.json",
+    "longfellow-78.json",
+    "willard-6.json",
+    "willard-78.json"
   ]
 }

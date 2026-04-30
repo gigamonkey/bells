@@ -2,6 +2,10 @@ import { Temporal } from '@js-temporal/polyfill';
 import { version } from './version.js';
 import {
   getBellSchedule,
+  getCalendars,
+  getSelectedCalendarId,
+  setSelectedCalendar,
+  getActiveOptionalTags,
   getZero,
   getSeventh,
   getExt,
@@ -79,6 +83,20 @@ const setupConfigPanel = () => {
 
   $('#apple').innerText = isTeacher() ? '🍎' : '✏️';
 
+  // Populate the calendar picker.
+  const calendarSelect = $('#calendar-select');
+  for (const { id, name } of getCalendars()) {
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.innerText = name;
+    calendarSelect.append(opt);
+  }
+  calendarSelect.value = getSelectedCalendarId();
+  calendarSelect.onchange = () => {
+    setSelectedCalendar(calendarSelect.value);
+    updateOptionalPeriodVisibility();
+  };
+
   let day = 1;
 
   const rows = $$('#periods_config tbody tr');
@@ -106,6 +124,35 @@ const setupConfigPanel = () => {
     };
 
     day++;
+  }
+
+  updateOptionalPeriodVisibility();
+};
+
+/**
+ * Show or hide the optional-period table (and individual columns) based on
+ * which optional tags ('zero', 'seventh', 'ext') the active calendar
+ * actually uses. Middle-school calendars don't define any of these, so the
+ * whole table is hidden.
+ */
+const updateOptionalPeriodVisibility = () => {
+  const tags = getActiveOptionalTags();
+  const table = $('#periods_config');
+  const hasAny = tags.has('zero') || tags.has('seventh') || tags.has('ext');
+  table.style.display = hasAny ? '' : 'none';
+  if (!hasAny) return;
+
+  // Column index in the table: 0=Day, 1=0th, 2=7th, 3=Ext.
+  const colTags = [null, 'zero', 'seventh', 'ext'];
+  const headerCells = table.querySelectorAll('thead th');
+  const bodyRows = table.querySelectorAll('tbody tr');
+  for (let col = 1; col < colTags.length; col++) {
+    const show = tags.has(colTags[col]);
+    if (headerCells[col]) headerCells[col].style.display = show ? '' : 'none';
+    for (const row of bodyRows) {
+      const cell = row.querySelectorAll('td')[col];
+      if (cell) cell.style.display = show ? '' : 'none';
+    }
   }
 };
 
