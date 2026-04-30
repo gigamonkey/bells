@@ -6,7 +6,7 @@
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
     "@peterseibel/bells": "^0.3.0",
-    "@peterseibel/bhs-calendars": "^2.3.1",
+    "@peterseibel/bhs-calendars": "^2.5.0",
     "cors": "^2.8.6",
     "esbuild": "0.28.0",
     "temporal-polyfill": "^0.3.2"
