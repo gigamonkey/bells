@@ -35,14 +35,14 @@ release-lib:
 	cd lib && npm version $(VERSION) --no-git-tag-version
 	git add lib/package.json lib/package-lock.json
 	git commit -m "v$$(node -p "require('./lib/package.json').version")"
-	git tag "v$$(node -p "require('./lib/package.json').version")"
+	tag="v$$(node -p "require('./lib/package.json').version")" && git tag -a -m "$$tag" "$$tag"
 	git push --follow-tags
 
 release-bhs-calendars:
 	cd bhs-calendars && npm version $(VERSION) --no-git-tag-version
 	git add bhs-calendars/package.json
 	git commit -m "calendars-v$$(node -p "require('./bhs-calendars/package.json').version")"
-	git tag "calendars-v$$(node -p "require('./bhs-calendars/package.json').version")"
+	tag="calendars-v$$(node -p "require('./bhs-calendars/package.json').version")" && git tag -a -m "$$tag" "$$tag"
 	git push --follow-tags
 
 local-deps:
