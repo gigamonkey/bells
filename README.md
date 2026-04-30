@@ -89,10 +89,10 @@ cd server && npm install @peterseibel/bells@latest
 
 ## Working on `@peterseibel/bhs-calendars` (the `bhs-calendars/` package)
 
-Each academic year is its own JSON file (e.g. `bhs-calendars/2025-2026.json`). The schema is documented in [lib/README.md](lib/README.md#calendar-data-format). Validate before publishing:
+Each academic year is its own JSON file (e.g. `bhs-calendars/bhs-2025-2026.json`). The schema is documented in [lib/README.md](lib/README.md#calendar-data-format). Validate before publishing:
 
 ```sh
-cd lib && npx bells-validate ../bhs-calendars/2025-2026.json
+cd lib && npx bells-validate ../bhs-calendars/bhs-2025-2026.json
 ```
 
 ### Publishing
@@ -147,7 +147,7 @@ npm install @peterseibel/bells@latest
 
 The deployed site is unaffected either way (esbuild bundles everything into `out.js`), but a `file:` dep in `package.json` hurts reproducibility and muddies `package-lock.json` diffs.
 
-An alternative is to temporarily edit the imports at the top of [calendar.js](calendar.js) to point at `./bhs-calendars/2025-2026.json` etc. — that avoids touching `package.json`, but you have to remember to revert the imports.
+An alternative is to temporarily edit the imports at the top of [calendar.js](calendar.js) to point at `./bhs-calendars/bhs-2025-2026.json` etc. — that avoids touching `package.json`, but you have to remember to revert the imports.
 
 ---
 

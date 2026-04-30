@@ -1,0 +1,165 @@
+{
+  "year": "2026-2027",
+  "id": "longfellow-78",
+  "name": "Longfellow Middle — 7th/8th grade",
+  "firstDayTeachers": "2026-08-10",
+  "firstDay": "2026-08-12",
+  "lastDay": "2027-06-03",
+  "timezone": "America/Los_Angeles",
+  "schedules": {
+    "NORMAL": [
+      {
+        "name": "Period 0",
+        "start": "8:00",
+        "end": "8:47",
+        "tags": [
+          "optional",
+          "zero"
+        ]
+      },
+      {
+        "name": "Advisory/UB",
+        "start": "8:51",
+        "end": "9:21"
+      },
+      {
+        "name": "Period 1",
+        "start": "9:25",
+        "end": "10:15"
+      },
+      {
+        "name": "Period 2",
+        "start": "10:19",
+        "end": "11:09"
+      },
+      {
+        "name": "Period 3",
+        "start": "11:13",
+        "end": "12:03"
+      },
+      {
+        "name": "Period 4B",
+        "start": "12:07",
+        "end": "12:57"
+      },
+      {
+        "name": "Lunch B",
+        "start": "12:58",
+        "end": "13:28"
+      },
+      {
+        "name": "Period 5",
+        "start": "13:32",
+        "end": "14:22"
+      },
+      {
+        "name": "Period 6",
+        "start": "14:26",
+        "end": "15:16"
+      },
+      {
+        "name": "Period 7",
+        "start": "15:20",
+        "end": "16:10",
+        "tags": [
+          "optional",
+          "seventh"
+        ]
+      }
+    ],
+    "WEDNESDAY": [
+      {
+        "name": "Period 0",
+        "start": "8:00",
+        "end": "8:47",
+        "tags": [
+          "optional",
+          "zero"
+        ]
+      },
+      {
+        "name": "Period 1 (+ 10 minute UB)",
+        "start": "8:51",
+        "end": "9:41"
+      },
+      {
+        "name": "Period 2",
+        "start": "9:45",
+        "end": "10:25"
+      },
+      {
+        "name": "Period 3",
+        "start": "10:29",
+        "end": "11:09"
+      },
+      {
+        "name": "Period 4B",
+        "start": "11:13",
+        "end": "11:53"
+      },
+      {
+        "name": "Lunch B",
+        "start": "11:57",
+        "end": "12:32"
+      },
+      {
+        "name": "Period 5",
+        "start": "12:36",
+        "end": "13:16"
+      },
+      {
+        "name": "Period 6",
+        "start": "13:20",
+        "end": "14:00"
+      }
+    ]
+  },
+  "weekdaySchedules": {
+    "wednesday": "WEDNESDAY"
+  },
+  "dates": {},
+  "holidays": [
+    "2026-09-07",
+    "2026-10-05",
+    "2026-10-12",
+    "2026-10-30",
+    "2026-11-11",
+    "2026-11-23",
+    "2026-11-24",
+    "2026-11-25",
+    "2026-11-26",
+    "2026-11-27",
+    "2026-12-21",
+    "2026-12-22",
+    "2026-12-23",
+    "2026-12-24",
+    "2026-12-25",
+    "2026-12-28",
+    "2026-12-29",
+    "2026-12-30",
+    "2026-12-31",
+    "2027-01-01",
+    "2027-01-18",
+    "2027-01-25",
+    "2027-02-12",
+    "2027-02-15",
+    "2027-03-15",
+    "2027-03-29",
+    "2027-03-30",
+    "2027-03-31",
+    "2027-04-01",
+    "2027-04-02",
+    "2027-05-21",
+    "2027-05-31"
+  ],
+  "teacherWorkDays": [
+    "2026-10-05",
+    "2027-01-25"
+  ],
+  "breakNames": {
+    "2026-11-23": "Fall Recess",
+    "2026-12-21": "Winter break",
+    "2027-02-12": "Presidents’ Day Weekend",
+    "2027-03-29": "Spring break"
+  }
+}
