@@ -1,0 +1,324 @@
+{
+  "year": "2026-2027",
+  "firstDayTeachers": "2026-08-10",
+  "firstDay": "2026-08-12",
+  "lastDay": "2027-06-03",
+  "timezone": "America/Los_Angeles",
+  "schedules": {
+    "NORMAL": [
+      {
+        "name": "Period 0",
+        "start": "7:26",
+        "end": "8:24",
+        "tags": [
+          "optional",
+          "zero"
+        ]
+      },
+      {
+        "name": "Period 1",
+        "start": "8:30",
+        "end": "9:28"
+      },
+      {
+        "name": "Period 2",
+        "start": "9:34",
+        "end": "10:37"
+      },
+      {
+        "name": "Period 3",
+        "start": "10:43",
+        "end": "11:41"
+      },
+      {
+        "name": "Lunch",
+        "start": "11:41",
+        "end": "12:21"
+      },
+      {
+        "name": "Period 4",
+        "start": "12:27",
+        "end": "1:25"
+      },
+      {
+        "name": "Period 5",
+        "start": "1:31",
+        "end": "2:29"
+      },
+      {
+        "name": "Period 6",
+        "start": "2:35",
+        "end": "3:33"
+      },
+      {
+        "name": "Period 7",
+        "start": "3:39",
+        "end": "4:37",
+        "tags": [
+          "optional",
+          "seventh"
+        ]
+      },
+      {
+        "name": "Period Ext",
+        "start": "3:39",
+        "end": "5:09",
+        "tags": [
+          "optional",
+          "ext"
+        ]
+      }
+    ],
+    "LATE START": [
+      {
+        "name": "Staff meeting",
+        "start": "8:03",
+        "end": "9:33",
+        "teachers": true
+      },
+      {
+        "name": "Period 1",
+        "start": "10:00",
+        "end": "10:43"
+      },
+      {
+        "name": "Period 2",
+        "start": "10:49",
+        "end": "11:37"
+      },
+      {
+        "name": "Period 3",
+        "start": "11:43",
+        "end": "12:26"
+      },
+      {
+        "name": "Lunch",
+        "start": "12:26",
+        "end": "13:06"
+      },
+      {
+        "name": "Period 4",
+        "start": "13:12",
+        "end": "13:55"
+      },
+      {
+        "name": "Period 5",
+        "start": "14:01",
+        "end": "14:44"
+      },
+      {
+        "name": "Period 6",
+        "start": "14:50",
+        "end": "15:33"
+      },
+      {
+        "name": "Period 7",
+        "start": "15:39",
+        "end": "16:22",
+        "tags": [
+          "optional",
+          "seventh"
+        ]
+      },
+      {
+        "name": "Period Ext",
+        "start": "15:39",
+        "end": "17:09",
+        "tags": [
+          "optional",
+          "ext"
+        ]
+      }
+    ],
+    "EXAMS 1": [
+      {
+        "name": "Period 1 Final",
+        "start": "8:30",
+        "end": "10:30"
+      },
+      {
+        "name": "Period 2 Final",
+        "start": "10:40",
+        "end": "12:40"
+      },
+      {
+        "name": "Lunch",
+        "start": "12:40",
+        "end": "13:20",
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
+      },
+      {
+        "name": "Finals Prep / Make Up",
+        "start": "13:20",
+        "end": "14:25",
+        "teachers": true
+      },
+      {
+        "name": "Teacher Common Prep",
+        "start": "14:25",
+        "end": "15:33",
+        "teachers": true
+      }
+    ],
+    "EXAMS 2": [
+      {
+        "name": "Period 3 Final",
+        "start": "8:30",
+        "end": "10:30"
+      },
+      {
+        "name": "Period 4 Final",
+        "start": "10:40",
+        "end": "12:40"
+      },
+      {
+        "name": "Lunch",
+        "start": "12:40",
+        "end": "13:20",
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
+      },
+      {
+        "name": "Finals Prep / Make Up",
+        "start": "13:20",
+        "end": "14:25",
+        "teachers": true
+      },
+      {
+        "name": "Teacher Common Prep",
+        "start": "14:25",
+        "end": "15:33",
+        "teachers": true
+      }
+    ],
+    "EXAMS 3": [
+      {
+        "name": "Period 5 Final",
+        "start": "8:30",
+        "end": "10:30"
+      },
+      {
+        "name": "Period 6 Final",
+        "start": "10:40",
+        "end": "12:40"
+      },
+      {
+        "name": "Lunch",
+        "start": "12:40",
+        "end": "13:20",
+        "tags": [
+          "optional",
+          "nonschool"
+        ]
+      },
+      {
+        "name": "Finals Prep / Make Up",
+        "start": "13:20",
+        "end": "14:25",
+        "teachers": true
+      },
+      {
+        "name": "Teacher Common Prep",
+        "start": "14:25",
+        "end": "15:33",
+        "teachers": true
+      }
+    ],
+    "BONUS DAY": [
+      {
+        "name": "Period 1",
+        "start": "8:30",
+        "end": "9:12"
+      },
+      {
+        "name": "Period 2",
+        "start": "9:18",
+        "end": "10:00"
+      },
+      {
+        "name": "Period 3",
+        "start": "10:06",
+        "end": "10:48"
+      },
+      {
+        "name": "Period 4",
+        "start": "10:54",
+        "end": "11:36"
+      },
+      {
+        "name": "Lunch",
+        "start": "11:36",
+        "end": "12:16"
+      },
+      {
+        "name": "Period 5",
+        "start": "12:22",
+        "end": "1:04"
+      },
+      {
+        "name": "Period 6",
+        "start": "1:10",
+        "end": "1:52"
+      },
+      {
+        "name": "Teacher check out",
+        "start": "1:52",
+        "end": "3:33",
+        "teachers": true
+      }
+    ]
+  },
+  "weekdaySchedules": {
+    "monday": "LATE START"
+  },
+  "dates": {},
+  "holidays": [
+    "2026-09-07",
+    "2026-10-05",
+    "2026-10-12",
+    "2026-10-30",
+    "2026-11-11",
+    "2026-11-23",
+    "2026-11-24",
+    "2026-11-25",
+    "2026-11-26",
+    "2026-11-27",
+    "2026-12-21",
+    "2026-12-22",
+    "2026-12-23",
+    "2026-12-24",
+    "2026-12-25",
+    "2026-12-28",
+    "2026-12-29",
+    "2026-12-30",
+    "2026-12-31",
+    "2027-01-01",
+    "2027-01-18",
+    "2027-01-25",
+    "2027-02-12",
+    "2027-02-15",
+    "2027-03-15",
+    "2027-03-29",
+    "2027-03-30",
+    "2027-03-31",
+    "2027-04-01",
+    "2027-04-02",
+    "2027-05-21",
+    "2027-05-31"
+  ],
+  "teacherWorkDays": [
+    "2026-10-05",
+    "2027-01-25"
+  ],
+  "breakNames": {
+    "2026-11-23": "Fall Recess",
+    "2026-12-21": "Winter break",
+    "2027-02-12": "Presidents’ Day Weekend",
+    "2027-03-29": "Spring break"
+  }
+}
