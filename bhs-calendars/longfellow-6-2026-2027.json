@@ -67,7 +67,7 @@
         ]
       }
     ],
-    "WEDNESDAY": [
+    "EARLY RELEASE": [
       {
         "name": "Period 0",
         "start": "8:00",
@@ -115,7 +115,7 @@
     ]
   },
   "weekdaySchedules": {
-    "wednesday": "WEDNESDAY"
+    "wednesday": "EARLY RELEASE"
   },
   "dates": {},
   "holidays": [
