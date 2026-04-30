@@ -10,57 +10,169 @@
         "name": "Period 00",
         "start": "7:45",
         "end": "8:30",
-        "tags": ["optional", "zero"]
+        "tags": [
+          "optional",
+          "zero"
+        ]
       },
-      { "name": "Period 1", "start": "8:40",  "end": "9:30" },
-      { "name": "Period 2", "start": "9:35",  "end": "10:20" },
-      { "name": "Advisory", "start": "10:25", "end": "10:55" },
-      { "name": "Period 3", "start": "11:00", "end": "11:45" },
-      { "name": "Period 4", "start": "11:50", "end": "12:35" },
-      { "name": "Lunch",    "start": "12:35", "end": "13:20" },
-      { "name": "Period 5", "start": "13:25", "end": "14:10" },
-      { "name": "Period 6", "start": "14:15", "end": "15:00" }
+      {
+        "name": "Period 1",
+        "start": "8:40",
+        "end": "9:30"
+      },
+      {
+        "name": "Period 2",
+        "start": "9:35",
+        "end": "10:20"
+      },
+      {
+        "name": "Advisory",
+        "start": "10:25",
+        "end": "10:55"
+      },
+      {
+        "name": "Period 3",
+        "start": "11:00",
+        "end": "11:45"
+      },
+      {
+        "name": "Period 4",
+        "start": "11:50",
+        "end": "12:35"
+      },
+      {
+        "name": "Lunch",
+        "start": "12:35",
+        "end": "13:20"
+      },
+      {
+        "name": "Period 5",
+        "start": "13:25",
+        "end": "14:10"
+      },
+      {
+        "name": "Period 6",
+        "start": "14:15",
+        "end": "15:00"
+      }
     ],
     "WEDNESDAY": [
       {
         "name": "Period 00",
         "start": "7:45",
         "end": "8:30",
-        "tags": ["optional", "zero"]
+        "tags": [
+          "optional",
+          "zero"
+        ]
       },
-      { "name": "Period 1", "start": "8:40",  "end": "9:26" },
-      { "name": "Period 2", "start": "9:31",  "end": "10:14" },
-      { "name": "Period 3", "start": "10:19", "end": "11:02" },
-      { "name": "Period 4", "start": "11:07", "end": "11:50" },
-      { "name": "Lunch",    "start": "11:50", "end": "12:33" },
-      { "name": "Period 5", "start": "12:38", "end": "13:21" },
-      { "name": "Period 6", "start": "13:26", "end": "14:09" }
+      {
+        "name": "Period 1",
+        "start": "8:40",
+        "end": "9:26"
+      },
+      {
+        "name": "Period 2",
+        "start": "9:31",
+        "end": "10:14"
+      },
+      {
+        "name": "Period 3",
+        "start": "10:19",
+        "end": "11:02"
+      },
+      {
+        "name": "Period 4",
+        "start": "11:07",
+        "end": "11:50"
+      },
+      {
+        "name": "Lunch",
+        "start": "11:50",
+        "end": "12:33"
+      },
+      {
+        "name": "Period 5",
+        "start": "12:38",
+        "end": "13:21"
+      },
+      {
+        "name": "Period 6",
+        "start": "13:26",
+        "end": "14:09"
+      }
     ],
     "THURSDAY": [
       {
         "name": "Period 00",
         "start": "7:45",
         "end": "8:30",
-        "tags": ["optional", "zero"]
+        "tags": [
+          "optional",
+          "zero"
+        ]
       },
-      { "name": "Period 1", "start": "8:40",  "end": "10:20" },
-      { "name": "Advisory", "start": "10:25", "end": "10:55" },
-      { "name": "Period 3", "start": "11:00", "end": "12:35" },
-      { "name": "Lunch",    "start": "12:35", "end": "13:20" },
-      { "name": "Period 5", "start": "13:25", "end": "15:00" }
+      {
+        "name": "Period 1",
+        "start": "8:40",
+        "end": "10:20"
+      },
+      {
+        "name": "Advisory",
+        "start": "10:25",
+        "end": "10:55"
+      },
+      {
+        "name": "Period 3",
+        "start": "11:00",
+        "end": "12:35"
+      },
+      {
+        "name": "Lunch",
+        "start": "12:35",
+        "end": "13:20"
+      },
+      {
+        "name": "Period 5",
+        "start": "13:25",
+        "end": "15:00"
+      }
     ],
     "FRIDAY": [
       {
         "name": "Period 00",
         "start": "7:45",
         "end": "8:30",
-        "tags": ["optional", "zero"]
+        "tags": [
+          "optional",
+          "zero"
+        ]
       },
-      { "name": "Period 2", "start": "8:40",  "end": "10:20" },
-      { "name": "Advisory", "start": "10:25", "end": "10:55" },
-      { "name": "Period 4", "start": "11:00", "end": "12:35" },
-      { "name": "Lunch",    "start": "12:35", "end": "13:20" },
-      { "name": "Period 6", "start": "13:25", "end": "15:00" }
+      {
+        "name": "Period 2",
+        "start": "8:40",
+        "end": "10:20"
+      },
+      {
+        "name": "Advisory",
+        "start": "10:25",
+        "end": "10:55"
+      },
+      {
+        "name": "Period 4",
+        "start": "11:00",
+        "end": "12:35"
+      },
+      {
+        "name": "Lunch",
+        "start": "12:35",
+        "end": "13:20"
+      },
+      {
+        "name": "Period 6",
+        "start": "13:25",
+        "end": "15:00"
+      }
     ]
   },
   "weekdaySchedules": {

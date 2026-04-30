@@ -10,21 +10,59 @@
         "name": "Period 0",
         "start": "8:00",
         "end": "8:47",
-        "tags": ["optional", "zero"]
+        "tags": [
+          "optional",
+          "zero"
+        ]
       },
-      { "name": "Advisory/UB", "start": "8:51",  "end": "9:21" },
-      { "name": "Period 1",    "start": "9:25",  "end": "10:15" },
-      { "name": "Period 2",    "start": "10:19", "end": "11:09" },
-      { "name": "Period 3",    "start": "11:13", "end": "12:03" },
-      { "name": "Lunch A",     "start": "12:04", "end": "12:34" },
-      { "name": "Period 4A",   "start": "12:38", "end": "13:28" },
-      { "name": "Period 5",    "start": "13:32", "end": "14:22" },
-      { "name": "Period 6",    "start": "14:26", "end": "15:16" },
+      {
+        "name": "Advisory/UB",
+        "start": "8:51",
+        "end": "9:21"
+      },
+      {
+        "name": "Period 1",
+        "start": "9:25",
+        "end": "10:15"
+      },
+      {
+        "name": "Period 2",
+        "start": "10:19",
+        "end": "11:09"
+      },
+      {
+        "name": "Period 3",
+        "start": "11:13",
+        "end": "12:03"
+      },
+      {
+        "name": "Lunch A",
+        "start": "12:04",
+        "end": "12:34"
+      },
+      {
+        "name": "Period 4A",
+        "start": "12:38",
+        "end": "13:28"
+      },
+      {
+        "name": "Period 5",
+        "start": "13:32",
+        "end": "14:22"
+      },
+      {
+        "name": "Period 6",
+        "start": "14:26",
+        "end": "15:16"
+      },
       {
         "name": "Period 7",
         "start": "15:20",
         "end": "16:10",
-        "tags": ["optional", "seventh"]
+        "tags": [
+          "optional",
+          "seventh"
+        ]
       }
     ],
     "WEDNESDAY": [
@@ -32,15 +70,46 @@
         "name": "Period 0",
         "start": "8:00",
         "end": "8:47",
-        "tags": ["optional", "zero"]
+        "tags": [
+          "optional",
+          "zero"
+        ]
       },
-      { "name": "Period 1 (+ 10 minute UB)", "start": "8:51",  "end": "9:41" },
-      { "name": "Period 2",                  "start": "9:45",  "end": "10:25" },
-      { "name": "Period 3",                  "start": "10:29", "end": "11:09" },
-      { "name": "Lunch A",                   "start": "11:13", "end": "11:48" },
-      { "name": "Period 4A",                 "start": "11:52", "end": "12:32" },
-      { "name": "Period 5",                  "start": "12:36", "end": "13:16" },
-      { "name": "Period 6",                  "start": "13:20", "end": "14:00" }
+      {
+        "name": "Period 1 (+ 10 minute UB)",
+        "start": "8:51",
+        "end": "9:41"
+      },
+      {
+        "name": "Period 2",
+        "start": "9:45",
+        "end": "10:25"
+      },
+      {
+        "name": "Period 3",
+        "start": "10:29",
+        "end": "11:09"
+      },
+      {
+        "name": "Lunch A",
+        "start": "11:13",
+        "end": "11:48"
+      },
+      {
+        "name": "Period 4A",
+        "start": "11:52",
+        "end": "12:32"
+      },
+      {
+        "name": "Period 5",
+        "start": "12:36",
+        "end": "13:16"
+      },
+      {
+        "name": "Period 6",
+        "start": "13:20",
+        "end": "14:00"
+      }
     ]
   },
   "weekdaySchedules": {
