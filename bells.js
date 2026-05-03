@@ -454,9 +454,14 @@ const updateCountdown = (t, instant, bellSchedule) => {
   const millisLeft = durationToMillis(schoolTimeLeft);
   const hoursLeft = millisLeft / (1000 * 60 * 60);
   const calendarDays = bellSchedule.calendarDaysLeft(instant);
-  const classDays = Math.max(0, left - (3 + 1)); // three days of exams plus one chaos day
-  const examDays = Math.max(0, Math.min(3, left - 1));
-  const chaosDays = Math.max(0, Math.min(1, left));
+  const nonClassLeft = bellSchedule.nonClassDaysLeft(instant);
+  const classDays = Math.max(0, left - nonClassLeft.length);
+  const nonClassGroups = [];
+  for (const { label } of nonClassLeft) {
+    const g = nonClassGroups.find((x) => x.label === label);
+    if (g) g.count++;
+    else nonClassGroups.push({ label, count: 1 });
+  }
   const countingToday = inSchool ? ' counting today' : '';
 
   const totalMillis = durationToMillis(bellSchedule.totalSchoolTime(instant));
@@ -502,11 +507,14 @@ const updateCountdown = (t, instant, bellSchedule) => {
       $('#countdown').append($('<p>', 'Last day of school!'));
     } else {
       $('#countdown').append($('<p>', `${days(left, 'school')} left in the year${countingToday}`));
-      if (classDays > 0) {
-        $('#countdown').append($('<p>', `${days(classDays, 'class')} until exams${countingToday}`));
+      if (classDays > 0 && nonClassGroups.length > 0) {
+        $('#countdown').append(
+          $('<p>', `${days(classDays, 'class')} until ${nonClassGroups[0].label}s${countingToday}`)
+        );
       }
-      $('#countdown').append($('<p>', days(examDays, 'exam')));
-      $('#countdown').append($('<p>', days(chaosDays, 'bonus')));
+      for (const g of nonClassGroups) {
+        $('#countdown').append($('<p>', days(g.count, g.label)));
+      }
       $('#countdown').append($('<p>', `${days(calendarDays, 'calendar')} until summer vacation!`));
     }
     if (hoursLeft < 100) {
