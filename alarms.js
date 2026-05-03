@@ -5,7 +5,6 @@ import { isTeacher } from './calendar.js';
 const STORAGE_KEY = 'alarms';
 const FIRED_KEY = 'alarmsFired';
 const MAX_MISSED_MS = 60 * 1000;
-const CHIME_INTERVAL_MS = 15000;
 const NOTIF_TAG_PREFIX = 'alarm:';
 const NOTIF_SCHEDULE_SLOP_MS = 2000;
 
@@ -294,7 +293,6 @@ function fireAlarm(alarm, period, fireMs) {
   const visible = document.visibilityState === 'visible';
   if (visible) {
     showBanner(describeAlarm(alarm, period, { short: true }), {
-      repeatChime: true,
       speakText: alarm.speakText,
       dedupKey: `alarm:${alarm.id}`,
     });
@@ -319,7 +317,7 @@ function cancelSpeech() {
   try { speechSynthesis.cancel(); } catch {}
 }
 
-function showBanner(labelText, { repeatChime = false, speakText = '', dedupKey = '' } = {}) {
+function showBanner(labelText, { speakText = '', dedupKey = '' } = {}) {
   let stack = $('#alarm-banner-stack');
   if (!stack) {
     stack = document.createElement('div');
@@ -339,12 +337,7 @@ function showBanner(labelText, { repeatChime = false, speakText = '', dedupKey =
   const close = document.createElement('span');
   close.className = 'alarm-banner-close';
   close.textContent = '×';
-  let intervalId = null;
   const dismiss = () => {
-    if (intervalId !== null) {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
     if (!document.querySelector('.alarm-banner:not(.closing)')) cancelSpeech();
     banner.classList.add('closing');
     setTimeout(() => {
@@ -358,14 +351,8 @@ function showBanner(labelText, { repeatChime = false, speakText = '', dedupKey =
   banner.append(label, close);
   stack.appendChild(banner);
   document.getElementById('container')?.classList.add('alarm-pulse');
-  const cue = () => {
-    playChime();
-    if (speakText) setTimeout(() => speak(speakText), 700);
-  };
-  cue();
-  if (repeatChime) {
-    intervalId = setInterval(cue, CHIME_INTERVAL_MS);
-  }
+  playChime();
+  if (speakText) setTimeout(() => speak(speakText), 700);
 }
 
 function ensureAudio() {
@@ -499,7 +486,6 @@ function renderAlarmList() {
     testBtn.textContent = 'Test';
     testBtn.onclick = () => {
       showBanner(describeAlarm(alarm) + ' (test)', {
-        repeatChime: true,
         speakText: alarm.speakText,
         dedupKey: `alarm:${alarm.id}`,
       });
@@ -770,7 +756,7 @@ function setupAlarms(getBellScheduleFnArg) {
     navigator.serviceWorker.addEventListener('message', (e) => {
       const data = e.data || {};
       if (data.type === 'alarm-notification-click') {
-        if (data.body) showBanner(data.body, { repeatChime: true });
+        if (data.body) showBanner(data.body);
       }
     });
   }
