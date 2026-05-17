@@ -773,6 +773,66 @@
         "teachers": true
       }
     ],
+    "2026-05-29": [
+      {
+        "name": "Period 0",
+        "start": "7:26",
+        "end": "8:24",
+        "tags": [
+          "optional",
+          "zero"
+        ]
+      },
+      {
+        "name": "Period 1",
+        "start": "8:30",
+        "end": "9:12"
+      },
+      {
+        "name": "Period 2",
+        "start": "9:18",
+        "end": "10:00"
+      },
+      {
+        "name": "Period 3",
+        "start": "10:06",
+        "end": "10:48"
+      },
+      {
+        "name": "Period 4",
+        "start": "10:54",
+        "end": "11:36"
+      },
+      {
+        "name": "Lunch",
+        "start": "11:36",
+        "end": "12:16"
+      },
+      {
+        "name": "Period 5",
+        "start": "12:22",
+        "end": "1:04"
+      },
+      {
+        "name": "Period 6",
+        "start": "1:10",
+        "end": "1:49"
+      },
+      {
+        "name": "Carnival",
+        "start": "1:52",
+        "end": "3:42"
+      },
+      {
+        "name": "Period 7",
+        "start": "3:48",
+        "end": "4:30",
+        "tags": [
+          "optional",
+          "seventh"
+        ]
+      }
+    ],
     "2026-06-01": "EXAMS 1",
     "2026-06-02": "EXAMS 2",
     "2026-06-03": "EXAMS 3",
