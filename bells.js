@@ -59,9 +59,37 @@ const toMillis = (instant) => instant.epochMilliseconds;
  */
 const durationToMillis = (duration) => duration.total({ unit: 'milliseconds' });
 
+/**
+ * Sum of (time left in the current period) + (full duration of every future
+ * occurrence of the same-named period this school year).
+ */
+const periodTimeLeftInYear = (instant, interval, bellSchedule) => {
+  const periodName = interval.name;
+  // Accumulate in BigInt nanoseconds and truncate-to-seconds at the end, to
+  // match how schoolTimeLeft in the library converts (otherwise the displayed
+  // seconds can disagree with the year countdown by one).
+  let totalNs = interval.end.epochNanoseconds - instant.epochNanoseconds;
+
+  const tz = bellSchedule.timezone;
+  let remaining = bellSchedule.schoolDaysLeft(instant) - 1;
+  let date = instant.toZonedDateTimeISO(tz).toPlainDate();
+
+  while (remaining > 0) {
+    date = bellSchedule.nextSchoolDay(date);
+    for (const p of bellSchedule.scheduleFor(date)) {
+      if (p.name === periodName) {
+        totalNs += p.end.epochNanoseconds - p.start.epochNanoseconds;
+      }
+    }
+    remaining--;
+  }
+
+  return Temporal.Duration.from({ seconds: Number(totalNs / 1_000_000_000n) });
+};
+
 let togo = true;
 
-/** 
+/**
  * To handle local PWA install state
 */
 let installPrompt = null;
@@ -366,7 +394,7 @@ const normalCountdown = (t, instant, bellSchedule) => {
 };
 
 const countdownText = (duration) => {
-  const { hours, minutes, seconds } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds' });
+  const { hours, minutes, seconds } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds', roundingMode: 'trunc' });
   if (hours < 24) {
     return hhmmss(duration);
   } else {
@@ -518,7 +546,11 @@ const updateCountdown = (t, instant, bellSchedule) => {
       $('#countdown').append($('<p>', `${days(calendarDays, 'calendar')} until summer vacation!`));
     }
     if (hoursLeft < 100) {
-      $('#countdown').append($('<p>', `${timeCountdown(schoolTimeLeft)} to go.`));
+      $('#countdown').append($('<p>', `${timeCountdown(schoolTimeLeft)} in school.`));
+      if (interval && interval.type === 'period') {
+        const periodLeft = periodTimeLeftInYear(instant, interval, bellSchedule);
+        $('#countdown').append($('<p>', `${timeCountdown(periodLeft)} in this period.`));
+      }
     }
   } else {
   }
@@ -660,7 +692,7 @@ const handleLocalInstallSetup = () => {
 
 };
 
-const setupOnlineDisplay = () => {    
+const setupOnlineDisplay = () => {
 
   const updateOnlineNotification = () => {
     if(onlineState.lan && onlineState.network) $(".no-wifi").setAttribute("hidden", "");

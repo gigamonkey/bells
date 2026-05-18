@@ -10,12 +10,12 @@ const timestring = (instant, timezone) => {
 };
 
 const hhmmss = (duration) => {
-  const { hours, minutes, seconds } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds' });
+  const { hours, minutes, seconds } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds', roundingMode: 'trunc' });
   return xx(hours) + ':' + xx(minutes) + ':' + xx(seconds);
 };
 
 const timeCountdown = (duration) => {
-  const { hours: h, minutes: m, seconds: s } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds' });
+  const { hours: h, minutes: m, seconds: s } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds', roundingMode: 'trunc' });
   return `${h} ${plural(h, 'hour')} ${m} ${plural(m, 'minute')} ${s} ${plural(s, 'second')}`;
 };
 
