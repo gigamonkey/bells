@@ -547,10 +547,10 @@ const updateCountdown = (t, instant, bellSchedule) => {
       }
     }
     if (hoursLeft < 100) {
-      $('#countdown').append($('<p>', `${timeCountdown(schoolTimeLeft)} in school.`));
+      $('#countdown').append($('<p>', `${timeCountdown(schoolTimeLeft)} to be spent in school.`));
       if (interval && interval.type === 'period') {
         const periodLeft = periodTimeLeftInYear(instant, interval, bellSchedule);
-        $('#countdown').append($('<p>', `${timeCountdown(periodLeft)} in this class.`));
+        $('#countdown').append($('<p>', `${timeCountdown(periodLeft)} to be spent in this class.`));
       }
     }
   } else {
