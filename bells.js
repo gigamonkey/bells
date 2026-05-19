@@ -540,13 +540,17 @@ const updateCountdown = (t, instant, bellSchedule) => {
       for (const g of nonClassGroups) {
         $('#countdown').append($('<p>', days(g.count, g.label)));
       }
-      $('#countdown').append($('<p>', `${days(calendarDays, 'calendar')} until summer vacation!`));
+      if (inSchool) {
+        $('#countdown').append($('<p>', `${days(calendarDays, 'calendar')} until summer vacation counting today!`));
+      } else {
+        $('#countdown').append($('<p>', `${days(calendarDays - 1, 'calendar')} until summer vacation after today!`));
+      }
     }
     if (hoursLeft < 100) {
       $('#countdown').append($('<p>', `${timeCountdown(schoolTimeLeft)} in school.`));
       if (interval && interval.type === 'period') {
         const periodLeft = periodTimeLeftInYear(instant, interval, bellSchedule);
-        $('#countdown').append($('<p>', `${timeCountdown(periodLeft)} in this period.`));
+        $('#countdown').append($('<p>', `${timeCountdown(periodLeft)} in this class.`));
       }
     }
   } else {
