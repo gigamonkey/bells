@@ -65,10 +65,7 @@ const durationToMillis = (duration) => duration.total({ unit: 'milliseconds' });
  */
 const periodTimeLeftInYear = (instant, interval, bellSchedule) => {
   const periodName = interval.name;
-  // Accumulate in BigInt nanoseconds and truncate-to-seconds at the end, to
-  // match how schoolTimeLeft in the library converts (otherwise the displayed
-  // seconds can disagree with the year countdown by one).
-  let totalNs = interval.end.epochNanoseconds - instant.epochNanoseconds;
+  let totalMillis = interval.end.epochMilliseconds - instant.epochMilliseconds;
 
   const tz = bellSchedule.timezone;
   let remaining = bellSchedule.schoolDaysLeft(instant) - 1;
@@ -78,13 +75,13 @@ const periodTimeLeftInYear = (instant, interval, bellSchedule) => {
     date = bellSchedule.nextSchoolDay(date);
     for (const p of bellSchedule.scheduleFor(date)) {
       if (p.name === periodName) {
-        totalNs += p.end.epochNanoseconds - p.start.epochNanoseconds;
+        totalMillis += p.end.epochMilliseconds - p.start.epochMilliseconds;
       }
     }
     remaining--;
   }
 
-  return Temporal.Duration.from({ seconds: Number(totalNs / 1_000_000_000n) });
+  return Temporal.Duration.from({ milliseconds: totalMillis });
 };
 
 let togo = true;
