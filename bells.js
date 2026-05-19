@@ -540,10 +540,10 @@ const updateCountdown = (t, instant, bellSchedule) => {
       for (const g of nonClassGroups) {
         $('#countdown').append($('<p>', days(g.count, g.label)));
       }
-      if (inSchool) {
-        $('#countdown').append($('<p>', `${days(calendarDays, 'calendar')} until summer vacation counting today!`));
-      } else {
+      if (interval.type == 'after-school') {
         $('#countdown').append($('<p>', `${days(calendarDays - 1, 'calendar')} until summer vacation after today!`));
+      } else {
+        $('#countdown').append($('<p>', `${days(calendarDays, 'calendar')} until summer vacation counting today!`));
       }
     }
     if (hoursLeft < 100) {
