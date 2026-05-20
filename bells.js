@@ -547,6 +547,11 @@ const updateCountdown = (t, instant, bellSchedule) => {
       }
     }
     if (hoursLeft < 100) {
+      const summerStart = bellSchedule.currentYearEnd(instant);
+      const untilSummer = instant.until(summerStart);
+      if (Temporal.Duration.compare(untilSummer, { hours: 168 }) <= 0) {
+        $('#countdown').append($('<p>', `${timeCountdown(untilSummer)} until summer vacation.`));
+      }
       $('#countdown').append($('<p>', `${timeCountdown(schoolTimeLeft)} to be spent in school.`));
       if (interval && interval.type === 'period') {
         const periodLeft = periodTimeLeftInYear(instant, interval, bellSchedule);
