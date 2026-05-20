@@ -66,6 +66,12 @@ export declare class BellSchedule {
   /** Start of the next academic year. Throws if no next year data is loaded. */
   nextYearStart(instant?: Temporal.Instant): Temporal.Instant;
 
+  /** Start of the school year containing `instant`, or null if `instant` isn't within any school year. */
+  currentYearStart(instant?: Temporal.Instant): Temporal.Instant | null;
+
+  /** End of the school year containing `instant`, or null if `instant` isn't within any school year. */
+  currentYearEnd(instant?: Temporal.Instant): Temporal.Instant | null;
+
   /** Total school time between two instants (only counts school-in-session time). */
   schoolTimeBetween(start: Temporal.Instant, end: Temporal.Instant): Temporal.Duration;
 
