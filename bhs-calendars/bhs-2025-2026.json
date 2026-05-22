@@ -293,22 +293,22 @@
     ],
     "LAST DAY OF SCHOOL": [
       {
-        "name": "Period 1",
+        "name": "Bonus Period 1",
         "start": "8:30",
         "end": "9:12"
       },
       {
-        "name": "Period 2",
+        "name": "Bonus Period 2",
         "start": "9:18",
         "end": "10:00"
       },
       {
-        "name": "Period 3",
+        "name": "Bonus Period 3",
         "start": "10:06",
         "end": "10:48"
       },
       {
-        "name": "Period 4",
+        "name": "Bonus Period 4",
         "start": "10:54",
         "end": "11:36"
       },
@@ -318,12 +318,12 @@
         "end": "12:16"
       },
       {
-        "name": "Period 5",
+        "name": "Bonus Period 5",
         "start": "12:22",
         "end": "1:04"
       },
       {
-        "name": "Period 6",
+        "name": "Bonus Period 6",
         "start": "1:10",
         "end": "1:52"
       },
