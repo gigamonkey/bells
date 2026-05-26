@@ -17,7 +17,7 @@ const hhmmss = (duration) => {
 const timeCountdown = (duration) => {
   const { hours: h, minutes: m, seconds: s } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds', roundingMode: 'trunc' });
   const parts = [[h, 'hour'], [m, 'minute'], [s, 'second']];
-  while (parts.length > 1 && parts[parts.length - 1][0] === 0) parts.pop();
+  //while (parts.length > 1 && parts[parts.length - 1][0] === 0) parts.pop();
   while (parts.length > 1 && parts[0][0] === 0) parts.shift();
   return parts.map(([n, w]) => `${n} ${plural(n, w)}`).join(' ');
 };
