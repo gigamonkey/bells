@@ -100,6 +100,7 @@ const setupConfigPanel = () => {
   $('#apple').onclick = (e) => {
     toggleTeacher(e);
     updateTeacherModeVisibility();
+    update();
   };
   $('#qr').onclick = toggleQR;
   $('#gear').onclick = toggleConfig;
@@ -352,7 +353,7 @@ const update = () => {
   // summerBounds returns null when we are inside a school year; non-null during summer.
   const summerInfo = bellSchedule.summerBounds(instant);
   if (summerInfo !== null) {
-    summerCountdown(instant, bellSchedule);
+    summerCountdown(instant, bellSchedule, summerInfo);
   } else {
     normalCountdown(t, instant, bellSchedule);
   }
@@ -362,7 +363,11 @@ const update = () => {
   timeoutID = setTimeout(update, 1000 - t.getMilliseconds());
 };
 
-const summerCountdown = (instant, bellSchedule) => {
+const summerCountdown = (instant, bellSchedule, summerInfo) => {
+  // If a school year has already ended (summerInfo.start is its end), that
+  // year is 100% complete; otherwise we're before the first year (0%).
+  updateYearProgress(summerInfo.start ? 1 : 0, 1);
+
   let nextYearStart = null;
   try {
     nextYearStart = bellSchedule.nextYearStart(instant);
@@ -471,6 +476,32 @@ const updateSummerProgress = (instant, bellSchedule) => {
   updateProgressBar('summerbar', startMillis, endMillis, tMillis);
 };
 
+// Update the year-completion percentage in the bottom-right corner. `done`
+// and `total` are school-time durations in millis; the ratio is clamped to
+// [0, 1] so it cleanly reaches 100% at the end of the year and never produces
+// NaN (e.g. during summer when no calendar covers `instant` and total is 0).
+const updateYearProgress = (done, total) => {
+  const smallCountdown = $('#small-countdown > p');
+  const fraction = total > 0 ? Math.min(1, Math.max(0, done / total)) : 0;
+
+  const display = () => {
+    if (smallCountdown.classList.contains('clicked')) {
+      smallCountdown.innerText = `${(100 * fraction).toPrecision(7)}%`;
+    } else {
+      const percent = Math.round(100 * fraction);
+      const nice = percent === 69 ? ' Nice!' : '';
+      smallCountdown.innerText = `${percent}%${nice}`;
+    }
+  };
+
+  display();
+
+  smallCountdown.onclick = (e) => {
+    e.target.classList.toggle('clicked');
+    display();
+  };
+};
+
 const updateCountdown = (t, instant, bellSchedule) => {
   const interval = bellSchedule.currentInterval(instant);
   const inSchool = interval ? interval.duringSchool : false;
@@ -492,24 +523,7 @@ const updateCountdown = (t, instant, bellSchedule) => {
   const totalMillis = durationToMillis(bellSchedule.totalSchoolTime(instant));
   const done = totalMillis - millisLeft;
 
-  const smallCountdown = $('#small-countdown > p');
-
-  const displaySmallCountdown = () => {
-    if (smallCountdown.classList.contains('clicked')) {
-      smallCountdown.innerText = `${((100 * done) / totalMillis).toPrecision(7)}%`;
-    } else {
-      const percent = Math.round((100 * done) / totalMillis);
-      const nice = percent === 69 ? ' Nice!' : '';
-      smallCountdown.innerText = `${percent}%${nice}`;
-    }
-  };
-
-  displaySmallCountdown();
-
-  smallCountdown.onclick = (e) => {
-    e.target.classList.toggle('clicked');
-    displaySmallCountdown();
-  };
+  updateYearProgress(done, totalMillis);
 
   // Determine if it's the last day of school.
   const isLastDay = (() => {
