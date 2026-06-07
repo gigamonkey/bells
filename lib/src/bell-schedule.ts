@@ -2,96 +2,78 @@
  * BellSchedule — wraps one or more Calendar instances.
  */
 
-import { Calendar, normalizeIncludeTags } from './calendar.js';
+import { Calendar, normalizeIncludeTags, type Interval } from './calendar.js';
+import type {
+  BellScheduleOptions,
+  NonClassDay,
+  Role,
+  ScheduledPeriod,
+  YearData,
+} from './types.js';
+
+interface DayBounds {
+  start: Temporal.Instant;
+  end: Temporal.Instant;
+}
+
+interface SummerBounds {
+  start: Temporal.Instant | null;
+  end: Temporal.Instant | null;
+}
 
 class BellSchedule {
-  #options;
-  #calendars;
+  #options: { role: Role; includeTags: Record<number, string[]> };
+  #calendars: Calendar[];
 
-  /**
-   * @param {object[]} calendarDataArray - Array of year data objects.
-   * @param {{ role?: string, includeTags?: string[] | Record<number, string[]> }} [options]
-   */
-  constructor(calendarDataArray, options = {}) {
-    const role = options.role || 'student';
+  constructor(calendarDataArray: YearData[], options: BellScheduleOptions = {}) {
+    const role: Role = options.role || 'student';
     const includeTags = normalizeIncludeTags(options.includeTags || {});
     this.#options = { role, includeTags };
     this.#calendars = calendarDataArray.map((d) => new Calendar(d, { role, includeTags }));
   }
 
-  /**
-   * The timezone shared by all calendars (e.g. 'America/Los_Angeles').
-   * @returns {string}
-   */
-  get timezone() {
+  /** The timezone shared by all calendars (e.g. 'America/Los_Angeles'). */
+  get timezone(): string {
     return this.#calendars[0].timezone;
   }
 
-  /**
-   * Find the Calendar that covers this instant.
-   * @param {Temporal.Instant} instant
-   * @returns {Calendar | null}
-   */
-  #calendarAt(instant) {
+  /** Find the Calendar that covers this instant. */
+  #calendarAt(instant: Temporal.Instant): Calendar | null {
     return this.#calendars.find((c) => c.isInCalendar(instant)) || null;
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @returns {Calendar | null}
-   */
-  #nextCalendar(instant) {
-    return this.#calendars.reduce((best, c) => {
+  #nextCalendar(instant: Temporal.Instant): Calendar | null {
+    return this.#calendars.reduce<Calendar | null>((best, c) => {
       if (Temporal.Instant.compare(c.startOfYear(), instant) <= 0) return best;
       if (!best || Temporal.Instant.compare(c.startOfYear(), best.startOfYear()) < 0) return c;
       return best;
     }, null);
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @returns {Calendar | null}
-   */
-  #prevCalendar(instant) {
-    return this.#calendars.reduce((best, c) => {
+  #prevCalendar(instant: Temporal.Instant): Calendar | null {
+    return this.#calendars.reduce<Calendar | null>((best, c) => {
       if (Temporal.Instant.compare(c.endOfYear(), instant) >= 0) return best;
       if (!best || Temporal.Instant.compare(c.endOfYear(), best.endOfYear()) > 0) return c;
       return best;
     }, null);
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {import('./calendar.js').Interval | null}
-   */
-  currentInterval(instant = Temporal.Now.instant()) {
+  currentInterval(instant: Temporal.Instant = Temporal.Now.instant()): Interval | null {
     const cal = this.#calendarAt(instant);
     return cal ? cal.currentInterval(instant) : null;
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {import('./calendar.js').Interval | null}
-   */
-  periodAt(instant = Temporal.Now.instant()) {
+  periodAt(instant: Temporal.Instant = Temporal.Now.instant()): Interval | null {
     const interval = this.currentInterval(instant);
     return interval && interval.type === 'period' ? interval : null;
   }
 
-  /**
-   * @param {Temporal.PlainDate} [date]
-   * @returns {boolean}
-   */
-  isSchoolDay(date = Temporal.Now.plainDateISO()) {
+  isSchoolDay(date: Temporal.PlainDate = Temporal.Now.plainDateISO()): boolean {
     const cal = this.#calendarForDate(date);
     return cal ? cal.isSchoolDay(date) : false;
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {{ start: Temporal.Instant, end: Temporal.Instant } | null}
-   */
-  currentDayBounds(instant = Temporal.Now.instant()) {
+  currentDayBounds(instant: Temporal.Instant = Temporal.Now.instant()): DayBounds | null {
     const cal = this.#calendarAt(instant);
     if (!cal) return null;
     const date = instant.toZonedDateTimeISO(cal.timezone).toPlainDate();
@@ -103,11 +85,7 @@ class BellSchedule {
     };
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {Temporal.Instant}
-   */
-  nextSchoolDayStart(instant = Temporal.Now.instant()) {
+  nextSchoolDayStart(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.nextSchoolDayStart(instant);
 
@@ -116,11 +94,7 @@ class BellSchedule {
     throw new Error('No calendar data available for next school day');
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {Temporal.Instant}
-   */
-  previousSchoolDayEnd(instant = Temporal.Now.instant()) {
+  previousSchoolDayEnd(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.previousSchoolDayEnd(instant);
 
@@ -129,41 +103,25 @@ class BellSchedule {
     throw new Error('No calendar data available for previous school day');
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {Temporal.Duration}
-   */
-  schoolTimeLeft(instant = Temporal.Now.instant()) {
+  schoolTimeLeft(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.schoolTimeLeft(instant);
     return Temporal.Duration.from({ seconds: 0 });
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {Temporal.Duration}
-   */
-  schoolTimeDone(instant = Temporal.Now.instant()) {
+  schoolTimeDone(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.schoolTimeDone(instant);
     return Temporal.Duration.from({ seconds: 0 });
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {Temporal.Duration}
-   */
-  totalSchoolTime(instant = Temporal.Now.instant()) {
+  totalSchoolTime(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.totalSchoolTime();
     return Temporal.Duration.from({ seconds: 0 });
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {Temporal.Instant}
-   */
-  nextYearStart(instant = Temporal.Now.instant()) {
+  nextYearStart(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant {
     const next = this.#nextCalendar(instant);
     if (!next) throw new Error('No next year calendar data available');
     return next.startOfYear();
@@ -172,10 +130,8 @@ class BellSchedule {
   /**
    * Start of the school year containing `instant`, or null if `instant`
    * isn't within any school year (e.g. during summer).
-   * @param {Temporal.Instant} [instant]
-   * @returns {Temporal.Instant | null}
    */
-  currentYearStart(instant = Temporal.Now.instant()) {
+  currentYearStart(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant | null {
     const cal = this.#calendarAt(instant);
     return cal ? cal.startOfYear() : null;
   }
@@ -183,20 +139,13 @@ class BellSchedule {
   /**
    * End of the school year containing `instant`, or null if `instant`
    * isn't within any school year (e.g. during summer).
-   * @param {Temporal.Instant} [instant]
-   * @returns {Temporal.Instant | null}
    */
-  currentYearEnd(instant = Temporal.Now.instant()) {
+  currentYearEnd(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant | null {
     const cal = this.#calendarAt(instant);
     return cal ? cal.endOfYear() : null;
   }
 
-  /**
-   * @param {Temporal.Instant} start
-   * @param {Temporal.Instant} end
-   * @returns {Temporal.Duration}
-   */
-  schoolTimeBetween(start, end) {
+  schoolTimeBetween(start: Temporal.Instant, end: Temporal.Instant): Temporal.Duration {
     let totalMillis = 0;
 
     for (const cal of this.#calendars) {
@@ -214,13 +163,8 @@ class BellSchedule {
     return Temporal.Duration.from({ milliseconds: totalMillis });
   }
 
-  /**
-   * Count school days between two plain dates (inclusive of both endpoints).
-   * @param {Temporal.PlainDate} start
-   * @param {Temporal.PlainDate} end
-   * @returns {number}
-   */
-  schoolDaysBetween(start, end) {
+  /** Count school days between two plain dates (inclusive of both endpoints). */
+  schoolDaysBetween(start: Temporal.PlainDate, end: Temporal.PlainDate): number {
     let count = 0;
     for (const cal of this.#calendars) {
       count += cal.schoolDaysBetween(start, end);
@@ -228,52 +172,32 @@ class BellSchedule {
     return count;
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {number}
-   */
-  schoolDaysLeft(instant = Temporal.Now.instant()) {
+  schoolDaysLeft(instant: Temporal.Instant = Temporal.Now.instant()): number {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.schoolDaysLeft(instant);
     return 0;
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {number}
-   */
-  calendarDaysLeft(instant = Temporal.Now.instant()) {
+  calendarDaysLeft(instant: Temporal.Instant = Temporal.Now.instant()): number {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.calendarDaysLeft(instant);
     return 0;
   }
 
-  /**
-   * Non-class days from `instant` through end of the active calendar's year.
-   * @param {Temporal.Instant} [instant]
-   * @returns {Array<{ date: Temporal.PlainDate, label: string }>}
-   */
-  nonClassDaysLeft(instant = Temporal.Now.instant()) {
+  /** Non-class days from `instant` through end of the active calendar's year. */
+  nonClassDaysLeft(instant: Temporal.Instant = Temporal.Now.instant()): NonClassDay[] {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.nonClassDaysLeft(instant);
     return [];
   }
 
-  /**
-   * Non-class label for a specific date, or null.
-   * @param {Temporal.PlainDate} date
-   * @returns {string | null}
-   */
-  nonClassLabel(date) {
+  /** Non-class label for a specific date, or null. */
+  nonClassLabel(date: Temporal.PlainDate): string | null {
     const cal = this.#calendarForDate(date);
     return cal ? cal.nonClassLabel(date) : null;
   }
 
-  /**
-   * @param {Temporal.Instant} [instant]
-   * @returns {{ start: Temporal.Instant, end: Temporal.Instant } | null}
-   */
-  summerBounds(instant = Temporal.Now.instant()) {
+  summerBounds(instant: Temporal.Instant = Temporal.Now.instant()): SummerBounds | null {
     if (this.#calendarAt(instant)) return null;
 
     const prev = this.#prevCalendar(instant);
@@ -287,12 +211,8 @@ class BellSchedule {
     };
   }
 
-  /**
-   * Find the calendar covering a PlainDate.
-   * @param {Temporal.PlainDate} date
-   * @returns {Calendar | null}
-   */
-  #calendarForDate(date) {
+  /** Find the calendar covering a PlainDate. */
+  #calendarForDate(date: Temporal.PlainDate): Calendar | null {
     return this.#calendars.find((c) => {
       return (
         Temporal.PlainDate.compare(c.firstDay, date) <= 0 &&
@@ -301,11 +221,7 @@ class BellSchedule {
     }) || null;
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @returns {Temporal.PlainDate}
-   */
-  nextSchoolDay(date) {
+  nextSchoolDay(date: Temporal.PlainDate): Temporal.PlainDate {
     let d = date.add({ days: 1 });
     for (let i = 0; i < 365; i++) {
       if (this.isSchoolDay(d)) return d;
@@ -314,11 +230,7 @@ class BellSchedule {
     throw new Error('No school day found within 365 days');
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @returns {Temporal.PlainDate}
-   */
-  previousSchoolDay(date) {
+  previousSchoolDay(date: Temporal.PlainDate): Temporal.PlainDate {
     let d = date.subtract({ days: 1 });
     for (let i = 0; i < 365; i++) {
       if (this.isSchoolDay(d)) return d;
@@ -330,21 +242,15 @@ class BellSchedule {
   /**
    * Returns the schedule name for a specific date (e.g. 'NORMAL', 'LATE_START'),
    * or null if the date has an inline override or is not a school day.
-   * @param {Temporal.PlainDate} date
-   * @returns {string | null}
    */
-  scheduleNameFor(date) {
+  scheduleNameFor(date: Temporal.PlainDate): string | null {
     const cal = this.#calendarForDate(date);
     if (!cal || !cal.isSchoolDay(date)) return null;
     return cal.schedule(date).name;
   }
 
-  /**
-   * Returns the periods for a specific date.
-   * @param {Temporal.PlainDate} date
-   * @returns {Array<{ name: string, start: Temporal.Instant, end: Temporal.Instant, tags: string[] }>}
-   */
-  scheduleFor(date) {
+  /** Returns the periods for a specific date. */
+  scheduleFor(date: Temporal.PlainDate): ScheduledPeriod[] {
     const cal = this.#calendarForDate(date);
     if (!cal || !cal.isSchoolDay(date)) return [];
     const sched = cal.schedule(date);
@@ -356,16 +262,12 @@ class BellSchedule {
     }));
   }
 
-  /**
-   * Returns the active periods for the current or next school day.
-   * @param {Temporal.Instant} [instant]
-   * @returns {Array<{ name: string, start: Temporal.Instant, end: Temporal.Instant, tags: string[] }>}
-   */
-  periodsForDate(instant = Temporal.Now.instant()) {
+  /** Returns the active periods for the current or next school day. */
+  periodsForDate(instant: Temporal.Instant = Temporal.Now.instant()): ScheduledPeriod[] {
     const cal = this.#calendarAt(instant) || this.#nextCalendar(instant);
     if (!cal) return [];
 
-    let date;
+    let date: Temporal.PlainDate;
     if (cal.isInCalendar(instant)) {
       const today = instant.toZonedDateTimeISO(cal.timezone).toPlainDate();
       if (cal.isSchoolDay(today)) {

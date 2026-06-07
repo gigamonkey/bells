@@ -10,6 +10,11 @@ npm install bells @js-temporal/polyfill
 
 `@js-temporal/polyfill` is a peer dependency. In Node 22+ you can use the native Temporal global and omit the polyfill.
 
+The library is written in TypeScript and ships type declarations. It uses
+`Temporal` as a global rather than importing it, so the bundled declarations
+type that global against `@js-temporal/polyfill` — having the peer dependency
+installed is enough for the types to resolve; no extra configuration is needed.
+
 ## Calendar data format
 
 Calendar data is an array of year objects, one per academic year:
