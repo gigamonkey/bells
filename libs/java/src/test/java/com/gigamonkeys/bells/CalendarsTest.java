@@ -43,8 +43,9 @@ class CalendarsTest {
   @Test
   void forYearLoadsSingleObjectFile(@TempDir Path dir) throws IOException {
     // A file holding a single year object (not an array) is normalized.
+    // Also exercises the default-options forYear(String) overload.
     Calendars cals = write(dir, YEAR);
-    BellSchedule bs = cals.forYear("2025-2026", Options.defaults());
+    BellSchedule bs = cals.forYear("2025-2026");
     assertEquals("America/Los_Angeles", bs.timezone());
   }
 

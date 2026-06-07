@@ -91,7 +91,13 @@ public final class Validator {
   private static YearResult validateYear(JsonNode year, int index) {
     List<String> errors = new ArrayList<>();
     List<String> warnings = new ArrayList<>();
-    String label = "Year " + index + " (" + text(year, "year", "unknown") + ")";
+    // Empty-string year falls back to "unknown" (matches the JS `year.year || 'unknown'`).
+    JsonNode yearVal = year == null ? null : year.get("year");
+    String yearLabel =
+        (yearVal == null || yearVal.isNull() || yearVal.asText().isEmpty())
+            ? "unknown"
+            : yearVal.asText();
+    String label = "Year " + index + " (" + yearLabel + ")";
 
     // 1. Required fields.
     for (String field : REQUIRED_FIELDS) {
@@ -369,7 +375,8 @@ public final class Validator {
       if (!optional) {
         lastTime = endTime;
         TimedPeriod entry = new TimedPeriod(text(p, "name", null), startTime, endTime);
-        if (p.has("teachers") && p.get("teachers").asBoolean(false)) {
+        // Any truthy teachers value = teacher period (matches the JS `if (p.teachers)`).
+        if (!isFalsy(p.get("teachers"))) {
           teacherPeriods.add(entry);
         } else {
           studentPeriods.add(entry);

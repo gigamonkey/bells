@@ -176,7 +176,7 @@ public final class BellSchedule {
   /**
    * @return start/end of the current school day, or {@code null} if not a school day
    */
-  public Bounds currentDayBounds() {
+  public DayBounds currentDayBounds() {
     return currentDayBounds(Instant.now());
   }
 
@@ -184,7 +184,7 @@ public final class BellSchedule {
    * @param instant a moment
    * @return start/end of that school day, or {@code null} if not a school day
    */
-  public Bounds currentDayBounds(Instant instant) {
+  public DayBounds currentDayBounds(Instant instant) {
     Calendar cal = calendarAt(instant);
     if (cal == null) {
       return null;
@@ -194,7 +194,7 @@ public final class BellSchedule {
       return null;
     }
     Schedule sched = cal.schedule(date);
-    return new Bounds(
+    return new DayBounds(
         sched.startOfDay(date, cal.timezone()), sched.endOfDay(date, cal.timezone()));
   }
 
@@ -456,7 +456,7 @@ public final class BellSchedule {
   /**
    * @return start/end of summer, or {@code null} if now is within a school year
    */
-  public Bounds summerBounds() {
+  public SummerBounds summerBounds() {
     return summerBounds(Instant.now());
   }
 
@@ -464,7 +464,7 @@ public final class BellSchedule {
    * @param instant a moment
    * @return start/end of summer, or {@code null} if it is within a school year
    */
-  public Bounds summerBounds(Instant instant) {
+  public SummerBounds summerBounds(Instant instant) {
     if (calendarAt(instant) != null) {
       return null;
     }
@@ -476,7 +476,7 @@ public final class BellSchedule {
       return null;
     }
 
-    return new Bounds(
+    return new SummerBounds(
         prev != null ? prev.endOfYear() : null, next != null ? next.startOfYear() : null);
   }
 

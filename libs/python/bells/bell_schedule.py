@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 from .calendar import Calendar, Interval, normalize_include_tags
-from .datetimeutil import instant_to_date, now_instant
+from .datetimeutil import _instant_to_date, _now_instant
 
 
 class BellSchedule:
@@ -66,13 +66,13 @@ class BellSchedule:
 
     def current_interval(self, instant: Optional[datetime] = None) -> Optional[Interval]:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         return cal.current_interval(instant) if cal else None
 
     def period_at(self, instant: Optional[datetime] = None) -> Optional[Interval]:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         interval = self.current_interval(instant)
         return interval if interval and interval.type == "period" else None
 
@@ -84,17 +84,17 @@ class BellSchedule:
         when the process runs elsewhere — e.g. a server in UTC.
         """
         if d is None:
-            d = instant_to_date(now_instant(), tz) if tz else date.today()
+            d = _instant_to_date(_now_instant(), tz) if tz else date.today()
         cal = self._calendar_for_date(d)
         return cal.is_school_day(d) if cal else False
 
     def current_day_bounds(self, instant: Optional[datetime] = None) -> Optional[dict]:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         if not cal:
             return None
-        d = instant_to_date(instant, cal.timezone)
+        d = _instant_to_date(instant, cal.timezone)
         if not cal.is_school_day(d):
             return None
         sched = cal.schedule(d)
@@ -105,7 +105,7 @@ class BellSchedule:
 
     def next_school_day_start(self, instant: Optional[datetime] = None) -> datetime:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         if cal:
             return cal.next_school_day_start(instant)
@@ -117,7 +117,7 @@ class BellSchedule:
 
     def previous_school_day_end(self, instant: Optional[datetime] = None) -> datetime:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         if cal:
             return cal.previous_school_day_end(instant)
@@ -129,25 +129,25 @@ class BellSchedule:
 
     def school_time_left(self, instant: Optional[datetime] = None) -> timedelta:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         return cal.school_time_left(instant) if cal else timedelta(0)
 
     def school_time_done(self, instant: Optional[datetime] = None) -> timedelta:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         return cal.school_time_done(instant) if cal else timedelta(0)
 
     def total_school_time(self, instant: Optional[datetime] = None) -> timedelta:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         return cal.total_school_time() if cal else timedelta(0)
 
     def next_year_start(self, instant: Optional[datetime] = None) -> datetime:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         nxt = self._next_calendar(instant)
         if not nxt:
             raise RuntimeError("No next year calendar data available")
@@ -155,13 +155,13 @@ class BellSchedule:
 
     def current_year_start(self, instant: Optional[datetime] = None) -> Optional[datetime]:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         return cal.start_of_year() if cal else None
 
     def current_year_end(self, instant: Optional[datetime] = None) -> Optional[datetime]:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         return cal.end_of_year() if cal else None
 
@@ -187,19 +187,19 @@ class BellSchedule:
 
     def school_days_left(self, instant: Optional[datetime] = None) -> int:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         return cal.school_days_left(instant) if cal else 0
 
     def calendar_days_left(self, instant: Optional[datetime] = None) -> int:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         return cal.calendar_days_left(instant) if cal else 0
 
     def non_class_days_left(self, instant: Optional[datetime] = None) -> list[dict]:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant)
         return cal.non_class_days_left(instant) if cal else []
 
@@ -209,7 +209,7 @@ class BellSchedule:
 
     def summer_bounds(self, instant: Optional[datetime] = None) -> Optional[dict]:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         if self._calendar_at(instant):
             return None
 
@@ -263,22 +263,22 @@ class BellSchedule:
 
     def periods_for_date(self, instant: Optional[datetime] = None) -> list[dict]:
         if instant is None:
-            instant = now_instant()
+            instant = _now_instant()
         cal = self._calendar_at(instant) or self._next_calendar(instant)
         if not cal:
             return []
 
         if cal.is_in_calendar(instant):
-            today = instant_to_date(instant, cal.timezone)
+            today = _instant_to_date(instant, cal.timezone)
             if cal.is_school_day(today):
                 sched = cal.schedule(today)
                 end_of_day = sched.end_of_day(today, cal.timezone)
                 if instant < end_of_day:
                     d = today
                 else:
-                    d = instant_to_date(cal.next_school_day_start(instant), cal.timezone)
+                    d = _instant_to_date(cal.next_school_day_start(instant), cal.timezone)
             else:
-                d = instant_to_date(cal.next_school_day_start(instant), cal.timezone)
+                d = _instant_to_date(cal.next_school_day_start(instant), cal.timezone)
         else:
             d = cal.first_day
 

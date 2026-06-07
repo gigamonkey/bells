@@ -445,6 +445,13 @@ describe('validateCalendarData', () => {
       assert.strictEqual(typeof result.valid, 'boolean');
     });
 
+    it('empty-string year is labelled "unknown"', () => {
+      const data = withPatch((d) => { d.year = ''; });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes('Year 0 (unknown)')));
+    });
+
     it('mixed ids are reported in insertion order', () => {
       const data = [
         { ...VALID_DATA[0], id: 'aaa' },

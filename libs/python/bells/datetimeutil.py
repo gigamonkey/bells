@@ -119,18 +119,18 @@ def resolve_schedule_times(periods: list[dict]) -> list[dict]:
     return result
 
 
-def plain_to_instant(d: date, t: time, tz: str) -> datetime:
+def _plain_to_instant(d: date, t: time, tz: str) -> datetime:
     """Combine a date and wall-clock time in timezone ``tz`` into a UTC instant."""
     aware = datetime.combine(d, t, tzinfo=ZoneInfo(tz))
     return aware.astimezone(timezone.utc)
 
 
-def instant_to_date(instant: datetime, tz: str) -> date:
+def _instant_to_date(instant: datetime, tz: str) -> date:
     """Return the calendar date of ``instant`` as observed in timezone ``tz``."""
     return instant.astimezone(ZoneInfo(tz)).date()
 
 
-def now_instant() -> datetime:
+def _now_instant() -> datetime:
     """The current moment as a UTC instant (counterpart of ``Temporal.Now.instant()``)."""
     return datetime.now(timezone.utc)
 
@@ -153,8 +153,8 @@ def days_between(a: datetime, b: datetime) -> int:
 
 def includes_weekend(start: datetime, end: datetime, tz: str) -> bool:
     """Does the span ``[start, end)`` include a Saturday or Sunday in ``tz``?"""
-    d = instant_to_date(start, tz)
-    end_date = instant_to_date(end, tz)
+    d = _instant_to_date(start, tz)
+    end_date = _instant_to_date(end, tz)
 
     while d < end_date:
         if d.isoweekday() in (6, 7):  # 6=Sat, 7=Sun

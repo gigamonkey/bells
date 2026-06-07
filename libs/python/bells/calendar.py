@@ -12,10 +12,10 @@ from typing import Optional, Union
 from .datetimeutil import (
     days_between,
     includes_weekend,
-    instant_to_date,
-    now_instant,
+    _instant_to_date,
+    _now_instant,
     parse_plain_date,
-    plain_to_instant,
+    _plain_to_instant,
     resolve_schedule_times,
 )
 
@@ -62,10 +62,10 @@ class Period:
         self.next: Optional["Period"] = None
 
     def start_instant(self, d: date, timezone: str) -> datetime:
-        return plain_to_instant(d, self.start, timezone)
+        return _plain_to_instant(d, self.start, timezone)
 
     def end_instant(self, d: date, timezone: str) -> datetime:
-        return plain_to_instant(d, self.end, timezone)
+        return _plain_to_instant(d, self.end, timezone)
 
     def is_after(self, instant: datetime, d: date, timezone: str) -> bool:
         return self.start_instant(d, timezone) > instant
@@ -108,12 +108,12 @@ class Interval:
 
     def left(self, now: Optional[datetime] = None) -> timedelta:
         if now is None:
-            now = now_instant()
+            now = _now_instant()
         return self.end - now
 
     def done(self, now: Optional[datetime] = None) -> timedelta:
         if now is None:
-            now = now_instant()
+            now = _now_instant()
         return now - self.start
 
 
@@ -293,7 +293,7 @@ class Calendar:
     # ── internal helpers ────────────────────────────────────────────────────
 
     def _noon_instant(self, d: date) -> datetime:
-        return plain_to_instant(d, time(hour=12), self.timezone)
+        return _plain_to_instant(d, time(hour=12), self.timezone)
 
     def _next_school_day(self, d: date) -> date:
         d = d + timedelta(days=1)
@@ -318,11 +318,11 @@ class Calendar:
             return timedelta(0)
 
         total = timedelta(0)
-        cursor_date = instant_to_date(cursor, self.timezone)
+        cursor_date = _instant_to_date(cursor, self.timezone)
 
         while cursor_date <= self.last_day:
             # Stop once the start of this day is past the finish time.
-            day_midnight = plain_to_instant(cursor_date, time(hour=0), self.timezone)
+            day_midnight = _plain_to_instant(cursor_date, time(hour=0), self.timezone)
             if day_midnight >= finish:
                 break
 
@@ -388,13 +388,13 @@ class Calendar:
         )
 
     def next_holiday(self, instant: datetime) -> date:
-        d = instant_to_date(instant, self.timezone) + timedelta(days=1)
+        d = _instant_to_date(instant, self.timezone) + timedelta(days=1)
         while not self.is_holiday(d) and d <= self.last_day:
             d = d + timedelta(days=1)
         return d
 
     def next_school_day_start(self, instant: datetime) -> datetime:
-        d = instant_to_date(instant, self.timezone)
+        d = _instant_to_date(instant, self.timezone)
         if self.is_school_day(d):
             start = self.schedule(d).start_of_day(d, self.timezone)
             if start > instant:
@@ -403,7 +403,7 @@ class Calendar:
         return self.schedule(nxt).start_of_day(nxt, self.timezone)
 
     def previous_school_day_end(self, instant: datetime) -> datetime:
-        d = instant_to_date(instant, self.timezone)
+        d = _instant_to_date(instant, self.timezone)
         if self.is_school_day(d):
             end = self.schedule(d).end_of_day(d, self.timezone)
             if end < instant:
@@ -412,12 +412,12 @@ class Calendar:
         return self.schedule(prev).end_of_day(prev, self.timezone)
 
     def current_interval(self, instant: datetime) -> Optional[Interval]:
-        d = instant_to_date(instant, self.timezone)
+        d = _instant_to_date(instant, self.timezone)
         sched = self.schedule(d)
         return sched.current_interval(instant)
 
     def school_days_left(self, instant: datetime) -> int:
-        d = instant_to_date(instant, self.timezone)
+        d = _instant_to_date(instant, self.timezone)
         sched = self.schedule(d)
         end_of_day = sched.end_of_day(d, self.timezone) if self.is_school_day(d) else None
 
@@ -438,7 +438,7 @@ class Calendar:
         return self.non_class_days.get(d.isoformat()) or None
 
     def non_class_days_left(self, instant: datetime) -> list[dict]:
-        today = instant_to_date(instant, self.timezone)
+        today = _instant_to_date(instant, self.timezone)
         today_sched = self.schedule(today) if self.is_school_day(today) else None
         today_end = today_sched.end_of_day(today, self.timezone) if today_sched else None
         includes_today = bool(today_end and instant < today_end)
@@ -470,7 +470,7 @@ class Calendar:
         return count
 
     def calendar_days_left(self, instant: datetime) -> int:
-        d = instant_to_date(instant, self.timezone)
+        d = _instant_to_date(instant, self.timezone)
         end_date = self.last_day + timedelta(days=1)
         return days_between(self._noon_instant(d), self._noon_instant(end_date))
 

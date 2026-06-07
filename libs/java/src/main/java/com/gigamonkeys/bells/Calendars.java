@@ -72,6 +72,16 @@ public final class Calendars {
   }
 
   /**
+   * Build a {@link BellSchedule} for a specific academic year, with default options.
+   *
+   * @param year e.g. {@code "2025-2026"}
+   * @return the bell schedule
+   */
+  public BellSchedule forYear(String year) {
+    return forYear(year, Options.defaults());
+  }
+
+  /**
    * Build a {@link BellSchedule} for a specific academic year.
    *
    * @param year e.g. {@code "2025-2026"}

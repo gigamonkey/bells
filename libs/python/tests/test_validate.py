@@ -345,6 +345,12 @@ class TestMalformedInput:
         result = validate_calendar_data(data)
         assert isinstance(result["valid"], bool)
 
+    def test_empty_year_labelled_unknown(self):
+        data = with_patch(lambda d: d.__setitem__("year", ""))
+        result = validate_calendar_data(data)
+        assert result["valid"] is False
+        assert any("Year 0 (unknown)" in e for e in result["errors"])
+
     def test_multiple_ids_reported_in_insertion_order(self):
         data = [
             {**VALID_DATA[0], "id": "aaa"},

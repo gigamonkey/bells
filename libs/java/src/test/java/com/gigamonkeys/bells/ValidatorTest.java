@@ -509,6 +509,15 @@ class ValidatorTest {
     }
 
     @Test
+    void emptyYearLabelledUnknown() {
+      // An empty-string year falls back to "unknown" in the message label.
+      JsonNode data = withPatch(o -> o.put("year", ""));
+      ValidationResult r = Validator.validate(data);
+      assertFalse(r.valid());
+      assertTrue(anyError(r, "Year 0 (unknown)"));
+    }
+
+    @Test
     void mixedIdsReportedInInsertionOrder() {
       ArrayNode array = MAPPER.createArrayNode();
       for (String id : new String[] {"aaa", "bbb", "ccc"}) {
