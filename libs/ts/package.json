@@ -5,7 +5,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/gigamonkey/bells",
-    "directory": "lib"
+    "directory": "ts"
   },
   "scripts": {
     "build": "tsc && node scripts/finish-build.mjs",

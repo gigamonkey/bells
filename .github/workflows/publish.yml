@@ -19,8 +19,8 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm install -g npm@latest
       - run: npm install
-        working-directory: lib
+        working-directory: libs/ts
       - run: npm test
-        working-directory: lib
+        working-directory: libs/ts
       - run: npm publish --provenance --access public
-        working-directory: lib
+        working-directory: libs/ts

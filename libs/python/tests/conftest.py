@@ -5,7 +5,7 @@ from datetime import date, datetime, time, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-# Make the package importable when running pytest from the lib-py directory
+# Make the package importable when running pytest from the python directory
 # without an editable install.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 

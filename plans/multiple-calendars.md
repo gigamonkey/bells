@@ -21,7 +21,7 @@ Conceptually a *calendar* is the set of yearly files that share the same
 have one year each so far). The yearly-file structure (`schedules`,
 `dates`, `holidays`, …) is unchanged.
 
-Update `validateCalendarData` in `lib/src/validate.js` to require both
+Update `validateCalendarData` in `libs/ts/src/validate.js` to require both
 fields and to reject mismatched `id`s when an array is passed.
 
 The BHS yearly files (`2022-2023.json` … `2026-2027.json`) all get

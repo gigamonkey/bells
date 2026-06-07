@@ -124,7 +124,7 @@ New icon in [index.html:17](index.html:17) `#icons` (🔔) next to gear/sched/ap
 
 ## Rollout order
 
-1. `alarms.js` logic + unit tests (add under `lib/` testing pattern or a new
+1. `alarms.js` logic + unit tests (add under `libs/ts/` testing pattern or a new
    lightweight test file — there's no current web-app test harness, so
    probably just exercise via `setOffset` manually).
 2. Banner + Web Audio chime, hard-coded single alarm for smoke testing.

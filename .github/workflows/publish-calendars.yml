@@ -19,10 +19,10 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm install -g npm@latest
       - run: npm install
-        working-directory: lib
+        working-directory: libs/ts
       - run: npm run build
-        working-directory: lib
+        working-directory: libs/ts
       - name: Validate calendar JSON
-        run: node lib/dist/bin/validate.js bhs-calendars/*-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].json
+        run: node libs/ts/dist/bin/validate.js bhs-calendars/*-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].json
       - run: npm publish --provenance --access public
         working-directory: bhs-calendars

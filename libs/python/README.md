@@ -1,7 +1,7 @@
 # bells (Python)
 
 A framework-agnostic Python library for querying school bell schedules. This is
-a port of the [`@peterseibel/bells`](../lib) JavaScript library, kept
+a port of the [`@peterseibel/bells`](../ts) JavaScript library, kept
 behaviorally identical to it.
 
 Where the JS library is built on the [Temporal API](https://tc39.es/proposal-temporal/),
@@ -21,7 +21,7 @@ Requires Python 3.9+ (uses `zoneinfo`). No third-party dependencies.
 
 ## Calendar data format
 
-The calendar data format is identical to the JS library — see [`../lib/README.md`](../lib/README.md)
+The calendar data format is identical to the JS library — see [`../ts/README.md`](../ts/README.md)
 for the full field reference. Briefly, calendar data is a list of year objects:
 
 ```json
@@ -127,7 +127,7 @@ python -m bells.cli calendars.json     # without installing
 ## Tests
 
 ```sh
-cd lib-py
+cd libs/python
 python -m pytest
 ```
 

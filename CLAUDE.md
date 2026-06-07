@@ -32,12 +32,12 @@ ES modules bundled by esbuild. The entry point is `bells.js`; `out.js` is the co
 - `bhs-calendars/` — Per-year JSON files (`2022-2023.json` … `2025-2026.json`) published as `@peterseibel/bhs-calendars` on npm; imported individually by `calendar.js`
 - `server/` — Express REST API server (`server/index.js`) wrapping `@peterseibel/bells` for HTTP access; has its own `package.json`. Endpoints: `GET /api/current`, `/api/schedule`, `/api/status`. All endpoints accept `role`, `includeTags`, `time`, and `date` query params. `PORT` and `CALENDARS_PATH` env vars configure the server.
 
-**`@peterseibel/bells` library (`lib/`):** Published to npm. Handles all schedule logic: time parsing, schedule selection, overlap validation. Key exports:
+**`@peterseibel/bells` library (`libs/ts/`):** Published to npm. Handles all schedule logic: time parsing, schedule selection, overlap validation. Key exports:
 - `BellSchedule` — main class; `periodsForDate(instant)` returns periods for a given moment
 - `Calendars` — loads calendar data from filesystem paths or URLs
 - `validateCalendarData` — validates calendar JSON; `bells-validate` CLI wraps it
 - Library uses `Temporal` as a global (set by consumer via `globalThis.Temporal = Temporal`)
-- Tests: `cd lib && npm test`
+- Tests: `cd libs/ts && npm test`
 
 **Update loop:** Every second, `update()` recalculates the current interval, updates countdowns, progress bars, background color (red = last 10 min of period, blue = class, purple = passing, pink = summer), and year-completion percentage.
 

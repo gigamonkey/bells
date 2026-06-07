@@ -1,7 +1,7 @@
 # Divergences from the JavaScript library
 
 This Python port aims to be behaviorally identical to the JavaScript
-[`@peterseibel/bells`](../lib) library. This file records the places where it
+[`@peterseibel/bells`](../ts) library. This file records the places where it
 intentionally differs. Each entry should eventually be reconciled — either by
 backporting the change to the JS library or by reverting it here.
 

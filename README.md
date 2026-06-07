@@ -14,10 +14,13 @@ Click the QR code icon to get a big QR code to easily share the app with your fr
 
 ## Development
 
-The repo contains four things:
+The repo contains:
 
 - **The web app** (repo root) — `bells.js`, `calendar.js`, `datetime.js`, `dom.js`, `index.html`, `style.css`, bundled to `out.js` by esbuild.
-- **`lib/`** — the `@peterseibel/bells` npm package: framework-agnostic schedule logic.
+- **`libs/`** — framework-agnostic ports of the schedule logic in three languages:
+  - **`libs/ts/`** — the `@peterseibel/bells` npm package (TypeScript); the reference implementation used by the web app and server.
+  - **`libs/python/`** — a Python port (see `libs/python/DIVERGENCES.md` for where it differs from the TS reference).
+  - **`libs/java/`** — a Java port built on `java.time`.
 - **`bhs-calendars/`** — the `@peterseibel/bhs-calendars` npm package: per-year BHS calendar JSON.
 - **`server/`** — an Express REST API (`@peterseibel/bells` over HTTP); has its own `package.json`.
 
@@ -45,10 +48,10 @@ There is no test suite for the web app. To test future dates without waiting, ca
 
 ---
 
-## Working on `@peterseibel/bells` (the `lib/` package)
+## Working on `@peterseibel/bells` (the `libs/ts/` package)
 
 ```sh
-cd lib
+cd libs/ts
 npm install
 npm test                                # node --test test/*.test.js
 npx bells-validate path/to/calendar.json
@@ -58,23 +61,23 @@ The library uses `Temporal` as a global; tests install a polyfill. Consumers mus
 
 ### Publishing
 
-Publishing is automated via GitHub Actions with npm Trusted Publisher (OIDC) — no token needed. The workflow (`.github/workflows/publish.yml`) fires on `v*` tags and runs `npm publish --provenance --access public` from `lib/`.
+Publishing is automated via GitHub Actions with npm Trusted Publisher (OIDC) — no token needed. The workflow (`.github/workflows/publish.yml`) fires on `v*` tags and runs `npm publish --provenance --access public` from `libs/ts/`.
 
 The `release-lib` make target does the version bump, tag, and push:
 
 ```sh
-make release-lib      # patch bump; commits lib/package.json, tags vX.Y.Z, pushes
+make release-lib      # patch bump; commits libs/ts/package.json, tags vX.Y.Z, pushes
 ```
 
 For a minor or major bump, run the steps manually:
 
 ```sh
-cd lib
+cd libs/ts
 npm version minor --no-git-tag-version   # or: major
 cd ..
-git add lib/package.json lib/package-lock.json
-git commit -m "v$(node -p "require('./lib/package.json').version")"
-git tag "v$(node -p "require('./lib/package.json').version")"
+git add libs/ts/package.json libs/ts/package-lock.json
+git commit -m "v$(node -p "require('./libs/ts/package.json').version")"
+git tag "v$(node -p "require('./libs/ts/package.json').version")"
 git push --follow-tags
 ```
 
@@ -89,15 +92,15 @@ cd server && npm install @peterseibel/bells@latest
 
 ## Working on `@peterseibel/bhs-calendars` (the `bhs-calendars/` package)
 
-Each academic year is its own JSON file (e.g. `bhs-calendars/bhs-2025-2026.json`). The schema is documented in [lib/README.md](lib/README.md#calendar-data-format). Validate before publishing:
+Each academic year is its own JSON file (e.g. `bhs-calendars/bhs-2025-2026.json`). The schema is documented in [libs/ts/README.md](libs/ts/README.md#calendar-data-format). Validate before publishing:
 
 ```sh
-cd lib && npx bells-validate ../bhs-calendars/bhs-2025-2026.json
+cd libs/ts && npx bells-validate ../../bhs-calendars/bhs-2025-2026.json
 ```
 
 ### Publishing
 
-Publishing is automated via GitHub Actions with npm Trusted Publisher (OIDC), the same as the `lib/` package. The workflow (`.github/workflows/publish-calendars.yml`) fires on `calendars-v*` tags, validates every year's JSON with `bells-validate`, and then runs `npm publish --provenance --access public` from `bhs-calendars/`.
+Publishing is automated via GitHub Actions with npm Trusted Publisher (OIDC), the same as the `libs/ts/` package. The workflow (`.github/workflows/publish-calendars.yml`) fires on `calendars-v*` tags, validates every year's JSON with `bells-validate`, and then runs `npm publish --provenance --access public` from `bhs-calendars/`.
 
 ```sh
 make release-calendars    # patch bump; commits, tags calendars-vX.Y.Z, pushes
@@ -126,14 +129,14 @@ cd server && npm install @peterseibel/bhs-calendars@latest
 
 ## Testing the web app against unpublished library changes
 
-Both libraries are imported from the npm registry by default, so edits to `lib/` or `bhs-calendars/` do not affect the web app until you publish. To test local changes before publishing, install the local directory as a file dependency:
+Both libraries are imported from the npm registry by default, so edits to `libs/ts/` or `bhs-calendars/` do not affect the web app until you publish. To test local changes before publishing, install the local directory as a file dependency:
 
 ```sh
 # Test against local bhs-calendars:
 npm install ./bhs-calendars
 
-# Test against local lib:
-npm install ./lib
+# Test against local ts library:
+npm install ./libs/ts
 ```
 
 esbuild picks up changes on the next rebuild (`npm run dev` is in watch mode), so edit the JSON or library source, save, and reload the browser. Validate calendar changes with `bells-validate` as you go.

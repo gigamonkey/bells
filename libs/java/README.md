@@ -1,7 +1,7 @@
 # bells (Java)
 
 A framework-agnostic Java library for querying school bell schedules. Built on
-`java.time`. This is a port of the JavaScript [`@peterseibel/bells`](../lib) library
+`java.time`. This is a port of the JavaScript [`@peterseibel/bells`](../ts) library
 and shares the same calendar data format and semantics.
 
 ## Installation
@@ -22,7 +22,7 @@ used for parsing calendar JSON.
 ## Calendar data format
 
 The calendar data format is identical to the JavaScript library; see
-[`../lib/README.md`](../lib/README.md) for the full specification. In brief, calendar
+[`../ts/README.md`](../ts/README.md) for the full specification. In brief, calendar
 data is one JSON object per academic year (or an array of them):
 
 ```json

@@ -32,10 +32,10 @@ lint:
 	npx eslint *.js
 
 release-lib:
-	cd lib && npm version $(VERSION) --no-git-tag-version
-	git add lib/package.json lib/package-lock.json
-	git commit -m "v$$(node -p "require('./lib/package.json').version")"
-	tag="v$$(node -p "require('./lib/package.json').version")" && git tag -a -m "$$tag" "$$tag"
+	cd libs/ts && npm version $(VERSION) --no-git-tag-version
+	git add libs/ts/package.json libs/ts/package-lock.json
+	git commit -m "v$$(node -p "require('./libs/ts/package.json').version")"
+	tag="v$$(node -p "require('./libs/ts/package.json').version")" && git tag -a -m "$$tag" "$$tag"
 	git push --follow-tags
 
 release-bhs-calendars:
@@ -46,7 +46,7 @@ release-bhs-calendars:
 	git push --follow-tags
 
 local-deps:
-	npm i ./lib
+	npm i ./libs/ts
 	npm i ./bhs-calendars
 
 real-deps:
