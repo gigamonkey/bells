@@ -240,7 +240,9 @@ public final class Schedule {
     ZoneId tz = calendar.timezone();
     if (days > 4) {
       LocalDate nextHoliday = calendar.nextHoliday(start);
-      return calendar.breakNames().getOrDefault(nextHoliday.toString(), "Vacation");
+      // Empty string falls back to "Vacation" (matches the JS `|| 'Vacation'`).
+      String name = calendar.breakNames().get(nextHoliday.toString());
+      return (name == null || name.isEmpty()) ? "Vacation" : name;
     } else if (DateTimes.includesWeekend(start, end, tz)) {
       return days > 3 ? "Long weekend" : "Weekend";
     } else {

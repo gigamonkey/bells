@@ -107,8 +107,11 @@ public final class Calendars {
 
     List<CalendarData> primary = load(year);
     CalendarData first = primary.get(0);
+    // Treat an empty firstDayTeachers as absent (matches the JS `|| firstDay`).
     String firstDay =
-        first.firstDayTeachers() != null ? first.firstDayTeachers() : first.firstDay();
+        (first.firstDayTeachers() == null || first.firstDayTeachers().isEmpty())
+            ? first.firstDay()
+            : first.firstDayTeachers();
     String lastDay = first.lastDay();
     String todayStr = today.toString();
     boolean inYear = todayStr.compareTo(firstDay) >= 0 && todayStr.compareTo(lastDay) <= 0;

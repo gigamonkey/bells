@@ -1,10 +1,12 @@
-from datetime import time
+from datetime import date, time
 
+import pytest
 from conftest import LA, la_instant, pt
 
 from bells.datetimeutil import (
     days_between,
     includes_weekend,
+    noon,
     parse_plain_time,
     resolve_schedule_times,
 )
@@ -201,3 +203,30 @@ class TestIncludesWeekend:
         start = la_instant("2025-08-20T16:00:00")
         end = la_instant("2025-08-20T17:00:00")
         assert includes_weekend(start, end, LA) is False
+
+
+# ─── parse_plain_time strict input ────────────────────────────────────────────
+
+
+class TestParsePlainTimeStrict:
+    @pytest.mark.parametrize(
+        "bad", ["8:30:00", "8:", "830", "8:30am", "25:00", "8:60", "", " 8:30", "8:3a"]
+    )
+    def test_rejects_malformed(self, bad):
+        with pytest.raises(ValueError):
+            parse_plain_time(bad, None)
+
+    def test_accepts_canonical(self):
+        t, ambiguous = parse_plain_time("8:30", None)
+        assert (t.hour, t.minute) == (8, 30)
+
+
+# ─── noon ─────────────────────────────────────────────────────────────────────
+
+
+class TestNoon:
+    def test_noon(self):
+        n = noon(date(2025, 8, 13))
+        assert (n.year, n.month, n.day) == (2025, 8, 13)
+        assert (n.hour, n.minute, n.second) == (12, 0, 0)
+        assert n.tzinfo is None

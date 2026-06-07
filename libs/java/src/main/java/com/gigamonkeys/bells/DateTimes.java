@@ -38,6 +38,25 @@ public final class DateTimes {
   }
 
   /**
+   * Strictly parse a {@code "H:M"}/{@code "HH:MM"} time string into {@code [hour, minute]}.
+   * Rejects anything that isn't exactly two 1–2 digit numeric components in range (no seconds,
+   * no am/pm suffix, no missing parts).
+   *
+   * @throws IllegalArgumentException if {@code str} is not a valid time string
+   */
+  private static int[] parseHourMinute(String str) {
+    String[] parts = str.split(":");
+    if (parts.length == 2 && parts[0].matches("[0-9]{1,2}") && parts[1].matches("[0-9]{1,2}")) {
+      int h = Integer.parseInt(parts[0]);
+      int m = Integer.parseInt(parts[1]);
+      if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+        return new int[] {h, m};
+      }
+    }
+    throw new IllegalArgumentException("Invalid time string: \"" + str + "\"");
+  }
+
+  /**
    * Parse a time string to a {@link LocalTime}.
    *
    * <p>Time strings may omit 24-hour notation for PM times. E.g. {@code "1:25"} means
@@ -61,9 +80,9 @@ public final class DateTimes {
    * @return the resolved time and whether it was ambiguous
    */
   public static ParsedTime parsePlainTime(String str, LocalTime previous) {
-    String[] parts = str.split(":");
-    int h = Integer.parseInt(parts[0].trim());
-    int m = Integer.parseInt(parts[1].trim());
+    int[] hm = parseHourMinute(str);
+    int h = hm[0];
+    int m = hm[1];
 
     // h = 0 or >= 13 have exactly one interpretation — return directly.
     if (h == 0 || h >= 13) {

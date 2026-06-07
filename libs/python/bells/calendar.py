@@ -148,7 +148,8 @@ class Schedule:
         tz = self.calendar.timezone
         if days > 4:
             next_holiday = self.calendar.next_holiday(start)
-            return self.calendar.break_names.get(next_holiday.isoformat(), "Vacation")
+            # Empty string falls back to "Vacation" (matches the JS `|| 'Vacation'`).
+            return self.calendar.break_names.get(next_holiday.isoformat()) or "Vacation"
         elif includes_weekend(start, end, tz):
             return "Long weekend" if days > 3 else "Weekend"
         else:
@@ -371,7 +372,8 @@ class Calendar:
                 periods = entry
         else:
             weekday_name = WEEKDAY_NAMES[d.isoweekday()]
-            name = self.weekday_schedules.get(weekday_name, "NORMAL")
+            # Empty string falls back to NORMAL (matches the JS `|| 'NORMAL'`).
+            name = self.weekday_schedules.get(weekday_name) or "NORMAL"
             periods = self._named_schedule(name)
         return Schedule(self, resolve_schedule_times(periods), d, name)
 
@@ -432,7 +434,8 @@ class Calendar:
         return count
 
     def non_class_label(self, d: date) -> Optional[str]:
-        return self.non_class_days.get(d.isoformat())
+        # Treat an empty-string label as absent (matches the JS `|| null`).
+        return self.non_class_days.get(d.isoformat()) or None
 
     def non_class_days_left(self, instant: datetime) -> list[dict]:
         today = instant_to_date(instant, self.timezone)

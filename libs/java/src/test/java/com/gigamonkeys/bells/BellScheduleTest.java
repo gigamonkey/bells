@@ -176,6 +176,13 @@ class BellScheduleTest {
     }
 
     @Test
+    void emptyLabelTreatedAsAbsent() {
+      String data = NON_CLASS_DATA.replace("\"2026-06-01\": \"exam\"", "\"2026-06-01\": \"\"");
+      BellSchedule bs = new BellSchedule(CalendarData.parse(data), Options.defaults());
+      org.junit.jupiter.api.Assertions.assertNull(bs.nonClassLabel(pd("2026-06-01")));
+    }
+
+    @Test
     void daysLeftFromActiveCalendar() {
       List<NonClassDay> list = makeNc().nonClassDaysLeft(laInstant("2026-05-15T08:00:00"));
       assertEquals(2, list.size());

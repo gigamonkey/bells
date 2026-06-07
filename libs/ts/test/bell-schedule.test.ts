@@ -202,6 +202,12 @@ describe('nonClassDays', () => {
     assert.strictEqual(make().nonClassLabel(pd('2025-08-19')), null);
   });
 
+  it('nonClassLabel treats an empty-string label as absent', () => {
+    const data = { ...NON_CLASS_DATA, nonClassDays: { '2026-06-01': '' } };
+    const bs = new BellSchedule([data], { role: 'student', includeTags: {} });
+    assert.strictEqual(bs.nonClassLabel(pd('2026-06-01')), null);
+  });
+
   it('nonClassDaysLeft returns entries from the active calendar', () => {
     const instant = Temporal.PlainDateTime.from('2026-05-15T08:00:00')
       .toZonedDateTime('America/Los_Angeles')

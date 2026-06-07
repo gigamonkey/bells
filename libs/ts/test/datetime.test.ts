@@ -283,3 +283,19 @@ describe('includesWeekend', () => {
     assert.strictEqual(includesWeekend(start, end, tz), false);
   });
 });
+
+// ─── parsePlainTime strict input ──────────────────────────────────────────────
+
+describe('parsePlainTime (strict)', () => {
+  for (const bad of ['8:30:00', '8:', '830', '8:30am', '25:00', '8:60', '', ' 8:30', '8:3a']) {
+    it(`rejects ${JSON.stringify(bad)}`, () => {
+      assert.throws(() => parsePlainTime(bad, null));
+    });
+  }
+
+  it('accepts canonical "8:30"', () => {
+    const { time } = parsePlainTime('8:30', null);
+    assert.strictEqual(time.hour, 8);
+    assert.strictEqual(time.minute, 30);
+  });
+});

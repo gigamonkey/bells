@@ -18,6 +18,24 @@ export const parsePlainDate = (str: string): Temporal.PlainDate => {
 };
 
 /**
+ * Strictly parse a "H:M" / "HH:MM" time string into [hour, minute]. Rejects
+ * anything that isn't exactly two 1–2 digit numeric components in range
+ * (no seconds, no am/pm suffix, no missing parts).
+ */
+const parseHourMinute = (str: string): [number, number] => {
+  const parts = str.split(':');
+  const ok = parts.length === 2 && parts.every((p) => /^[0-9]{1,2}$/.test(p));
+  if (ok) {
+    const h = Number(parts[0]);
+    const m = Number(parts[1]);
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+      return [h, m];
+    }
+  }
+  throw new RangeError(`Invalid time string: "${str}"`);
+};
+
+/**
  * Parse a time string to a Temporal.PlainTime.
  *
  * Time strings may omit 24-hour notation for PM times. E.g. "1:25" means
@@ -38,7 +56,7 @@ export const parsePlainDate = (str: string): Temporal.PlainDate => {
  * @param previous - the previously resolved time
  */
 export const parsePlainTime = (str: string, previous: Temporal.PlainTime | null): ParsedTime => {
-  const [h, m] = str.split(':').map(Number);
+  const [h, m] = parseHourMinute(str);
 
   // h = 0 or >= 13 have exactly one interpretation — return directly.
   if (h === 0 || h >= 13) {

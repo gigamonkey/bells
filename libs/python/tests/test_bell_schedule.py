@@ -164,6 +164,11 @@ class TestNonClassDays:
     def test_label_unlisted(self):
         assert make_nc_bs().non_class_label(pd("2025-08-19")) is None
 
+    def test_empty_label_treated_as_absent(self):
+        data = {**NON_CLASS_DATA, "nonClassDays": {"2026-06-01": ""}}
+        bs = BellSchedule([data], {"role": "student", "include_tags": {}})
+        assert bs.non_class_label(pd("2026-06-01")) is None
+
     def test_days_left_active_calendar(self):
         lst = make_nc_bs().non_class_days_left(la_instant("2026-05-15T08:00:00"))
         assert len(lst) == 2

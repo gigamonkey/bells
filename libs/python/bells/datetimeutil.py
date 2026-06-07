@@ -34,6 +34,20 @@ def parse_plain_date(s: str) -> date:
     return date.fromisoformat(s)
 
 
+def _parse_hour_minute(s: str) -> tuple[int, int]:
+    """Strictly parse a ``"H:M"``/``"HH:MM"`` string into ``(hour, minute)``.
+
+    Rejects anything that isn't exactly two 1–2 digit numeric components in
+    range (no seconds, no am/pm suffix, no missing parts).
+    """
+    parts = s.split(":")
+    if len(parts) == 2 and all(1 <= len(p) <= 2 and p.isascii() and p.isdigit() for p in parts):
+        h, m = int(parts[0]), int(parts[1])
+        if 0 <= h <= 23 and 0 <= m <= 59:
+            return h, m
+    raise ValueError(f'Invalid time string: "{s}"')
+
+
 def parse_plain_time(s: str, previous: Optional[time]) -> ParsedTime:
     """Parse a time string into a :class:`datetime.time`.
 
@@ -53,8 +67,7 @@ def parse_plain_time(s: str, previous: Optional[time]) -> ParsedTime:
     Returns ``ambiguous=True`` only when no candidate is ``>= previous`` (a data
     error); the AM candidate is returned in that case.
     """
-    h_str, m_str = s.split(":")
-    h, m = int(h_str), int(m_str)
+    h, m = _parse_hour_minute(s)
 
     # h == 0 or h >= 13 have exactly one interpretation — return directly.
     if h == 0 or h >= 13:
@@ -120,6 +133,11 @@ def instant_to_date(instant: datetime, tz: str) -> date:
 def now_instant() -> datetime:
     """The current moment as a UTC instant (counterpart of ``Temporal.Now.instant()``)."""
     return datetime.now(timezone.utc)
+
+
+def noon(d: date) -> datetime:
+    """A naive :class:`datetime` at noon on ``d`` (counterpart of ``noon`` in JS)."""
+    return datetime.combine(d, time(hour=12, minute=0, second=0))
 
 
 def days_between(a: datetime, b: datetime) -> int:

@@ -2,6 +2,7 @@ package com.gigamonkeys.bells;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.gigamonkeys.bells.DateTimes.ParsedTime;
@@ -244,6 +245,28 @@ class DateTimesTest {
     @Test
     void sameWeekdayNoWeekend() {
       assertFalse(DateTimes.includesWeekend(instant("2025-08-20T16:00:00"), instant("2025-08-20T17:00:00"), LA));
+    }
+  }
+
+  // ─── parsePlainTime strict input ──────────────────────────────────────────────
+
+  @Nested
+  class ParsePlainTimeStrict {
+
+    @Test
+    void rejectsMalformed() {
+      String[] bad = {"8:30:00", "8:", "830", "8:30am", "25:00", "8:60", "", " 8:30", "8:3a"};
+      for (String s : bad) {
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> DateTimes.parsePlainTime(s, null),
+            "should reject \"" + s + "\"");
+      }
+    }
+
+    @Test
+    void acceptsCanonical() {
+      assertEquals(LocalTime.of(8, 30), DateTimes.parsePlainTime("8:30", null).time());
     }
   }
 }

@@ -137,7 +137,9 @@ public final class Calendar {
       }
     } else {
       String weekdayName = WEEKDAY_NAMES[date.getDayOfWeek().getValue()];
-      name = weekdaySchedules.getOrDefault(weekdayName, "NORMAL");
+      // Empty string falls back to NORMAL (matches the JS `|| 'NORMAL'`).
+      String mapped = weekdaySchedules.get(weekdayName);
+      name = (mapped == null || mapped.isEmpty()) ? "NORMAL" : mapped;
       periods = namedSchedule(name);
     }
 
@@ -282,7 +284,9 @@ public final class Calendar {
    * @return the non-class label for that date, or {@code null}
    */
   public String nonClassLabel(LocalDate date) {
-    return nonClassDays.get(date.toString());
+    // Treat an empty-string label as absent (matches the JS `|| null`).
+    String label = nonClassDays.get(date.toString());
+    return (label == null || label.isEmpty()) ? null : label;
   }
 
   /**
