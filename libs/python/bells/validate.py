@@ -14,6 +14,36 @@ from zoneinfo import ZoneInfo
 from .datetimeutil import parse_plain_date, parse_plain_time
 
 
+REQUIRED_FIELDS = ("year", "id", "name", "timezone", "firstDay", "lastDay", "schedules")
+
+
+def _is_falsy(value) -> bool:
+    """Whether ``value`` is falsy in the JavaScript sense.
+
+    The JS reference uses ``!value`` and ``value || default`` throughout, so an
+    empty string, ``0``, ``False``, ``None``/missing, and ``NaN`` are falsy,
+    while empty objects/arrays (``{}``/``[]``) are truthy. Mirrors Java's
+    ``Validator.isFalsy``.
+    """
+    if value is None or value is False:
+        return True
+    if isinstance(value, str):
+        return value == ""
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return value == 0 or value != value  # 0 or NaN
+    return False  # objects and arrays are truthy
+
+
+def _as_dict(value) -> dict:
+    """Return ``value`` if it is a dict, else an empty dict (JS-tolerant)."""
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value) -> list:
+    """Return ``value`` if it is a list, else an empty list (JS-tolerant)."""
+    return value if isinstance(value, list) else []
+
+
 def _is_valid_timezone(tz: str) -> bool:
     """Whether ``tz`` is a valid IANA timezone identifier."""
     try:
@@ -132,11 +162,20 @@ def _validate_year(year: dict, index: int) -> dict:
     """Validate a single year data object."""
     errors: list[str] = []
     warnings: list[str] = []
-    label = f"Year {index} ({year.get('year') or 'unknown'})"
+    year_name = year.get("year") if isinstance(year, dict) else None
+    label = f"Year {index} ({year_name or 'unknown'})"
+
+    # A non-object array element: every required field reads as missing, then we
+    # bail out — matching the JS reference, where property access on a primitive
+    # yields undefined.
+    if not isinstance(year, dict):
+        for field in REQUIRED_FIELDS:
+            errors.append(f'{label}: missing required field "{field}"')
+        return {"errors": errors, "warnings": warnings}
 
     # 1. Required fields.
-    for field in ("year", "id", "name", "timezone", "firstDay", "lastDay", "schedules"):
-        if not year.get(field):
+    for field in REQUIRED_FIELDS:
+        if _is_falsy(year.get(field)):
             errors.append(f'{label}: missing required field "{field}"')
 
     schedules = year.get("schedules")
@@ -185,7 +224,7 @@ def _validate_year(year: dict, index: int) -> dict:
         return range_start <= d <= last_day
 
     VALID_WEEKDAYS = {"monday", "tuesday", "wednesday", "thursday", "friday"}
-    for day, name in (year.get("weekdaySchedules") or {}).items():
+    for day, name in _as_dict(year.get("weekdaySchedules")).items():
         if day not in VALID_WEEKDAYS:
             errors.append(f'{label}: weekdaySchedules key "{day}" is not a valid weekday name')
         if not isinstance(name, str) or name not in (year.get("schedules") or {}):
@@ -193,7 +232,7 @@ def _validate_year(year: dict, index: int) -> dict:
                 f'{label}: weekdaySchedules.{day} references unknown schedule "{name}"'
             )
 
-    for key, value in (year.get("dates") or {}).items():
+    for key, value in _as_dict(year.get("dates")).items():
         if not _try_parse_date(key):
             errors.append(f'{label}: dates key "{key}" is not a valid date')
         elif not in_range(key):
@@ -206,20 +245,20 @@ def _validate_year(year: dict, index: int) -> dict:
                 f"{label}: dates.{key} must be a schedule name or an array of periods"
             )
 
-    for d in year.get("holidays") or []:
+    for d in _as_list(year.get("holidays")):
         if not in_range(d):
             errors.append(f'{label}: holiday "{d}" is outside the calendar year range')
 
-    for d in year.get("teacherWorkDays") or []:
+    for d in _as_list(year.get("teacherWorkDays")):
         if not in_range(d):
             errors.append(f'{label}: teacherWorkDay "{d}" is outside the calendar year range')
 
-    for key in (year.get("breakNames") or {}).keys():
+    for key in _as_dict(year.get("breakNames")).keys():
         if not in_range(key):
             errors.append(f'{label}: breakNames key "{key}" is outside the calendar year range')
 
-    holiday_set = set(year.get("holidays") or [])
-    for key, value in (year.get("nonClassDays") or {}).items():
+    holiday_set = set(_as_list(year.get("holidays")))
+    for key, value in _as_dict(year.get("nonClassDays")).items():
         d = _try_parse_date(key)
         if not d:
             errors.append(f'{label}: nonClassDays key "{key}" is not a valid date')
@@ -241,10 +280,10 @@ def _validate_year(year: dict, index: int) -> dict:
 
     # 5. Validate period times in all schedules.
     all_schedules = []
-    for key, periods in (year.get("schedules") or {}).items():
+    for key, periods in _as_dict(year.get("schedules")).items():
         if isinstance(periods, list):
             all_schedules.append((periods, f"{label} schedules.{key}"))
-    for key, value in (year.get("dates") or {}).items():
+    for key, value in _as_dict(year.get("dates")).items():
         if isinstance(value, list):
             all_schedules.append((value, f"{label} dates.{key}"))
 
@@ -279,8 +318,14 @@ def validate_calendar_data(data) -> dict:
         errors.extend(result["errors"])
         warnings.extend(result["warnings"])
 
-    # All entries in an array must share the same id.
-    ids = {y.get("id") for y in arr if y.get("id") is not None}
+    # All entries in an array must share the same id. Preserve insertion order
+    # (dict.fromkeys) so the message is deterministic, matching the JS Set and
+    # Java LinkedHashSet.
+    ids = list(
+        dict.fromkeys(
+            y.get("id") for y in arr if isinstance(y, dict) and y.get("id") is not None
+        )
+    )
     if len(ids) > 1:
         joined = ", ".join(f'"{s}"' for s in ids)
         errors.append(f"Calendar array mixes multiple ids: {joined}")

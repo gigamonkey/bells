@@ -310,3 +310,47 @@ class TestEdgeCases:
         result = validate_calendar_data(data)
         assert result["valid"] is False
         assert any("timezone" in e or "Bad/Zone" in e for e in result["errors"])
+
+
+class TestMalformedInput:
+    """Malformed (wrong-type) input must be reported, never crash."""
+
+    def test_non_object_array_element(self):
+        # A primitive where a year object is expected: report missing fields,
+        # don't crash. Matches the JS reference and the Java port.
+        result = validate_calendar_data([42])
+        assert result["valid"] is False
+        assert any('missing required field "year"' in e for e in result["errors"])
+        assert any('missing required field "schedules"' in e for e in result["errors"])
+
+    def test_non_object_element_alongside_valid(self):
+        data = [VALID_DATA[0], "not a year"]
+        result = validate_calendar_data(data)
+        assert result["valid"] is False
+        # The valid year is still validated; the bad element reports missing fields.
+        assert any("Year 1" in e and "missing required field" in e for e in result["errors"])
+
+    def test_empty_object_schedules_is_present_not_missing(self):
+        # An empty (but present) object is truthy in JS, so `schedules` is not
+        # "missing"; instead schedules.NORMAL is reported missing.
+        data = with_patch(lambda d: d.__setitem__("schedules", {}))
+        result = validate_calendar_data(data)
+        assert result["valid"] is False
+        assert any("missing schedules.NORMAL" in e for e in result["errors"])
+        assert not any('missing required field "schedules"' in e for e in result["errors"])
+
+    def test_malformed_container_does_not_crash(self):
+        # weekdaySchedules given a non-object: must not raise.
+        data = with_patch(lambda d: d.__setitem__("weekdaySchedules", 42))
+        result = validate_calendar_data(data)
+        assert isinstance(result["valid"], bool)
+
+    def test_multiple_ids_reported_in_insertion_order(self):
+        data = [
+            {**VALID_DATA[0], "id": "aaa"},
+            {**VALID_DATA[0], "id": "bbb"},
+            {**VALID_DATA[0], "id": "ccc"},
+        ]
+        result = validate_calendar_data(data)
+        assert result["valid"] is False
+        assert 'Calendar array mixes multiple ids: "aaa", "bbb", "ccc"' in result["errors"]

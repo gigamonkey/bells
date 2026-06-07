@@ -414,4 +414,48 @@ describe('validateCalendarData', () => {
       assert.ok(result.errors.some((e) => e.includes('timezone') || e.includes('Bad/Zone')));
     });
   });
+
+  describe('malformed input', () => {
+    it('non-object array element → reports missing fields, does not throw', () => {
+      const result = validateCalendarData([42]);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes('missing required field "year"')));
+      assert.ok(result.errors.some((e) => e.includes('missing required field "schedules"')));
+    });
+
+    it('non-object element alongside a valid year', () => {
+      const result = validateCalendarData([VALID_DATA[0], 'not a year']);
+      assert.strictEqual(result.valid, false);
+      assert.ok(
+        result.errors.some((e) => e.includes('Year 1') && e.includes('missing required field'))
+      );
+    });
+
+    it('empty-object schedules is present (not "missing"), but NORMAL is missing', () => {
+      const data = withPatch((d) => { d.schedules = {}; });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes('missing schedules.NORMAL')));
+      assert.ok(!result.errors.some((e) => e.includes('missing required field "schedules"')));
+    });
+
+    it('malformed container (non-object weekdaySchedules) does not throw', () => {
+      const data = withPatch((d) => { d.weekdaySchedules = 42; });
+      const result = validateCalendarData(data);
+      assert.strictEqual(typeof result.valid, 'boolean');
+    });
+
+    it('mixed ids are reported in insertion order', () => {
+      const data = [
+        { ...VALID_DATA[0], id: 'aaa' },
+        { ...VALID_DATA[0], id: 'bbb' },
+        { ...VALID_DATA[0], id: 'ccc' },
+      ];
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, false);
+      assert.ok(
+        result.errors.includes('Calendar array mixes multiple ids: "aaa", "bbb", "ccc"')
+      );
+    });
+  });
 });

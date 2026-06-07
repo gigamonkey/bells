@@ -1,6 +1,7 @@
 package com.gigamonkeys.bells;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -456,6 +457,60 @@ class ValidatorTest {
       ValidationResult r = Validator.validate(array);
       assertFalse(r.valid());
       assertTrue(r.errors().stream().anyMatch(e -> e.contains("timezone") || e.contains("Bad/Zone")));
+    }
+  }
+
+  // ─── malformed input ────────────────────────────────────────────────────────────
+
+  @Nested
+  class MalformedInput {
+
+    @Test
+    void nonObjectArrayElementReportsMissingFields() {
+      ValidationResult r = Validator.validate(arr("[42]"));
+      assertFalse(r.valid());
+      assertTrue(anyError(r, "missing required field \"year\""));
+      assertTrue(anyError(r, "missing required field \"schedules\""));
+    }
+
+    @Test
+    void nonObjectElementAlongsideValid() {
+      ArrayNode array = MAPPER.createArrayNode();
+      array.add(validData().get(0).deepCopy());
+      array.add("not a year");
+      ValidationResult r = Validator.validate(array);
+      assertFalse(r.valid());
+      assertTrue(r.errors().stream()
+          .anyMatch(e -> e.contains("Year 1") && e.contains("missing required field")));
+    }
+
+    @Test
+    void emptyObjectSchedulesIsPresentNotMissing() {
+      JsonNode data = withPatch(o -> o.set("schedules", MAPPER.createObjectNode()));
+      ValidationResult r = Validator.validate(data);
+      assertFalse(r.valid());
+      assertTrue(anyError(r, "missing schedules.NORMAL"));
+      assertFalse(anyError(r, "missing required field \"schedules\""));
+    }
+
+    @Test
+    void malformedContainerDoesNotThrow() {
+      JsonNode data = withPatch(o -> o.put("weekdaySchedules", 42));
+      ValidationResult r = Validator.validate(data);
+      assertNotNull(r);
+    }
+
+    @Test
+    void mixedIdsReportedInInsertionOrder() {
+      ArrayNode array = MAPPER.createArrayNode();
+      for (String id : new String[] {"aaa", "bbb", "ccc"}) {
+        ObjectNode y = (ObjectNode) validData().get(0).deepCopy();
+        y.put("id", id);
+        array.add(y);
+      }
+      ValidationResult r = Validator.validate(array);
+      assertFalse(r.valid());
+      assertTrue(r.errors().contains("Calendar array mixes multiple ids: \"aaa\", \"bbb\", \"ccc\""));
     }
   }
 }
