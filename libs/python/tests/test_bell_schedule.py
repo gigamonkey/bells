@@ -132,6 +132,19 @@ class TestScheduleFor:
             assert "name" in p and "start" in p and "end" in p and "tags" in p
 
 
+class TestPeriodsForDate:
+    def test_during_school_returns_todays_periods(self):
+        # Tuesday 2025-08-19 mid-morning → today's two periods.
+        periods = make_bs().periods_for_date(la_instant("2025-08-19T08:45:00"))
+        assert [p["name"] for p in periods] == ["Period 1", "Period 2"]
+
+    def test_after_school_rolls_to_next_day(self):
+        # After Tuesday's end → Wednesday's periods.
+        periods = make_bs().periods_for_date(la_instant("2025-08-19T20:00:00"))
+        start_la = periods[0]["start"].astimezone(ZoneInfo(LA)).date()
+        assert start_la.isoformat() == "2025-08-20"
+
+
 NON_CLASS_DATA = {
     **CALENDAR_DATA,
     "dates": {"2026-06-01": "NORMAL", "2026-06-04": "NORMAL"},

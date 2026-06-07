@@ -157,6 +157,30 @@ class CalendarTest {
       Period first = calendar(data, Options.defaults()).schedule(pd("2025-08-18")).firstPeriod();
       assertEquals(LocalTime.of(8, 30), first.start());
     }
+
+    @Test
+    void namedDateOverrideUsesThatSchedule() {
+      String data = CALENDAR_DATA
+          .replace("\"schedules\": {",
+              "\"schedules\": {\n      \"ASSEMBLY\": [ { \"name\": \"Assembly\", \"start\": \"9:00\","
+                  + " \"end\": \"10:00\" } ],")
+          .replace("\"weekdaySchedules\":",
+              "\"dates\": { \"2025-08-19\": \"ASSEMBLY\" },\n  \"weekdaySchedules\":");
+      Calendar cal = calendar(data, Options.defaults());
+      assertEquals("Assembly", cal.schedule(pd("2025-08-19")).firstPeriod().name());
+    }
+
+    @Test
+    void customWeekdayScheduleMapping() {
+      String data = CALENDAR_DATA
+          .replace("\"schedules\": {",
+              "\"schedules\": {\n      \"ASSEMBLY\": [ { \"name\": \"Assembly\", \"start\": \"9:00\","
+                  + " \"end\": \"10:00\" } ],")
+          .replace("\"weekdaySchedules\": { \"monday\": \"LATE_START\" }",
+              "\"weekdaySchedules\": { \"wednesday\": \"ASSEMBLY\" }");
+      Calendar cal = calendar(data, Options.defaults());
+      assertEquals("Assembly", cal.schedule(pd("2025-08-20")).firstPeriod().name()); // Wednesday
+    }
   }
 
   // ─── startOfYear / endOfYear ──────────────────────────────────────────────────
@@ -219,6 +243,18 @@ class CalendarTest {
       Schedule sched = makeSched(Options.defaults());
       Period p = new Period("Period 0", LocalTime.of(7, 26), LocalTime.of(8, 24), List.of("optional", "zero"), false);
       assertFalse(sched.hasPeriod(p));
+    }
+
+    @Test
+    void seventhAllowedButExtNotAllowed() {
+      // includeTags { 2: ["seventh"] }: Period 7 passes, Period Ext does not.
+      Schedule sched = makeSched(new Options(Options.STUDENT, Map.of(2, List.of("seventh"))));
+      Period p7 = new Period(
+          "Period 7", LocalTime.of(15, 39), LocalTime.of(16, 37), List.of("optional", "seventh"), false);
+      Period pExt = new Period(
+          "Period Ext", LocalTime.of(15, 39), LocalTime.of(17, 9), List.of("optional", "ext"), false);
+      assertTrue(sched.hasPeriod(p7));
+      assertFalse(sched.hasPeriod(pExt));
     }
 
     @Test

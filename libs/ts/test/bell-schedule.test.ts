@@ -250,3 +250,23 @@ describe('isSchoolDay', () => {
     );
   });
 });
+
+// ─── periodsForDate ───────────────────────────────────────────────────────────
+
+describe('periodsForDate', () => {
+  const laInstant = (isoLocal) =>
+    Temporal.PlainDateTime.from(isoLocal).toZonedDateTime('America/Los_Angeles').toInstant();
+
+  it("returns today's periods during the school day", () => {
+    // Tuesday 2025-08-19 mid-morning → today's two periods.
+    const periods = makeBellSchedule().periodsForDate(laInstant('2025-08-19T08:45:00'));
+    assert.deepStrictEqual(periods.map((p) => p.name), ['Period 1', 'Period 2']);
+  });
+
+  it('rolls to the next school day after the day ends', () => {
+    // After Tuesday's end → Wednesday's periods.
+    const periods = makeBellSchedule().periodsForDate(laInstant('2025-08-19T20:00:00'));
+    const startDate = periods[0].start.toZonedDateTimeISO('America/Los_Angeles').toPlainDate();
+    assert.strictEqual(startDate.toString(), '2025-08-20');
+  });
+});

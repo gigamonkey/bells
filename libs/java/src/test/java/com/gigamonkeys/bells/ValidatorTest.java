@@ -178,6 +178,14 @@ class ValidatorTest {
     }
 
     @Test
+    void inlineArrayWithAmTimesValid() {
+      // AM-style times (e.g. "8:30") inside a dates inline override parse correctly.
+      JsonNode data = withPatch(o -> o.set("dates",
+          obj("{\"2025-09-15\":[{\"name\":\"Assembly\",\"start\":\"8:30\",\"end\":\"15:33\"}]}")));
+      assertTrue(Validator.validate(data).valid());
+    }
+
+    @Test
     void scheduleNameReferenceValid() {
       JsonNode data = withPatch(o -> o.set("dates", obj("{\"2025-09-15\":\"LATE_START\"}")));
       assertTrue(Validator.validate(data).valid());
