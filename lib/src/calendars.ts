@@ -4,31 +4,29 @@
  */
 
 import { BellSchedule } from './bell-schedule.js';
+import type { BellScheduleOptions, YearData } from './types.js';
 
 class Calendars {
-  #basePath;
-  #cache;
+  #basePath: string;
+  #cache: Map<string, YearData[]>;
 
   /**
-   * @param {string} basePath - Directory path (e.g. './calendars/') or URL base.
+   * @param basePath - Directory path (e.g. './calendars/') or URL base.
    */
-  constructor(basePath) {
+  constructor(basePath: string) {
     this.#basePath = basePath;
     this.#cache = new Map(); // year string → parsed data
   }
 
-  /**
-   * Load data for a specific academic year.
-   * @param {string} year - e.g. '2025-2026'
-   * @returns {Promise<object[]>}
-   */
-  async #load(year) {
-    if (this.#cache.has(year)) {
-      return this.#cache.get(year);
+  /** Load data for a specific academic year (e.g. '2025-2026'). */
+  async #load(year: string): Promise<YearData[]> {
+    const cached = this.#cache.get(year);
+    if (cached) {
+      return cached;
     }
 
     const filePath = `${this.#basePath}${year}.json`;
-    let data;
+    let data: unknown;
 
     if (this.#basePath.startsWith('http://') || this.#basePath.startsWith('https://')) {
       const res = await fetch(filePath);
@@ -41,18 +39,13 @@ class Calendars {
     }
 
     // Normalize to array.
-    const arr = Array.isArray(data) ? data : [data];
+    const arr = (Array.isArray(data) ? data : [data]) as YearData[];
     this.#cache.set(year, arr);
     return arr;
   }
 
-  /**
-   * Get a BellSchedule for a specific academic year.
-   * @param {string} year - e.g. '2025-2026'
-   * @param {object} [options]
-   * @returns {Promise<BellSchedule>}
-   */
-  async forYear(year, options = {}) {
+  /** Get a BellSchedule for a specific academic year (e.g. '2025-2026'). */
+  async forYear(year: string, options: BellScheduleOptions = {}): Promise<BellSchedule> {
     const arr = await this.#load(year);
     return new BellSchedule(arr, options);
   }
@@ -61,10 +54,8 @@ class Calendars {
    * Get a BellSchedule appropriate for the current instant.
    * During summer, loads both the most recent ended year and the next upcoming
    * year so summer-bounds and next-year-start queries work correctly.
-   * @param {object} [options]
-   * @returns {Promise<BellSchedule>}
    */
-  async current(options = {}) {
+  async current(options: BellScheduleOptions = {}): Promise<BellSchedule> {
     const today = Temporal.Now.plainDateISO();
     const year = this.#academicYearFor(today);
 
@@ -106,10 +97,8 @@ class Calendars {
   /**
    * Determine the academic year label for a given date.
    * Academic year starts in August.
-   * @param {Temporal.PlainDate} date
-   * @returns {string} e.g. '2025-2026'
    */
-  #academicYearFor(date) {
+  #academicYearFor(date: Temporal.PlainDate): string {
     const { month, year } = date;
     if (month >= 8) {
       return `${year}-${year + 1}`;
@@ -118,20 +107,12 @@ class Calendars {
     }
   }
 
-  /**
-   * @param {string} year - e.g. '2025-2026'
-   * @returns {string} - e.g. '2026-2027'
-   */
-  #nextAcademicYear(year) {
+  #nextAcademicYear(year: string): string {
     const [start] = year.split('-').map(Number);
     return `${start + 1}-${start + 2}`;
   }
 
-  /**
-   * @param {string} year - e.g. '2025-2026'
-   * @returns {string} - e.g. '2024-2025'
-   */
-  #prevAcademicYear(year) {
+  #prevAcademicYear(year: string): string {
     const [start] = year.split('-').map(Number);
     return `${start - 1}-${start}`;
   }

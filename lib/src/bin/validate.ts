@@ -19,12 +19,13 @@ if (filePaths.length === 0) {
 let anyErrors = false;
 
 for (const filePath of filePaths) {
-  let data;
+  let data: unknown;
   try {
     const text = await readFile(filePath, 'utf8');
     data = JSON.parse(text);
   } catch (err) {
-    console.error(`Error reading ${filePath}: ${err.message}`);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`Error reading ${filePath}: ${message}`);
     anyErrors = true;
     continue;
   }

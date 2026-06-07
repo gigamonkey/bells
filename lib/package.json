@@ -8,27 +8,41 @@
     "directory": "lib"
   },
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "build": "tsc && node scripts/finish-build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --noEmit && node --import tsx --test test/*.test.ts",
+    "prepublishOnly": "npm run build"
   },
   "exports": {
-    ".": "./src/index.js",
-    "./calendars": "./src/calendars.js",
-    "./validate": "./src/validate.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./calendars": {
+      "types": "./dist/calendars.d.ts",
+      "default": "./dist/calendars.js"
+    },
+    "./validate": {
+      "types": "./dist/validate.d.ts",
+      "default": "./dist/validate.js"
+    }
   },
   "bin": {
-    "bells-validate": "src/bin/validate.js"
+    "bells-validate": "dist/bin/validate.js"
   },
   "files": [
+    "dist/",
     "src/",
-    "index.d.ts",
-    "calendars.d.ts",
-    "validate.d.ts",
     "README.md"
   ],
   "peerDependencies": {
     "@js-temporal/polyfill": ">=0.4"
   },
   "devDependencies": {
-    "temporal-polyfill": "^0.3.2"
+    "@js-temporal/polyfill": "^0.5.1",
+    "@types/node": "^25.9.2",
+    "temporal-polyfill": "^0.3.2",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }

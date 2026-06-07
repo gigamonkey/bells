@@ -4,16 +4,17 @@
  */
 
 import { parsePlainDate, resolveScheduleTimes, daysBetween, noon, includesWeekend } from './datetime.js';
+import type {
+  IncludeTags,
+  IntervalType,
+  NonClassDay,
+  PeriodData,
+  ResolvedPeriod,
+  Role,
+  YearData,
+} from './types.js';
 
-/**
- * Normalize the includeTags option.
- * Accepts either a flat array (same tags every weekday) or a per-day-of-week map.
- * Returns a map: { 1: [...], 2: [...], 3: [...], 4: [...], 5: [...] }
- *
- * @param {string[] | Record<number, string[]>} includeTags
- * @returns {Record<number, string[]>}
- */
-const WEEKDAY_NAMES = {
+const WEEKDAY_NAMES: Record<number, string> = {
   1: 'monday',
   2: 'tuesday',
   3: 'wednesday',
@@ -23,19 +24,43 @@ const WEEKDAY_NAMES = {
   7: 'sunday',
 };
 
-const normalizeIncludeTags = (includeTags) => {
+/**
+ * Normalize the includeTags option.
+ * Accepts either a flat array (same tags every weekday) or a per-day-of-week map.
+ * Returns a map: { 1: [...], 2: [...], 3: [...], 4: [...], 5: [...] }
+ */
+const normalizeIncludeTags = (includeTags: IncludeTags): Record<number, string[]> => {
   if (Array.isArray(includeTags)) {
     return { 1: includeTags, 2: includeTags, 3: includeTags, 4: includeTags, 5: includeTags };
   }
   return includeTags || {};
 };
 
+interface CalendarOptions {
+  role: Role;
+  includeTags: IncludeTags;
+}
+
 class Calendar {
-  #noonInstant(date) {
+  data: YearData;
+  timezone: string;
+  role: Role;
+  includeTags: Record<number, string[]>;
+  firstDay: Temporal.PlainDate;
+  lastDay: Temporal.PlainDate;
+  schedules: Record<string, PeriodData[]>;
+  weekdaySchedules: Record<string, string>;
+  dates: Record<string, string | PeriodData[]>;
+  holidays: string[];
+  teacherWorkDays: string[];
+  breakNames: Record<string, string>;
+  nonClassDays: Record<string, string>;
+
+  #noonInstant(date: Temporal.PlainDate): Temporal.Instant {
     return noon(date).toZonedDateTime(this.timezone).toInstant();
   }
 
-  #nextSchoolDay(date) {
+  #nextSchoolDay(date: Temporal.PlainDate): Temporal.PlainDate {
     let d = date.add({ days: 1 });
     while (!this.isSchoolDay(d)) {
       d = d.add({ days: 1 });
@@ -43,7 +68,7 @@ class Calendar {
     return d;
   }
 
-  #previousSchoolDay(date) {
+  #previousSchoolDay(date: Temporal.PlainDate): Temporal.PlainDate {
     let d = date.subtract({ days: 1 });
     while (!this.isSchoolDay(d)) {
       d = d.subtract({ days: 1 });
@@ -51,7 +76,7 @@ class Calendar {
     return d;
   }
 
-  #schoolTimeBetween(start, end) {
+  #schoolTimeBetween(start: Temporal.Instant, end: Temporal.Instant): Temporal.Duration {
     // Clamp start/end to calendar bounds.
     const calStart = this.startOfYear();
     const calEnd = this.endOfYear();
@@ -90,11 +115,7 @@ class Calendar {
     return Temporal.Duration.from({ milliseconds: totalMillis });
   }
 
-  /**
-   * @param {object} data - One year's calendar data object.
-   * @param {{ role: string, includeTags: Record<number, string[]> }} options
-   */
-  constructor(data, options) {
+  constructor(data: YearData, options: CalendarOptions) {
     this.data = data;
     this.timezone = data.timezone;
     this.role = options.role;
@@ -113,37 +134,29 @@ class Calendar {
     this.nonClassDays = data.nonClassDays || {};
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @returns {boolean}
-   */
-  isInCalendar(instant) {
+  isInCalendar(instant: Temporal.Instant): boolean {
     return (
       Temporal.Instant.compare(this.startOfYear(), instant) <= 0 &&
       Temporal.Instant.compare(instant, this.endOfYear()) <= 0
     );
   }
 
-  startOfYear() {
+  startOfYear(): Temporal.Instant {
     const sched = this.schedule(this.firstDay);
     return sched.firstPeriod().startInstant(this.firstDay, this.timezone);
   }
 
-  endOfYear() {
+  endOfYear(): Temporal.Instant {
     const sched = this.schedule(this.lastDay);
     return sched.lastPeriod().endInstant(this.lastDay, this.timezone);
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @returns {Schedule}
-   */
-  schedule(date) {
+  schedule(date: Temporal.PlainDate): Schedule {
     const d = date.toString();
-    let periods;
-    let name = null;
-    if (d in this.dates && d >= this.firstDay.toString()) {
-      const entry = this.dates[d];
+    let periods: PeriodData[];
+    let name: string | null = null;
+    const entry = this.dates[d];
+    if (entry !== undefined && d >= this.firstDay.toString()) {
       if (typeof entry === 'string') {
         periods = this.#namedSchedule(entry);
         name = entry;
@@ -158,7 +171,7 @@ class Calendar {
     return new Schedule(this, resolveScheduleTimes(periods), date, name);
   }
 
-  #namedSchedule(name) {
+  #namedSchedule(name: string): PeriodData[] {
     const periods = this.schedules[name];
     if (!periods) {
       throw new Error(`Unknown schedule "${name}"`);
@@ -166,20 +179,12 @@ class Calendar {
     return periods;
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @returns {boolean}
-   */
-  isSchoolDay(date) {
+  isSchoolDay(date: Temporal.PlainDate): boolean {
     const dow = date.dayOfWeek;
     return dow !== 6 && dow !== 7 && !this.isHoliday(date);
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @returns {boolean}
-   */
-  isHoliday(date) {
+  isHoliday(date: Temporal.PlainDate): boolean {
     const d = date.toString();
     return (
       this.holidays.includes(d) &&
@@ -187,12 +192,8 @@ class Calendar {
     );
   }
 
-  /**
-   * Find the next holiday after the given instant.
-   * @param {Temporal.Instant} instant
-   * @returns {Temporal.PlainDate}
-   */
-  nextHoliday(instant) {
+  /** Find the next holiday after the given instant. */
+  nextHoliday(instant: Temporal.Instant): Temporal.PlainDate {
     let d = instant.toZonedDateTimeISO(this.timezone).toPlainDate().add({ days: 1 });
     while (!this.isHoliday(d) && Temporal.PlainDate.compare(d, this.lastDay) <= 0) {
       d = d.add({ days: 1 });
@@ -200,11 +201,7 @@ class Calendar {
     return d;
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @returns {Temporal.Instant}
-   */
-  nextSchoolDayStart(instant) {
+  nextSchoolDayStart(instant: Temporal.Instant): Temporal.Instant {
     const date = instant.toZonedDateTimeISO(this.timezone).toPlainDate();
     if (this.isSchoolDay(date)) {
       const start = this.schedule(date).startOfDay(date, this.timezone);
@@ -216,11 +213,7 @@ class Calendar {
     return this.schedule(next).startOfDay(next, this.timezone);
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @returns {Temporal.Instant}
-   */
-  previousSchoolDayEnd(instant) {
+  previousSchoolDayEnd(instant: Temporal.Instant): Temporal.Instant {
     const date = instant.toZonedDateTimeISO(this.timezone).toPlainDate();
     if (this.isSchoolDay(date)) {
       const end = this.schedule(date).endOfDay(date, this.timezone);
@@ -232,22 +225,14 @@ class Calendar {
     return this.schedule(prev).endOfDay(prev, this.timezone);
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @returns {Interval | null}
-   */
-  currentInterval(instant) {
+  currentInterval(instant: Temporal.Instant): Interval | null {
     const date = instant.toZonedDateTimeISO(this.timezone).toPlainDate();
     const sched = this.schedule(date);
     return sched.currentInterval(instant);
   }
 
-  /**
-   * Count school days remaining from `instant` through end of year.
-   * @param {Temporal.Instant} instant
-   * @returns {number}
-   */
-  schoolDaysLeft(instant) {
+  /** Count school days remaining from `instant` through end of year. */
+  schoolDaysLeft(instant: Temporal.Instant): number {
     const date = instant.toZonedDateTimeISO(this.timezone).toPlainDate();
     const sched = this.schedule(date);
     const endOfDay = this.isSchoolDay(date) ? sched.endOfDay(date, this.timezone) : null;
@@ -268,26 +253,18 @@ class Calendar {
     return count;
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @returns {string | null}
-   */
-  nonClassLabel(date) {
+  nonClassLabel(date: Temporal.PlainDate): string | null {
     return this.nonClassDays[date.toString()] || null;
   }
 
-  /**
-   * Non-class days from `instant` through end of year, in date order.
-   * @param {Temporal.Instant} instant
-   * @returns {Array<{ date: Temporal.PlainDate, label: string }>}
-   */
-  nonClassDaysLeft(instant) {
+  /** Non-class days from `instant` through end of year, in date order. */
+  nonClassDaysLeft(instant: Temporal.Instant): NonClassDay[] {
     const today = instant.toZonedDateTimeISO(this.timezone).toPlainDate();
     const todaySched = this.isSchoolDay(today) ? this.schedule(today) : null;
     const todayEnd = todaySched ? todaySched.endOfDay(today, this.timezone) : null;
     const includesToday = todayEnd && Temporal.Instant.compare(instant, todayEnd) < 0;
 
-    const result = [];
+    const result: NonClassDay[] = [];
     for (const [dateStr, label] of Object.entries(this.nonClassDays)) {
       const d = parsePlainDate(dateStr);
       const cmp = Temporal.PlainDate.compare(d, today);
@@ -300,13 +277,8 @@ class Calendar {
     return result;
   }
 
-  /**
-   * Count school days between two plain dates (inclusive of both endpoints).
-   * @param {Temporal.PlainDate} start
-   * @param {Temporal.PlainDate} end
-   * @returns {number}
-   */
-  schoolDaysBetween(start, end) {
+  /** Count school days between two plain dates (inclusive of both endpoints). */
+  schoolDaysBetween(start: Temporal.PlainDate, end: Temporal.PlainDate): number {
     // Clamp to calendar bounds.
     const from = Temporal.PlainDate.compare(start, this.firstDay) < 0 ? this.firstDay : start;
     const to = Temporal.PlainDate.compare(end, this.lastDay) > 0 ? this.lastDay : end;
@@ -320,62 +292,49 @@ class Calendar {
     return count;
   }
 
-  /**
-   * Count calendar days remaining until the day after lastDay.
-   * @param {Temporal.Instant} instant
-   * @returns {number}
-   */
-  calendarDaysLeft(instant) {
+  /** Count calendar days remaining until the day after lastDay. */
+  calendarDaysLeft(instant: Temporal.Instant): number {
     const date = instant.toZonedDateTimeISO(this.timezone).toPlainDate();
     const endDate = this.lastDay.add({ days: 1 });
     return daysBetween(this.#noonInstant(date), this.#noonInstant(endDate));
   }
 
-  /**
-   * Compute total school time (as Duration) from `instant` to end of year.
-   * @param {Temporal.Instant} instant
-   * @returns {Temporal.Duration}
-   */
-  schoolTimeLeft(instant) {
+  /** Compute total school time (as Duration) from `instant` to end of year. */
+  schoolTimeLeft(instant: Temporal.Instant): Temporal.Duration {
     return this.#schoolTimeBetween(instant, this.endOfYear());
   }
 
-  /**
-   * Compute school time (as Duration) from start of year to `instant`.
-   * @param {Temporal.Instant} instant
-   * @returns {Temporal.Duration}
-   */
-  schoolTimeDone(instant) {
+  /** Compute school time (as Duration) from start of year to `instant`. */
+  schoolTimeDone(instant: Temporal.Instant): Temporal.Duration {
     return this.#schoolTimeBetween(this.startOfYear(), instant);
   }
 
-  /**
-   * Total school time in the year.
-   * @returns {Temporal.Duration}
-   */
-  totalSchoolTime() {
+  /** Total school time in the year. */
+  totalSchoolTime(): Temporal.Duration {
     return this.#schoolTimeBetween(this.startOfYear(), this.endOfYear());
   }
 
   /**
    * Public entry point for cross-instance school-time computation.
    * Clamps to this calendar's bounds before summing.
-   * @param {Temporal.Instant} start
-   * @param {Temporal.Instant} end
-   * @returns {Temporal.Duration}
    */
-  schoolTimeBetween(start, end) {
+  schoolTimeBetween(start: Temporal.Instant, end: Temporal.Instant): Temporal.Duration {
     return this.#schoolTimeBetween(start, end);
   }
 }
 
 class Schedule {
-  /**
-   * @param {Calendar} calendar
-   * @param {Array<{name: string, start: Temporal.PlainTime, end: Temporal.PlainTime, tags?: string[], teachers?: boolean}>} periods
-   * @param {Temporal.PlainDate} date
-   */
-  constructor(calendar, periods, date, name = null) {
+  calendar: Calendar;
+  date: Temporal.PlainDate;
+  name: string | null;
+  rawPeriods: Period[];
+
+  constructor(
+    calendar: Calendar,
+    periods: ResolvedPeriod[],
+    date: Temporal.PlainDate,
+    name: string | null = null,
+  ) {
     this.calendar = calendar;
     this.date = date;
     this.name = name;
@@ -388,7 +347,7 @@ class Schedule {
     });
   }
 
-  #maybeBreak(instant) {
+  #maybeBreak(instant: Temporal.Instant): Interval | null {
     if (this.notInSchool(instant)) {
       const prev = this.calendar.previousSchoolDayEnd(instant);
       const next = this.calendar.nextSchoolDayStart(instant);
@@ -401,7 +360,7 @@ class Schedule {
     return null;
   }
 
-  #breakName(days, start, end) {
+  #breakName(days: number, start: Temporal.Instant, end: Temporal.Instant): string {
     const tz = this.calendar.timezone;
     if (days > 4) {
       const nextHoliday = this.calendar.nextHoliday(start);
@@ -413,12 +372,8 @@ class Schedule {
     }
   }
 
-  /**
-   * Determine if a period should be included given the current date/config.
-   * @param {Period} p
-   * @returns {boolean}
-   */
-  hasPeriod(p) {
+  /** Determine if a period should be included given the current date/config. */
+  hasPeriod(p: Period): boolean {
     if (p.teachers) {
       return this.calendar.role === 'teacher';
     }
@@ -435,10 +390,7 @@ class Schedule {
     return tags.some((tag) => tag !== 'optional' && allowed.includes(tag));
   }
 
-  /**
-   * @returns {Period[]}
-   */
-  actualPeriods() {
+  actualPeriods(): Period[] {
     const base = this.rawPeriods.filter((p) => this.hasPeriod(p));
 
     if (base.length === 0) return base;
@@ -447,45 +399,31 @@ class Schedule {
     // periods (e.g. Food Trucks) that should not define school day boundaries.
     // User-configurable optional periods (zero, seventh, ext) are kept so that
     // enabling them correctly affects the start/end of the school day.
-    const isNonschool = (p) => (p.tags || []).includes('nonschool');
+    const isNonschool = (p: Period) => (p.tags || []).includes('nonschool');
     while (base.length > 0 && (base[0].tags || []).includes('optional') && isNonschool(base[0])) base.shift();
     while (base.length > 0 && (base[base.length - 1].tags || []).includes('optional') && isNonschool(base[base.length - 1])) base.pop();
 
     return base;
   }
 
-  firstPeriod() {
+  firstPeriod(): Period {
     return this.actualPeriods()[0];
   }
 
-  lastPeriod() {
+  lastPeriod(): Period {
     const ps = this.actualPeriods();
     return ps[ps.length - 1];
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @param {string} timezone
-   * @returns {Temporal.Instant}
-   */
-  startOfDay(date, timezone) {
+  startOfDay(date: Temporal.PlainDate, timezone: string): Temporal.Instant {
     return this.firstPeriod().startInstant(date, timezone);
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @param {string} timezone
-   * @returns {Temporal.Instant}
-   */
-  endOfDay(date, timezone) {
+  endOfDay(date: Temporal.PlainDate, timezone: string): Temporal.Instant {
     return this.lastPeriod().endInstant(date, timezone);
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @returns {boolean}
-   */
-  notInSchool(instant) {
+  notInSchool(instant: Temporal.Instant): boolean {
     const date = this.date;
     const tz = this.calendar.timezone;
     return (
@@ -495,11 +433,7 @@ class Schedule {
     );
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @returns {Interval | null}
-   */
-  currentInterval(instant) {
+  currentInterval(instant: Temporal.Instant): Interval | null {
     const daysOff = this.#maybeBreak(instant);
     if (daysOff) return daysOff;
 
@@ -529,7 +463,7 @@ class Schedule {
         [],
       );
     } else {
-      for (let p = first; p !== null; p = p.next) {
+      for (let p: Period | null = first; p !== null; p = p.next) {
         if (p.contains(instant, date, tz)) {
           return p.toInterval(date, tz);
         } else if (p.next && p.isBefore(instant, date, tz) && p.next.isAfter(instant, date, tz)) {
@@ -550,79 +484,52 @@ class Schedule {
 }
 
 class Period {
-  /**
-   * @param {string} name
-   * @param {Temporal.PlainTime} start
-   * @param {Temporal.PlainTime} end
-   * @param {string[] | undefined} tags
-   * @param {boolean | undefined} teachers
-   */
-  constructor(name, start, end, tags, teachers) {
+  name: string;
+  start: Temporal.PlainTime;
+  end: Temporal.PlainTime;
+  tags: string[];
+  teachers: boolean;
+  next: Period | null;
+
+  constructor(
+    name: string,
+    start: Temporal.PlainTime,
+    end: Temporal.PlainTime,
+    tags: string[] | undefined,
+    teachers: boolean | undefined,
+  ) {
     this.name = name;
-    this.start = start; // Temporal.PlainTime
-    this.end = end;     // Temporal.PlainTime
+    this.start = start;
+    this.end = end;
     this.tags = tags || [];
     this.teachers = !!teachers;
     this.next = null;
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @param {string} timezone
-   * @returns {Temporal.Instant}
-   */
-  startInstant(date, timezone) {
+  startInstant(date: Temporal.PlainDate, timezone: string): Temporal.Instant {
     return date.toPlainDateTime(this.start).toZonedDateTime(timezone).toInstant();
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @param {string} timezone
-   * @returns {Temporal.Instant}
-   */
-  endInstant(date, timezone) {
+  endInstant(date: Temporal.PlainDate, timezone: string): Temporal.Instant {
     return date.toPlainDateTime(this.end).toZonedDateTime(timezone).toInstant();
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @param {Temporal.PlainDate} date
-   * @param {string} timezone
-   * @returns {boolean}
-   */
-  isAfter(instant, date, timezone) {
+  isAfter(instant: Temporal.Instant, date: Temporal.PlainDate, timezone: string): boolean {
     return Temporal.Instant.compare(this.startInstant(date, timezone), instant) > 0;
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @param {Temporal.PlainDate} date
-   * @param {string} timezone
-   * @returns {boolean}
-   */
-  isBefore(instant, date, timezone) {
+  isBefore(instant: Temporal.Instant, date: Temporal.PlainDate, timezone: string): boolean {
     return Temporal.Instant.compare(this.endInstant(date, timezone), instant) < 0;
   }
 
-  /**
-   * @param {Temporal.Instant} instant
-   * @param {Temporal.PlainDate} date
-   * @param {string} timezone
-   * @returns {boolean}
-   */
-  contains(instant, date, timezone) {
+  contains(instant: Temporal.Instant, date: Temporal.PlainDate, timezone: string): boolean {
     return (
       Temporal.Instant.compare(this.startInstant(date, timezone), instant) < 0 &&
       Temporal.Instant.compare(instant, this.endInstant(date, timezone)) < 0
     );
   }
 
-  /**
-   * @param {Temporal.PlainDate} date
-   * @param {string} timezone
-   * @returns {Interval}
-   */
-  toInterval(date, timezone) {
+  toInterval(date: Temporal.PlainDate, timezone: string): Interval {
     return new Interval(
       this.name,
       this.startInstant(date, timezone),
@@ -635,15 +542,21 @@ class Period {
 }
 
 class Interval {
-  /**
-   * @param {string} name
-   * @param {Temporal.Instant} start
-   * @param {Temporal.Instant} end
-   * @param {boolean} duringSchool
-   * @param {'period'|'passing'|'before-school'|'after-school'|'break'} type
-   * @param {string[]} tags
-   */
-  constructor(name, start, end, duringSchool, type, tags) {
+  name: string;
+  start: Temporal.Instant;
+  end: Temporal.Instant;
+  duringSchool: boolean;
+  type: IntervalType;
+  tags: string[];
+
+  constructor(
+    name: string,
+    start: Temporal.Instant,
+    end: Temporal.Instant,
+    duringSchool: boolean,
+    type: IntervalType,
+    tags: string[],
+  ) {
     this.name = name;
     this.start = start;
     this.end = end;
@@ -652,21 +565,14 @@ class Interval {
     this.tags = tags;
   }
 
-  /**
-   * @param {Temporal.Instant} [now]
-   * @returns {Temporal.Duration}
-   */
-  left(now = Temporal.Now.instant()) {
+  left(now: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
     return now.until(this.end);
   }
 
-  /**
-   * @param {Temporal.Instant} [now]
-   * @returns {Temporal.Duration}
-   */
-  done(now = Temporal.Now.instant()) {
+  done(now: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
     return this.start.until(now);
   }
 }
 
 export { Calendar, Schedule, Period, Interval, normalizeIncludeTags };
+export type { CalendarOptions };

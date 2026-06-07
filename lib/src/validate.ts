@@ -1,32 +1,37 @@
 /**
  * Validates calendar data objects.
+ *
+ * This module operates on untrusted JSON, so its inputs are intentionally
+ * loosely typed (`unknown` at the boundary, `any` for raw records being
+ * probed). The point of validation is precisely to confirm the shape that the
+ * strongly-typed rest of the library assumes.
  */
 
 import { parsePlainDate, parsePlainTime } from './datetime.js';
 
-/**
- * Check if a string is a valid IANA timezone identifier.
- * @param {string} tz
- * @returns {boolean}
- */
-const isValidTimezone = (tz) => {
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/** Check if a string is a valid IANA timezone identifier. */
+const isValidTimezone = (tz: unknown): boolean => {
   try {
     // Try to use it as a timezone by creating a ZonedDateTime.
-    Temporal.Now.instant().toZonedDateTimeISO(tz);
+    Temporal.Now.instant().toZonedDateTimeISO(tz as string);
     return true;
   } catch {
     return false;
   }
 };
 
-/**
- * Try to parse a date string; return null if invalid.
- * @param {string} str
- * @returns {Temporal.PlainDate | null}
- */
-const tryParseDate = (str) => {
+/** Try to parse a date string; return null if invalid. */
+const tryParseDate = (str: unknown): Temporal.PlainDate | null => {
   try {
-    return parsePlainDate(str);
+    return parsePlainDate(str as string);
   } catch {
     return null;
   }
@@ -35,13 +40,10 @@ const tryParseDate = (str) => {
 /**
  * Validate all time strings in a schedule's period list.
  * Returns an array of error strings.
- * @param {object[]} periods
- * @param {string} scheduleLabel - for error messages
- * @returns {string[]}
  */
-const validatePeriodTimes = (periods, scheduleLabel) => {
-  const errors = [];
-  let lastTime = null;
+const validatePeriodTimes = (periods: any[], scheduleLabel: string): string[] => {
+  const errors: string[] = [];
+  let lastTime: Temporal.PlainTime | null = null;
 
   for (const p of periods) {
     if (!p.start || !p.end) {
@@ -79,22 +81,28 @@ const validatePeriodTimes = (periods, scheduleLabel) => {
   return errors;
 };
 
+interface ResolvedEntry {
+  name: string;
+  startTime: Temporal.PlainTime;
+  endTime: Temporal.PlainTime;
+}
+
 /**
  * Check for overlapping non-optional periods in a schedule.
  * Student vs student overlaps are errors; teacher vs student overlaps are
  * warnings (teacher schedules run on a separate track from student schedules).
- * @param {object[]} periods
- * @param {string} scheduleLabel
- * @returns {{ errors: string[], warnings: string[] }}
  */
-const validateNoOverlap = (periods, scheduleLabel) => {
-  const errors = [];
-  const warnings = [];
+const validateNoOverlap = (
+  periods: any[],
+  scheduleLabel: string,
+): { errors: string[]; warnings: string[] } => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
 
   // Resolve times, separating student and teacher periods.
-  const studentPeriods = [];
-  const teacherPeriods = [];
-  let lastTime = null;
+  const studentPeriods: ResolvedEntry[] = [];
+  const teacherPeriods: ResolvedEntry[] = [];
+  let lastTime: Temporal.PlainTime | null = null;
   for (const p of periods) {
     if (!p.start || !p.end) continue;
 
@@ -104,7 +112,7 @@ const validateNoOverlap = (periods, scheduleLabel) => {
 
     if (!optional) {
       lastTime = endTime;
-      const entry = { name: p.name, startTime, endTime };
+      const entry: ResolvedEntry = { name: p.name, startTime, endTime };
       if (p.teachers) {
         teacherPeriods.push(entry);
       } else {
@@ -113,7 +121,7 @@ const validateNoOverlap = (periods, scheduleLabel) => {
     }
   }
 
-  const overlaps = (a, b) => {
+  const overlaps = (a: ResolvedEntry, b: ResolvedEntry): boolean => {
     const aStart = a.startTime.hour * 60 + a.startTime.minute;
     const aEnd = a.endTime.hour * 60 + a.endTime.minute;
     const bStart = b.startTime.hour * 60 + b.startTime.minute;
@@ -146,15 +154,10 @@ const validateNoOverlap = (periods, scheduleLabel) => {
   return { errors, warnings };
 };
 
-/**
- * Validate a single year data object.
- * @param {object} year
- * @param {number} index - index in the array, for error messages
- * @returns {{ errors: string[], warnings: string[] }}
- */
-const validateYear = (year, index) => {
-  const errors = [];
-  const warnings = [];
+/** Validate a single year data object. */
+const validateYear = (year: any, index: number): { errors: string[]; warnings: string[] } => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
   const label = `Year ${index} (${year.year || 'unknown'})`;
 
   // 1. Required fields.
@@ -209,7 +212,7 @@ const validateYear = (year, index) => {
 
   // 4. Check all dates in schedules keys, holidays, teacherWorkDays, breakNames
   //    fall within [rangeStart, lastDay].
-  const inRange = (dateStr) => {
+  const inRange = (dateStr: string): boolean => {
     const d = tryParseDate(dateStr);
     if (!d) return false;
     if (!rangeStart || !lastDay) return true; // can't check without bounds
@@ -289,7 +292,7 @@ const validateYear = (year, index) => {
   }
 
   // 5. Validate period times in all schedules.
-  const allSchedules = [];
+  const allSchedules: Array<[any[], string]> = [];
 
   for (const [key, periods] of Object.entries(year.schedules || {})) {
     if (Array.isArray(periods)) {
@@ -313,19 +316,18 @@ const validateYear = (year, index) => {
 };
 
 /**
- * Validate an array of calendar year data objects.
- * @param {object | object[]} data
- * @returns {{ valid: boolean, errors: string[], warnings: string[] }}
+ * Validate an array (or single object) of calendar year data.
+ * Returns { valid, errors, warnings }.
  */
-const validateCalendarData = (data) => {
-  const errors = [];
-  const warnings = [];
+const validateCalendarData = (data: unknown): ValidationResult => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
 
   if (!data || typeof data !== 'object') {
     return { valid: false, errors: ['Data must be an object or array'], warnings: [] };
   }
 
-  const arr = Array.isArray(data) ? data : [data];
+  const arr: any[] = Array.isArray(data) ? data : [data];
 
   if (arr.length === 0) {
     return { valid: false, errors: ['Data array is empty'], warnings: [] };

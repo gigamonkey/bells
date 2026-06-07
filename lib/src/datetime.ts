@@ -2,12 +2,18 @@
  * Pure Temporal utilities for the bells library.
  */
 
+import type { PeriodData, ResolvedPeriod } from './types.js';
+
+/** Result of resolving an ambiguous time string. */
+export interface ParsedTime {
+  time: Temporal.PlainTime;
+  ambiguous: boolean;
+}
+
 /**
  * Parse a "YYYY-MM-DD" string to a Temporal.PlainDate.
- * @param {string} str
- * @returns {Temporal.PlainDate}
  */
-const parsePlainDate = (str) => {
+export const parsePlainDate = (str: string): Temporal.PlainDate => {
   return Temporal.PlainDate.from(str);
 };
 
@@ -28,11 +34,10 @@ const parsePlainDate = (str) => {
  *
  * Returns ambiguous=true only when no candidate is >= previous (data error).
  *
- * @param {string} str - e.g. "8:30", "1:25", "13:25"
- * @param {Temporal.PlainTime | null} previous - the previously resolved time
- * @returns {{ time: Temporal.PlainTime, ambiguous: boolean }}
+ * @param str - e.g. "8:30", "1:25", "13:25"
+ * @param previous - the previously resolved time
  */
-const parsePlainTime = (str, previous) => {
+export const parsePlainTime = (str: string, previous: Temporal.PlainTime | null): ParsedTime => {
   const [h, m] = str.split(':').map(Number);
 
   // h = 0 or >= 13 have exactly one interpretation — return directly.
@@ -73,13 +78,10 @@ const parsePlainTime = (str, previous) => {
 /**
  * Resolve all time strings in a raw period array.
  * Returns a new array of periods with `start` and `end` as Temporal.PlainTime.
- *
- * @param {Array<{name: string, start: string, end: string, [key: string]: any}>} periods
- * @returns {Array<{name: string, start: Temporal.PlainTime, end: Temporal.PlainTime, [key: string]: any}>}
  */
-const resolveScheduleTimes = (periods) => {
-  let lastTime = null;
-  const result = [];
+export const resolveScheduleTimes = (periods: PeriodData[]): ResolvedPeriod[] => {
+  let lastTime: Temporal.PlainTime | null = null;
+  const result: ResolvedPeriod[] = [];
 
   for (const p of periods) {
     const optional = p.tags?.includes('optional');
@@ -99,12 +101,8 @@ const resolveScheduleTimes = (periods) => {
 /**
  * Number of calendar days between two Temporal.Instants.
  * Uses noon to avoid DST edge cases.
- *
- * @param {Temporal.Instant} a
- * @param {Temporal.Instant} b
- * @returns {number}
  */
-const daysBetween = (a, b) => {
+export const daysBetween = (a: Temporal.Instant, b: Temporal.Instant): number => {
   // Compare as PlainDate in UTC to avoid DST issues.
   const dateA = a.toZonedDateTimeISO('UTC').toPlainDate();
   const dateB = b.toZonedDateTimeISO('UTC').toPlainDate();
@@ -113,24 +111,20 @@ const daysBetween = (a, b) => {
 
 /**
  * Return a Temporal.PlainDateTime at noon on the given PlainDate.
- *
- * @param {Temporal.PlainDate} date
- * @returns {Temporal.PlainDateTime}
  */
-const noon = (date) => {
+export const noon = (date: Temporal.PlainDate): Temporal.PlainDateTime => {
   return date.toPlainDateTime({ hour: 12, minute: 0, second: 0 });
 };
 
 /**
  * Does the span from start to end (exclusive) include a Saturday or Sunday?
  * Both arguments are Temporal.Instant. timezone is an IANA timezone string.
- *
- * @param {Temporal.Instant} start
- * @param {Temporal.Instant} end
- * @param {string} timezone
- * @returns {boolean}
  */
-const includesWeekend = (start, end, timezone) => {
+export const includesWeekend = (
+  start: Temporal.Instant,
+  end: Temporal.Instant,
+  timezone: string,
+): boolean => {
   let d = start.toZonedDateTimeISO(timezone).toPlainDate();
   const endDate = end.toZonedDateTimeISO(timezone).toPlainDate();
 
@@ -141,5 +135,3 @@ const includesWeekend = (start, end, timezone) => {
   }
   return false;
 };
-
-export { parsePlainDate, parsePlainTime, resolveScheduleTimes, daysBetween, noon, includesWeekend };
