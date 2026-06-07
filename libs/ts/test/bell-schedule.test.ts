@@ -217,3 +217,36 @@ describe('nonClassDays', () => {
     assert.deepStrictEqual(make().nonClassDaysLeft(instant), []);
   });
 });
+
+// ─── isSchoolDay ──────────────────────────────────────────────────────────────
+
+describe('isSchoolDay', () => {
+  it('true for a normal weekday in range', () => {
+    assert.strictEqual(makeBellSchedule().isSchoolDay(pd('2025-08-13')), true);
+  });
+
+  it('false on a weekend', () => {
+    assert.strictEqual(makeBellSchedule().isSchoolDay(pd('2025-08-16')), false);
+  });
+
+  it('false on a holiday', () => {
+    assert.strictEqual(makeBellSchedule().isSchoolDay(pd('2025-09-01')), false);
+  });
+
+  it('false outside any calendar', () => {
+    assert.strictEqual(makeBellSchedule().isSchoolDay(pd('2024-01-01')), false);
+  });
+
+  it('no-arg defaults to today in the system-local zone', () => {
+    const bs = makeBellSchedule();
+    assert.strictEqual(bs.isSchoolDay(), bs.isSchoolDay(Temporal.Now.plainDateISO()));
+  });
+
+  it('timeZone arg anchors "today" to that zone', () => {
+    const bs = makeBellSchedule();
+    assert.strictEqual(
+      bs.isSchoolDay(undefined, 'America/Los_Angeles'),
+      bs.isSchoolDay(Temporal.Now.plainDateISO('America/Los_Angeles'))
+    );
+  });
+});

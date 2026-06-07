@@ -13,6 +13,7 @@ from typing import Optional
 from urllib.request import urlopen
 
 from .bell_schedule import BellSchedule
+from .datetimeutil import instant_to_date, now_instant
 
 
 class Calendars:
@@ -45,13 +46,17 @@ class Calendars:
         arr = self._load(year)
         return BellSchedule(arr, options or {})
 
-    def current(self, options: Optional[dict] = None) -> BellSchedule:
+    def current(self, options: Optional[dict] = None, tz: Optional[str] = None) -> BellSchedule:
         """Build a BellSchedule appropriate for the current date.
 
         During summer, loads both the most recent ended year and the next
         upcoming year so summer-bounds and next-year-start queries work.
+
+        "Today" defaults to the system-local date; pass ``tz`` (an IANA name) to
+        anchor the academic-year rollover to a specific zone (e.g. the school's)
+        when running elsewhere — e.g. a server in UTC.
         """
-        today = date.today()
+        today = instant_to_date(now_instant(), tz) if tz else date.today()
         year = self._academic_year_for(today)
 
         primary_arr = self._load(year)

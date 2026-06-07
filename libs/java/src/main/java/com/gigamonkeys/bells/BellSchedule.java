@@ -63,10 +63,6 @@ public final class BellSchedule {
     return calendars.get(0).timezone().getId();
   }
 
-  private ZoneId zone() {
-    return calendars.get(0).timezone();
-  }
-
   // ─── Calendar selection ───────────────────────────────────────────────────────
 
   private Calendar calendarAt(Instant instant) {
@@ -150,10 +146,20 @@ public final class BellSchedule {
   // ─── School day predicates ────────────────────────────────────────────────────
 
   /**
-   * @return whether today (in the schedule's timezone) is a school day
+   * @return whether today (in the system-default timezone) is a school day. Pass a {@link
+   *     ZoneId} to anchor "today" to a specific zone (e.g. the school's) when the process runs
+   *     elsewhere.
    */
   public boolean isSchoolDay() {
-    return isSchoolDay(LocalDate.now(zone()));
+    return isSchoolDay(LocalDate.now());
+  }
+
+  /**
+   * @param zone the timezone in which to determine today's date
+   * @return whether today (in {@code zone}) is a school day
+   */
+  public boolean isSchoolDay(ZoneId zone) {
+    return isSchoolDay(LocalDate.now(zone));
   }
 
   /**

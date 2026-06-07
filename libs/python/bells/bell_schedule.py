@@ -76,16 +76,15 @@ class BellSchedule:
         interval = self.current_interval(instant)
         return interval if interval and interval.type == "period" else None
 
-    def is_school_day(self, d: Optional[date] = None) -> bool:
+    def is_school_day(self, d: Optional[date] = None, tz: Optional[str] = None) -> bool:
+        """Whether ``d`` is a school day.
+
+        With no date, defaults to today in the system-local timezone; pass ``tz``
+        (an IANA name) to anchor "today" to a specific zone (e.g. the school's)
+        when the process runs elsewhere — e.g. a server in UTC.
+        """
         if d is None:
-            # Derive "today" in the relevant calendar's timezone rather than the
-            # system-local timezone, so a server in another zone agrees with the
-            # school on what day it is. See DIVERGENCES.md (#1). The JS library
-            # defaults to Temporal.Now.plainDateISO() (system-local) instead.
-            instant = now_instant()
-            cal = self._calendar_at(instant)
-            tz = cal.timezone if cal else self.timezone
-            d = instant_to_date(instant, tz)
+            d = instant_to_date(now_instant(), tz) if tz else date.today()
         cal = self._calendar_for_date(d)
         return cal.is_school_day(d) if cal else False
 

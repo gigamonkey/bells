@@ -1,3 +1,4 @@
+from datetime import date, datetime, timezone
 from zoneinfo import ZoneInfo
 
 from conftest import LA, la_instant, pd
@@ -78,6 +79,29 @@ class TestSchoolDaysBetween:
 
     def test_full_week(self):
         assert make_bs().school_days_between(pd("2025-08-18"), pd("2025-08-25")) == 6
+
+
+class TestIsSchoolDay:
+    def test_school_day(self):
+        assert make_bs().is_school_day(pd("2025-08-13")) is True
+
+    def test_weekend(self):
+        assert make_bs().is_school_day(pd("2025-08-16")) is False
+
+    def test_holiday(self):
+        assert make_bs().is_school_day(pd("2025-09-01")) is False
+
+    def test_outside_range(self):
+        assert make_bs().is_school_day(pd("2024-01-01")) is False
+
+    def test_no_arg_defaults_to_system_local_today(self):
+        bs = make_bs()
+        assert bs.is_school_day() == bs.is_school_day(date.today())
+
+    def test_tz_arg_anchors_today_to_zone(self):
+        bs = make_bs()
+        today_la = datetime.now(timezone.utc).astimezone(ZoneInfo(LA)).date()
+        assert bs.is_school_day(tz=LA) == bs.is_school_day(today_la)
 
 
 class TestScheduleFor:

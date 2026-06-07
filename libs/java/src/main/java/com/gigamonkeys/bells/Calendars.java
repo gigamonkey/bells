@@ -83,6 +83,17 @@ public final class Calendars {
   }
 
   /**
+   * Build a {@link BellSchedule} appropriate for the current instant, using the system-default
+   * timezone to evaluate "today".
+   *
+   * @param options the viewer options
+   * @return the bell schedule
+   */
+  public BellSchedule current(Options options) {
+    return current(ZoneId.systemDefault(), options);
+  }
+
+  /**
    * Build a {@link BellSchedule} appropriate for the current instant. During summer, also
    * loads the adjacent year so summer-bounds and next-year-start queries work correctly.
    *

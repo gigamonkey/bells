@@ -5,8 +5,11 @@ import static com.gigamonkeys.bells.Fixtures.SIMPLE_DATA;
 import static com.gigamonkeys.bells.Fixtures.laInstant;
 import static com.gigamonkeys.bells.Fixtures.pd;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -204,6 +207,45 @@ class BellScheduleTest {
       List<PeriodInstant> periods = make().periodsForDate(laInstant("2025-08-19T20:00:00"));
       ZonedDateTime start = periods.get(0).start().atZone(LA);
       assertEquals("2025-08-20", start.toLocalDate().toString());
+    }
+  }
+
+  // ─── isSchoolDay ────────────────────────────────────────────────────────────
+
+  @Nested
+  class IsSchoolDay {
+
+    @Test
+    void schoolDay() {
+      assertTrue(make().isSchoolDay(pd("2025-08-13")));
+    }
+
+    @Test
+    void weekend() {
+      assertFalse(make().isSchoolDay(pd("2025-08-16")));
+    }
+
+    @Test
+    void holiday() {
+      assertFalse(make().isSchoolDay(pd("2025-09-01")));
+    }
+
+    @Test
+    void outsideRange() {
+      assertFalse(make().isSchoolDay(pd("2024-01-01")));
+    }
+
+    @Test
+    void noArgDefaultsToSystemLocalToday() {
+      BellSchedule bs = make();
+      assertEquals(bs.isSchoolDay(LocalDate.now()), bs.isSchoolDay());
+    }
+
+    @Test
+    void zoneArgAnchorsTodayToZone() {
+      BellSchedule bs = make();
+      ZoneId la = ZoneId.of("America/Los_Angeles");
+      assertEquals(bs.isSchoolDay(LocalDate.now(la)), bs.isSchoolDay(la));
     }
   }
 }

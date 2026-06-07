@@ -54,9 +54,13 @@ class Calendars {
    * Get a BellSchedule appropriate for the current instant.
    * During summer, loads both the most recent ended year and the next upcoming
    * year so summer-bounds and next-year-start queries work correctly.
+   *
+   * "Today" defaults to the system-local date; pass `timeZone` to anchor the
+   * academic-year rollover to a specific zone (e.g. the school's) when running
+   * elsewhere — e.g. a server in UTC.
    */
-  async current(options: BellScheduleOptions = {}): Promise<BellSchedule> {
-    const today = Temporal.Now.plainDateISO();
+  async current(options: BellScheduleOptions = {}, timeZone?: string): Promise<BellSchedule> {
+    const today = Temporal.Now.plainDateISO(timeZone);
     const year = this.#academicYearFor(today);
 
     const primaryArr = await this.#load(year);

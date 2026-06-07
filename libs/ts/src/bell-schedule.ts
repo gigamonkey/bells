@@ -68,9 +68,15 @@ class BellSchedule {
     return interval && interval.type === 'period' ? interval : null;
   }
 
-  isSchoolDay(date: Temporal.PlainDate = Temporal.Now.plainDateISO()): boolean {
-    const cal = this.#calendarForDate(date);
-    return cal ? cal.isSchoolDay(date) : false;
+  /**
+   * Whether the given date is a school day. With no date, defaults to today in the
+   * system-local timezone; pass `timeZone` to anchor "today" to a specific zone (e.g. the
+   * school's) when running elsewhere.
+   */
+  isSchoolDay(date?: Temporal.PlainDate, timeZone?: string): boolean {
+    const d = date ?? Temporal.Now.plainDateISO(timeZone);
+    const cal = this.#calendarForDate(d);
+    return cal ? cal.isSchoolDay(d) : false;
   }
 
   currentDayBounds(instant: Temporal.Instant = Temporal.Now.instant()): DayBounds | null {
