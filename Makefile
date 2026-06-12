@@ -37,6 +37,20 @@ pretty:
 lint:
 	npx eslint *.js
 
+# Run all three library test suites, including the cross-implementation
+# golden tests in libs/golden/.
+test-libs:
+	cd libs/ts && npm test
+	cd libs/python && python3 -m pytest
+	cd libs/java && mvn -q test
+
+# Regenerate libs/golden/expected/ from the TypeScript reference
+# implementation. Review the diff before committing — a change in expected/
+# is a semantic change to the library. See libs/golden/README.md.
+golden-generate:
+	cd libs/ts && npm run golden:generate
+	git status --short libs/golden/expected/
+
 release-lib:
 	cd libs/ts && npm version $(VERSION) --no-git-tag-version
 	git add libs/ts/package.json libs/ts/package-lock.json

@@ -1,0 +1,17 @@
+{
+  "description": "Flat includeTags list: zero and seventh periods enabled every weekday. Tuesday 2025-08-26 (PDT) on the BHS 2025-2026 calendar; the school day runs Period 0 (7:26) through Period 7 (16:37).",
+  "calendars": ["bhs-2025-2026.json"],
+  "options": { "includeTags": ["zero", "seventh"] },
+  "queries": [
+    { "id": "during-period-0", "method": "currentInterval", "args": { "instant": "2025-08-26T15:00:00Z" } },
+    { "id": "before-period-0", "method": "currentInterval", "args": { "instant": "2025-08-26T14:00:00Z" } },
+    { "id": "during-period-7", "method": "currentInterval", "args": { "instant": "2025-08-26T23:00:00Z" } },
+    { "id": "after-period-7", "method": "currentInterval", "args": { "instant": "2025-08-26T23:45:00Z" } },
+    { "id": "day-bounds-with-optional", "method": "currentDayBounds", "args": { "instant": "2025-08-26T16:00:00Z" } },
+    { "id": "schedule-for-with-optional", "method": "scheduleFor", "args": { "date": "2025-08-26" } },
+    { "id": "total-time-with-optional", "method": "totalSchoolTime", "args": { "instant": "2025-08-26T16:00:00Z" } },
+    { "id": "time-left-with-optional", "method": "schoolTimeLeft", "args": { "instant": "2025-08-26T16:00:00Z" } },
+    { "id": "periods-for-date-with-optional", "method": "periodsForDate", "args": { "instant": "2025-08-26T16:00:00Z" } },
+    { "id": "next-start-includes-period-0", "method": "nextSchoolDayStart", "args": { "instant": "2025-08-26T23:50:00Z" } }
+  ]
+}

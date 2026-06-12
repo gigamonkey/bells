@@ -1,0 +1,17 @@
+{
+  "description": "Weekday-keyed includeTags map: seventh period on Mondays, zero period on Tuesdays, nothing extra other days. Monday 2025-09-08 is a late-start day (PDT) on the BHS 2025-2026 calendar.",
+  "calendars": ["bhs-2025-2026.json"],
+  "options": { "includeTags": { "1": ["seventh"], "2": ["zero"] } },
+  "queries": [
+    { "id": "monday-period-7", "method": "currentInterval", "args": { "instant": "2025-09-08T22:45:00Z" } },
+    { "id": "monday-day-bounds", "method": "currentDayBounds", "args": { "instant": "2025-09-08T18:00:00Z" } },
+    { "id": "monday-schedule-for", "method": "scheduleFor", "args": { "date": "2025-09-08" } },
+    { "id": "tuesday-period-0", "method": "currentInterval", "args": { "instant": "2025-09-09T15:00:00Z" } },
+    { "id": "tuesday-day-bounds", "method": "currentDayBounds", "args": { "instant": "2025-09-09T16:00:00Z" } },
+    { "id": "tuesday-schedule-for", "method": "scheduleFor", "args": { "date": "2025-09-09" } },
+    { "id": "wednesday-no-extras-bounds", "method": "currentDayBounds", "args": { "instant": "2025-09-10T16:00:00Z" } },
+    { "id": "wednesday-before-school", "method": "currentInterval", "args": { "instant": "2025-09-10T15:00:00Z" } },
+    { "id": "monday-total-time", "method": "totalSchoolTime", "args": { "instant": "2025-09-08T18:00:00Z" } },
+    { "id": "tuesday-total-time", "method": "totalSchoolTime", "args": { "instant": "2025-09-09T16:00:00Z" } }
+  ]
+}

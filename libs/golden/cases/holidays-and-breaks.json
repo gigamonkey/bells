@@ -1,0 +1,28 @@
+{
+  "description": "Holidays, multi-day breaks, break names, and non-class (exam) days on the BHS 2025-2026 calendar. Thanksgiving week and winter break are PST.",
+  "calendars": ["bhs-2025-2026.json"],
+  "options": {},
+  "queries": [
+    { "id": "labor-day-interval", "method": "currentInterval", "args": { "instant": "2025-09-01T18:00:00Z" } },
+    { "id": "labor-day-is-school", "method": "isSchoolDay", "args": { "date": "2025-09-01" } },
+    { "id": "halloween-is-school", "method": "isSchoolDay", "args": { "date": "2025-10-31" } },
+    { "id": "veterans-day-is-school", "method": "isSchoolDay", "args": { "date": "2025-11-11" } },
+    { "id": "thanksgiving-wednesday-interval", "method": "currentInterval", "args": { "instant": "2025-11-26T20:00:00Z" } },
+    { "id": "thanksgiving-day-bounds", "method": "currentDayBounds", "args": { "instant": "2025-11-26T20:00:00Z" } },
+    { "id": "next-start-from-thanksgiving", "method": "nextSchoolDayStart", "args": { "instant": "2025-11-26T20:00:00Z" } },
+    { "id": "previous-end-from-thanksgiving", "method": "previousSchoolDayEnd", "args": { "instant": "2025-11-26T20:00:00Z" } },
+    { "id": "next-school-day-over-break", "method": "nextSchoolDay", "args": { "date": "2025-11-21" } },
+    { "id": "previous-school-day-over-break", "method": "previousSchoolDay", "args": { "date": "2025-12-01" } },
+    { "id": "winter-break-interval", "method": "currentInterval", "args": { "instant": "2025-12-25T20:00:00Z" } },
+    { "id": "school-days-thanksgiving-week", "method": "schoolDaysBetween", "args": { "start": "2025-11-24", "end": "2025-11-28" } },
+    { "id": "school-time-thanksgiving-week", "method": "schoolTimeBetween", "args": { "start": "2025-11-24T08:00:00Z", "end": "2025-11-29T08:00:00Z" } },
+    { "id": "school-time-left-on-holiday", "method": "schoolTimeLeft", "args": { "instant": "2025-09-01T18:00:00Z" } },
+    { "id": "non-class-label-exam-day", "method": "nonClassLabel", "args": { "date": "2025-12-17" } },
+    { "id": "non-class-label-normal-day", "method": "nonClassLabel", "args": { "date": "2025-08-26" } },
+    { "id": "non-class-label-last-day", "method": "nonClassLabel", "args": { "date": "2026-06-04" } },
+    { "id": "non-class-days-left-mid-december", "method": "nonClassDaysLeft", "args": { "instant": "2025-12-15T17:00:00Z" } },
+    { "id": "exam-day-interval", "method": "currentInterval", "args": { "instant": "2025-12-17T17:00:00Z" } },
+    { "id": "exam-day-schedule-name", "method": "scheduleNameFor", "args": { "date": "2025-12-17" } },
+    { "id": "exam-day-schedule-for", "method": "scheduleFor", "args": { "date": "2025-12-17" } }
+  ]
+}

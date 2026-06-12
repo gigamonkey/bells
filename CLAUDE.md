@@ -38,6 +38,9 @@ ES modules bundled by esbuild. The entry point is `bells.js`; `out.js` is the co
 - `validateCalendarData` — validates calendar JSON; `bells-validate` CLI wraps it
 - Library uses `Temporal` as a global (set by consumer via `globalThis.Temporal = Temporal`)
 - Tests: `cd libs/ts && npm test`
+- Python and Java ports live in `libs/python/` and `libs/java/` (pytest / `mvn test`)
+
+**Golden tests (`libs/golden/`):** Language-neutral fixtures asserting the three ports stay behaviorally identical; each port's normal test command runs them. Expected files are generated from the TS reference implementation via `make golden-generate` (regenerate + review diff after any intentional behavior change; change TS first, then bring Python/Java back to green). `make test-libs` runs all three suites. See `libs/golden/README.md`.
 
 **Update loop:** Every second, `update()` recalculates the current interval, updates countdowns, progress bars, background color (red = last 10 min of period, blue = class, purple = passing, pink = summer), and year-completion percentage.
 

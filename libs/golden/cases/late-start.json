@@ -1,0 +1,18 @@
+{
+  "description": "Monday late-start resolution via weekdaySchedules on the BHS 2025-2026 calendar (Monday 2025-09-08, PDT). Student view: the teachers-only staff meeting is excluded.",
+  "calendars": ["bhs-2025-2026.json"],
+  "options": {},
+  "queries": [
+    { "id": "monday-early-morning", "method": "currentInterval", "args": { "instant": "2025-09-08T16:30:00Z" } },
+    { "id": "monday-period-1", "method": "currentInterval", "args": { "instant": "2025-09-08T17:15:00Z" } },
+    { "id": "monday-day-bounds", "method": "currentDayBounds", "args": { "instant": "2025-09-08T17:15:00Z" } },
+    { "id": "monday-schedule-name", "method": "scheduleNameFor", "args": { "date": "2025-09-08" } },
+    { "id": "tuesday-schedule-name", "method": "scheduleNameFor", "args": { "date": "2025-09-09" } },
+    { "id": "monday-schedule-for", "method": "scheduleFor", "args": { "date": "2025-09-08" } },
+    { "id": "monday-periods-for-date", "method": "periodsForDate", "args": { "instant": "2025-09-08T14:00:00Z" } },
+    { "id": "sunday-interval", "method": "currentInterval", "args": { "instant": "2025-09-07T20:00:00Z" } },
+    { "id": "next-start-from-sunday", "method": "nextSchoolDayStart", "args": { "instant": "2025-09-07T20:00:00Z" } },
+    { "id": "monday-time-left-before-start", "method": "schoolTimeLeft", "args": { "instant": "2025-09-08T16:30:00Z" } },
+    { "id": "monday-total-time", "method": "totalSchoolTime", "args": { "instant": "2025-09-08T17:15:00Z" } }
+  ]
+}

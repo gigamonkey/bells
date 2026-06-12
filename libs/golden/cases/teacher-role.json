@@ -1,0 +1,21 @@
+{
+  "description": "Teacher role on the BHS 2025-2026 calendar: teacher first days before students start, teachers-only periods (late-start staff meeting), and teacher work days that are student holidays (2025-10-06).",
+  "calendars": ["bhs-2025-2026.json"],
+  "options": { "role": "teacher" },
+  "queries": [
+    { "id": "teacher-first-day-is-school", "method": "isSchoolDay", "args": { "date": "2025-08-11" } },
+    { "id": "setup-day-is-school", "method": "isSchoolDay", "args": { "date": "2025-08-12" } },
+    { "id": "student-first-day-is-school", "method": "isSchoolDay", "args": { "date": "2025-08-13" } },
+    { "id": "pd-day-interval", "method": "currentInterval", "args": { "instant": "2025-08-11T16:00:00Z" } },
+    { "id": "pd-day-bounds", "method": "currentDayBounds", "args": { "instant": "2025-08-11T16:00:00Z" } },
+    { "id": "pd-day-schedule-for", "method": "scheduleFor", "args": { "date": "2025-08-11" } },
+    { "id": "late-start-staff-meeting", "method": "currentInterval", "args": { "instant": "2025-09-08T15:30:00Z" } },
+    { "id": "late-start-day-bounds", "method": "currentDayBounds", "args": { "instant": "2025-09-08T15:30:00Z" } },
+    { "id": "late-start-schedule-for", "method": "scheduleFor", "args": { "date": "2025-09-08" } },
+    { "id": "teacher-work-day-is-school", "method": "isSchoolDay", "args": { "date": "2025-10-06" } },
+    { "id": "teacher-work-day-schedule-for", "method": "scheduleFor", "args": { "date": "2025-10-06" } },
+    { "id": "teacher-days-left", "method": "schoolDaysLeft", "args": { "instant": "2025-08-11T16:00:00Z" } },
+    { "id": "teacher-year-start", "method": "currentYearStart", "args": { "instant": "2025-08-11T16:00:00Z" } },
+    { "id": "teacher-total-time-late-start", "method": "totalSchoolTime", "args": { "instant": "2025-09-08T15:30:00Z" } }
+  ]
+}

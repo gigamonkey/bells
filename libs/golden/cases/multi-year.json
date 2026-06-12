@@ -1,0 +1,18 @@
+{
+  "description": "Both BHS years loaded: queries that span the year gap and queries resolved against the second year (fall 2026, PDT).",
+  "calendars": ["bhs-2025-2026.json", "bhs-2026-2027.json"],
+  "options": {},
+  "queries": [
+    { "id": "timezone", "method": "timezone", "args": {} },
+    { "id": "school-days-spanning-years", "method": "schoolDaysBetween", "args": { "start": "2026-05-01", "end": "2026-09-15" } },
+    { "id": "school-time-spanning-years", "method": "schoolTimeBetween", "args": { "start": "2026-06-01T16:00:00Z", "end": "2026-08-20T00:00:00Z" } },
+    { "id": "second-year-interval", "method": "currentInterval", "args": { "instant": "2026-09-15T16:30:00Z" } },
+    { "id": "second-year-is-school", "method": "isSchoolDay", "args": { "date": "2026-09-15" } },
+    { "id": "second-year-monday-schedule", "method": "scheduleNameFor", "args": { "date": "2026-09-14" } },
+    { "id": "second-year-year-start", "method": "currentYearStart", "args": { "instant": "2026-09-15T16:30:00Z" } },
+    { "id": "second-year-days-left", "method": "schoolDaysLeft", "args": { "instant": "2026-09-15T16:30:00Z" } },
+    { "id": "second-year-day-bounds", "method": "currentDayBounds", "args": { "instant": "2026-09-15T16:30:00Z" } },
+    { "id": "night-before-second-year-prev-end", "method": "previousSchoolDayEnd", "args": { "instant": "2026-08-12T05:00:00Z" } },
+    { "id": "second-year-first-day-interval", "method": "currentInterval", "args": { "instant": "2026-08-12T16:00:00Z" } }
+  ]
+}

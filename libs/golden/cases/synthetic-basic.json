@@ -1,0 +1,18 @@
+{
+  "description": "The minimal synthetic calendar shared by the three ports' unit suites: two-period NORMAL days, LATE_START Mondays, a few holidays. Mirrors a sample of the hand-written unit tests.",
+  "calendars": ["synthetic.json"],
+  "options": {},
+  "queries": [
+    { "id": "timezone", "method": "timezone", "args": {} },
+    { "id": "next-school-day-over-weekend", "method": "nextSchoolDay", "args": { "date": "2025-08-15" } },
+    { "id": "next-school-day-over-labor-day", "method": "nextSchoolDay", "args": { "date": "2025-08-29" } },
+    { "id": "next-school-day-over-thanksgiving", "method": "nextSchoolDay", "args": { "date": "2025-11-26" } },
+    { "id": "previous-school-day-over-labor-day", "method": "previousSchoolDay", "args": { "date": "2025-09-02" } },
+    { "id": "school-days-august", "method": "schoolDaysBetween", "args": { "start": "2025-08-13", "end": "2025-08-31" } },
+    { "id": "during-period-1", "method": "currentInterval", "args": { "instant": "2025-08-26T16:00:00Z" } },
+    { "id": "after-short-day", "method": "currentInterval", "args": { "instant": "2025-08-26T19:00:00Z" } },
+    { "id": "monday-late-start-bounds", "method": "currentDayBounds", "args": { "instant": "2025-08-25T18:00:00Z" } },
+    { "id": "total-school-time", "method": "totalSchoolTime", "args": { "instant": "2025-08-26T16:00:00Z" } },
+    { "id": "school-time-done-mid-period-2", "method": "schoolTimeDone", "args": { "instant": "2025-08-26T17:00:00Z" } }
+  ]
+}

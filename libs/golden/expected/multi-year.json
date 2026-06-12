@@ -1,0 +1,30 @@
+{
+  "timezone": "America/Los_Angeles",
+  "school-days-spanning-years": 47,
+  "school-time-spanning-years": 209400,
+  "second-year-interval": {
+    "name": "Passing to Period 2",
+    "type": "passing",
+    "start": "2026-09-15T16:28:00Z",
+    "end": "2026-09-15T16:34:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
+  "second-year-is-school": true,
+  "second-year-monday-schedule": "LATE START",
+  "second-year-year-start": "2026-08-12T15:30:00Z",
+  "second-year-days-left": 157,
+  "second-year-day-bounds": {
+    "start": "2026-09-15T15:30:00Z",
+    "end": "2026-09-15T22:33:00Z"
+  },
+  "night-before-second-year-prev-end": "2026-06-04T20:52:00Z",
+  "second-year-first-day-interval": {
+    "name": "Period 1",
+    "type": "period",
+    "start": "2026-08-12T15:30:00Z",
+    "end": "2026-08-12T16:28:00Z",
+    "duringSchool": true,
+    "tags": []
+  }
+}

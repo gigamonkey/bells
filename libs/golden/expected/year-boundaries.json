@@ -1,0 +1,87 @@
+{
+  "first-day-interval": {
+    "name": "Period 1",
+    "type": "period",
+    "start": "2025-08-13T15:30:00Z",
+    "end": "2025-08-13T16:28:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
+  "first-day-is-school": true,
+  "before-year-interval": null,
+  "before-year-summer-bounds": {
+    "start": null,
+    "end": "2025-08-13T15:30:00Z"
+  },
+  "before-year-next-start": "2025-08-13T15:30:00Z",
+  "last-day-interval": {
+    "name": "Bonus Period 3",
+    "type": "period",
+    "start": "2026-06-04T17:06:00Z",
+    "end": "2026-06-04T17:48:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
+  "exact-boundary-instant-is-null": null,
+  "last-day-is-school": true,
+  "last-day-time-left": 13920,
+  "summer-interval": null,
+  "summer-bounds": {
+    "start": "2026-06-04T20:52:00Z",
+    "end": "2026-08-12T15:30:00Z"
+  },
+  "summer-next-start": "2026-08-12T15:30:00Z",
+  "summer-previous-end": "2026-06-04T20:52:00Z",
+  "summer-days-left": 0,
+  "summer-year-start": null,
+  "summer-year-end": null,
+  "next-year-start-from-summer": "2026-08-12T15:30:00Z",
+  "next-year-start-from-fall": "2026-08-12T15:30:00Z",
+  "days-left-near-year-end": 4,
+  "next-school-day-across-summer": "2026-08-12",
+  "previous-school-day-across-summer": "2026-06-04",
+  "periods-for-date-in-summer": [
+    {
+      "name": "Period 1",
+      "start": "2026-08-12T15:30:00Z",
+      "end": "2026-08-12T16:28:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 2",
+      "start": "2026-08-12T16:34:00Z",
+      "end": "2026-08-12T17:37:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 3",
+      "start": "2026-08-12T17:43:00Z",
+      "end": "2026-08-12T18:41:00Z",
+      "tags": []
+    },
+    {
+      "name": "Lunch",
+      "start": "2026-08-12T18:41:00Z",
+      "end": "2026-08-12T19:21:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 4",
+      "start": "2026-08-12T19:27:00Z",
+      "end": "2026-08-12T20:25:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 5",
+      "start": "2026-08-12T20:31:00Z",
+      "end": "2026-08-12T21:29:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 6",
+      "start": "2026-08-12T21:35:00Z",
+      "end": "2026-08-12T22:33:00Z",
+      "tags": []
+    }
+  ]
+}

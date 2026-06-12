@@ -11,6 +11,7 @@
     "build": "tsc && node scripts/finish-build.mjs",
     "typecheck": "tsc --noEmit",
     "test": "tsc --noEmit && node --import tsx --test test/*.test.ts",
+    "golden:generate": "node --import tsx scripts/generate-golden.ts",
     "prepublishOnly": "npm run build"
   },
   "exports": {

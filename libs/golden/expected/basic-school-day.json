@@ -1,0 +1,278 @@
+{
+  "timezone": "America/Los_Angeles",
+  "before-school": {
+    "name": "Before school",
+    "type": "before-school",
+    "start": "2025-08-25T22:33:00Z",
+    "end": "2025-08-26T15:30:00Z",
+    "duringSchool": false,
+    "tags": []
+  },
+  "during-period-1": {
+    "name": "Period 1",
+    "type": "period",
+    "start": "2025-08-26T15:30:00Z",
+    "end": "2025-08-26T16:28:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
+  "period-at-period-1": {
+    "name": "Period 1",
+    "type": "period",
+    "start": "2025-08-26T15:30:00Z",
+    "end": "2025-08-26T16:28:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
+  "passing-1-to-2": {
+    "name": "Passing to Period 2",
+    "type": "passing",
+    "start": "2025-08-26T16:28:00Z",
+    "end": "2025-08-26T16:34:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
+  "period-at-passing": null,
+  "lunch": {
+    "name": "Lunch",
+    "type": "period",
+    "start": "2025-08-26T18:41:00Z",
+    "end": "2025-08-26T19:21:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
+  "pm-period-via-shorthand-times": {
+    "name": "Period 5",
+    "type": "period",
+    "start": "2025-08-26T20:31:00Z",
+    "end": "2025-08-26T21:29:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
+  "last-ten-minutes-period-6": {
+    "name": "Period 6",
+    "type": "period",
+    "start": "2025-08-26T21:35:00Z",
+    "end": "2025-08-26T22:33:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
+  "after-school": {
+    "name": "After school",
+    "type": "after-school",
+    "start": "2025-08-26T22:33:00Z",
+    "end": "2025-08-27T15:30:00Z",
+    "duringSchool": false,
+    "tags": []
+  },
+  "is-school-day-tuesday": true,
+  "is-school-day-saturday": false,
+  "day-bounds": {
+    "start": "2025-08-26T15:30:00Z",
+    "end": "2025-08-26T22:33:00Z"
+  },
+  "day-bounds-saturday": null,
+  "next-start-after-school": "2025-08-27T15:30:00Z",
+  "previous-end-before-school": "2025-08-25T22:33:00Z",
+  "school-time-left": 4131780,
+  "school-time-done": 219420,
+  "total-school-time": 4351200,
+  "school-days-left": 171,
+  "calendar-days-left": 283,
+  "current-year-start": "2025-08-13T15:30:00Z",
+  "current-year-end": "2026-06-04T20:52:00Z",
+  "summer-bounds-during-year": null,
+  "schedule-name-tuesday": "NORMAL",
+  "schedule-name-monday": "LATE START",
+  "schedule-name-override-day": null,
+  "schedule-for-tuesday": [
+    {
+      "name": "Period 1",
+      "start": "2025-08-26T15:30:00Z",
+      "end": "2025-08-26T16:28:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 2",
+      "start": "2025-08-26T16:34:00Z",
+      "end": "2025-08-26T17:37:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 3",
+      "start": "2025-08-26T17:43:00Z",
+      "end": "2025-08-26T18:41:00Z",
+      "tags": []
+    },
+    {
+      "name": "Lunch",
+      "start": "2025-08-26T18:41:00Z",
+      "end": "2025-08-26T19:21:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 4",
+      "start": "2025-08-26T19:27:00Z",
+      "end": "2025-08-26T20:25:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 5",
+      "start": "2025-08-26T20:31:00Z",
+      "end": "2025-08-26T21:29:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 6",
+      "start": "2025-08-26T21:35:00Z",
+      "end": "2025-08-26T22:33:00Z",
+      "tags": []
+    }
+  ],
+  "schedule-for-override-day": [
+    {
+      "name": "Period 1",
+      "start": "2025-08-27T15:30:00Z",
+      "end": "2025-08-27T16:12:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 2A",
+      "start": "2025-08-27T16:18:00Z",
+      "end": "2025-08-27T17:26:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 2B",
+      "start": "2025-08-27T17:32:00Z",
+      "end": "2025-08-27T18:40:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 3",
+      "start": "2025-08-27T18:46:00Z",
+      "end": "2025-08-27T19:28:00Z",
+      "tags": []
+    },
+    {
+      "name": "Lunch",
+      "start": "2025-08-27T19:28:00Z",
+      "end": "2025-08-27T20:08:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 4",
+      "start": "2025-08-27T20:14:00Z",
+      "end": "2025-08-27T20:56:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 5",
+      "start": "2025-08-27T21:02:00Z",
+      "end": "2025-08-27T21:44:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 6",
+      "start": "2025-08-27T21:50:00Z",
+      "end": "2025-08-27T22:33:00Z",
+      "tags": []
+    }
+  ],
+  "periods-for-date-during-day": [
+    {
+      "name": "Period 1",
+      "start": "2025-08-26T15:30:00Z",
+      "end": "2025-08-26T16:28:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 2",
+      "start": "2025-08-26T16:34:00Z",
+      "end": "2025-08-26T17:37:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 3",
+      "start": "2025-08-26T17:43:00Z",
+      "end": "2025-08-26T18:41:00Z",
+      "tags": []
+    },
+    {
+      "name": "Lunch",
+      "start": "2025-08-26T18:41:00Z",
+      "end": "2025-08-26T19:21:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 4",
+      "start": "2025-08-26T19:27:00Z",
+      "end": "2025-08-26T20:25:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 5",
+      "start": "2025-08-26T20:31:00Z",
+      "end": "2025-08-26T21:29:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 6",
+      "start": "2025-08-26T21:35:00Z",
+      "end": "2025-08-26T22:33:00Z",
+      "tags": []
+    }
+  ],
+  "periods-for-date-after-end": [
+    {
+      "name": "Period 1",
+      "start": "2025-08-27T15:30:00Z",
+      "end": "2025-08-27T16:12:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 2A",
+      "start": "2025-08-27T16:18:00Z",
+      "end": "2025-08-27T17:26:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 2B",
+      "start": "2025-08-27T17:32:00Z",
+      "end": "2025-08-27T18:40:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 3",
+      "start": "2025-08-27T18:46:00Z",
+      "end": "2025-08-27T19:28:00Z",
+      "tags": []
+    },
+    {
+      "name": "Lunch",
+      "start": "2025-08-27T19:28:00Z",
+      "end": "2025-08-27T20:08:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 4",
+      "start": "2025-08-27T20:14:00Z",
+      "end": "2025-08-27T20:56:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 5",
+      "start": "2025-08-27T21:02:00Z",
+      "end": "2025-08-27T21:44:00Z",
+      "tags": []
+    },
+    {
+      "name": "Period 6",
+      "start": "2025-08-27T21:50:00Z",
+      "end": "2025-08-27T22:33:00Z",
+      "tags": []
+    }
+  ],
+  "school-time-whole-day": 25380,
+  "school-days-first-month": 23
+}
