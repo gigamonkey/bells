@@ -105,7 +105,7 @@ The `teachers` boolean field marks teacher-only periods that are excluded for st
 ### `BellSchedule`
 
 ```js
-import { BellSchedule } from 'bells';
+import { BellSchedule } from '@peterseibel/bells';
 import calendarData from './my-calendars.json' with { type: 'json' };
 
 const bells = new BellSchedule(calendarData, {
@@ -148,7 +148,7 @@ bells.summerBounds()              // { start, end } | null
 For loading per-year JSON files from a directory or URL:
 
 ```js
-import { Calendars } from 'bells';
+import { Calendars } from '@peterseibel/bells/calendars';
 
 const calendars = new Calendars('./calendars/');
 // or: new Calendars('https://example.com/calendars/');
@@ -165,7 +165,7 @@ Files must be named `{year}.json` (e.g. `2025-2026.json`). In Node.js, paths are
 ### Validation
 
 ```js
-import { validateCalendarData } from 'bells/validate';
+import { validateCalendarData } from '@peterseibel/bells/validate';
 
 const { valid, errors } = validateCalendarData(data);
 if (!valid) {
