@@ -5,15 +5,25 @@ A framework-agnostic JavaScript library for querying school bell schedules. Buil
 ## Installation
 
 ```sh
-npm install bells @js-temporal/polyfill
+npm install @peterseibel/bells @js-temporal/polyfill
 ```
 
-`@js-temporal/polyfill` is a peer dependency. In Node 22+ you can use the native Temporal global and omit the polyfill.
+The library is built on the [Temporal API](https://tc39.es/proposal-temporal/),
+which it expects as a global (`globalThis.Temporal`) rather than importing it.
+Supply it once, at startup, before using the library:
 
-The library is written in TypeScript and ships type declarations. It uses
-`Temporal` as a global rather than importing it, so the bundled declarations
-type that global against `@js-temporal/polyfill` — having the peer dependency
-installed is enough for the types to resolve; no extra configuration is needed.
+```js
+import { Temporal } from '@js-temporal/polyfill';
+globalThis.Temporal = Temporal;
+```
+
+`@js-temporal/polyfill` is a peer dependency. On a runtime that already provides
+a native `Temporal` global, you can skip both the install and the assignment.
+
+The library ships TypeScript declarations. Because it types `Temporal` against
+`@js-temporal/polyfill`, having that peer dependency installed is enough for the
+types to resolve — no `tsconfig` changes needed. (This handles typechecking; you
+still need the runtime assignment above unless `Temporal` is already global.)
 
 ## Calendar data format
 
