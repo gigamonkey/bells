@@ -119,6 +119,10 @@ const bells = new BellSchedule(calendarData, {
   },
   // Or use a flat array for the same tags every weekday:
   // includeTags: ['seventh']
+
+  // Which periods are "numbered" and what number they carry, for the
+  // abstract-time API. Default: match /^Period (\d+)\b/ in the name.
+  // periodNumber: (period) => ...number or null...
 });
 
 // What's happening right now?
@@ -142,6 +146,67 @@ bells.nextYearStart()             // Temporal.Instant (throws if not loaded)
 bells.schoolTimeBetween(a, b)     // Temporal.Duration
 bells.summerBounds()              // { start, end } | null
 ```
+
+### Abstract times
+
+An *abstract time* describes a moment relative to the schedule — "five minutes
+before the end of the period", "start of school next Monday" — rather than as
+a wall-clock time. It has three independent parts: a *day spec* (which date,
+possibly relative to a base date), a *time anchor* (a schedule-defined point
+in that day: `start_of_period`, `end_of_period`, `start_of_day`, `end_of_day`,
+or `midnight`), and a signed `HH:MM` offset.
+
+Resolution happens in two phases, so the period can stay unbound until query
+time (a stored "start of period" resolves differently for a period-2 class
+than a period-5 class):
+
+```js
+import { parseTime, formatTime } from '@peterseibel/bells';
+
+// Standalone — no calendar needed:
+const t = parseTime('end_of_period -00:05 +1 day');
+formatTime(t);                    // canonical round-trip
+
+// Phase 1 (load time): bind the day spec against a base date. Warnings for
+// specs that don't make sense against the calendar (e.g. a school anchor on
+// a holiday) are reported via the callback (default: console.warn).
+const bound = bells.bindTime(baseDate, t, (warning) => console.warn(warning));
+// → { date: '2026-01-06', anchor: 'end_of_period', offset: '-00:05' }
+
+// Phase 2 (query time): resolve to a concrete time, supplying the period if
+// the anchor needs one. Null when the date has no schedule or no such period.
+bells.resolveTime(bound, 3);      // Temporal.ZonedDateTime | null
+
+// Pieces of the above, usable directly:
+bells.resolveDay(baseDate, t.day);       // Temporal.PlainDate
+bells.timeWarnings(bound);               // string[] (empty = OK)
+bells.addSchoolDays(date, 3);            // n school days out (n may be negative)
+bells.periodOnDate(date, 3);             // ScheduledPeriod | null
+bells.currentOrNextPeriodNumber();       // number | null
+```
+
+The string syntax is `anchor [time-offset] [day-part]`, whitespace-separated
+and case-insensitive:
+
+| String                    | Meaning                                              |
+| ------------------------- | ---------------------------------------------------- |
+| `start_of_period`         | start of the (later-bound) period on the base date   |
+| `end_of_period -00:05`    | five minutes before the end of the period            |
+| `end_of_day +1 day`       | end of school on the next school day                 |
+| `start_of_period monday`  | start of the period on the next Monday               |
+| `start_of_day next week`  | start of school on the first school day of next week |
+| `end_of_day end of week`  | end of school on the last school day of this week    |
+| `midnight +1 week`        | midnight exactly one calendar week out               |
+| `start_of_day 2026-01-05` | start of school on an absolute date                  |
+
+Day-part semantics: `±N day(s)` counts *school* days; `±N week(s)` is literal
+calendar arithmetic (no snapping); a weekday name means the first such day
+strictly after the base date, taken literally even if it's a holiday; the week
+boundaries (`start of [next] week`, `end of [next] week`) are the loose,
+calendar-aware forms that snap to the first/last school day of the ISO week.
+`start of week` on a week with no school days advances to the first day back
+(with a warning); `end of week` on such a week throws. Resolution that runs
+past the loaded calendars throws a `RangeError`.
 
 ### `Calendars`
 
