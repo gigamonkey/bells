@@ -56,6 +56,11 @@ export interface BellScheduleOptions {
   /** 'student' (default) or 'teacher'. */
   role?: Role;
   includeTags?: IncludeTags;
+  /**
+   * Extract a period number from a period, or null for non-numbered
+   * intervals (e.g. "Lunch"). Default: match /^Period (\d+)\b/ in the name.
+   */
+  periodNumber?: (period: { name: string }) => number | null;
 }
 
 export type IntervalType =

@@ -2,6 +2,13 @@
  * BellSchedule — wraps one or more Calendar instances.
  */
 
+import {
+  parseOffsetMinutes,
+  type AbstractTime,
+  type BoundTime,
+  type DaySpec,
+  type TimeAnchor,
+} from './abstract-time.js';
 import { Calendar, normalizeIncludeTags, type Interval } from './calendar.js';
 import type {
   BellScheduleOptions,
@@ -21,14 +28,22 @@ interface SummerBounds {
   end: Temporal.Instant | null;
 }
 
+/** The bhs-cs heuristic for numbered periods: "Period 3", "Period 3 Final". */
+const defaultPeriodNumber = (period: { name: string }): number | null => {
+  const m = /^Period (\d+)\b/.exec(period.name);
+  return m ? Number(m[1]) : null;
+};
+
 class BellSchedule {
   #options: { role: Role; includeTags: Record<number, string[]> };
   #calendars: Calendar[];
+  #periodNumber: (period: { name: string }) => number | null;
 
   constructor(calendarDataArray: YearData[], options: BellScheduleOptions = {}) {
     const role: Role = options.role || 'student';
     const includeTags = normalizeIncludeTags(options.includeTags || {});
     this.#options = { role, includeTags };
+    this.#periodNumber = options.periodNumber || defaultPeriodNumber;
     this.#calendars = calendarDataArray.map((d) => new Calendar(d, { role, includeTags }));
   }
 
@@ -296,6 +311,194 @@ class BellSchedule {
       end: p.endInstant(date, cal.timezone),
       tags: p.tags,
     }));
+  }
+
+  // ─── Abstract times ─────────────────────────────────────────────────────────
+
+  #firstCalendarDay(): Temporal.PlainDate {
+    return this.#calendars.reduce(
+      (min, c) => (Temporal.PlainDate.compare(c.firstDay, min) < 0 ? c.firstDay : min),
+      this.#calendars[0].firstDay,
+    );
+  }
+
+  #lastCalendarDay(): Temporal.PlainDate {
+    return this.#calendars.reduce(
+      (max, c) => (Temporal.PlainDate.compare(c.lastDay, max) > 0 ? c.lastDay : max),
+      this.#calendars[0].lastDay,
+    );
+  }
+
+  #checkInCalendars(date: Temporal.PlainDate, what: string): void {
+    if (
+      Temporal.PlainDate.compare(date, this.#firstCalendarDay()) < 0 ||
+      Temporal.PlainDate.compare(date, this.#lastCalendarDay()) > 0
+    ) {
+      throw new RangeError(`Resolving ${what} runs outside the loaded calendars at ${date}`);
+    }
+  }
+
+  /** n school days from `date` (n may be negative; 0 = date itself). */
+  addSchoolDays(date: Temporal.PlainDate, n: number): Temporal.PlainDate {
+    if (!Number.isInteger(n)) {
+      throw new Error(`School-day offset must be an integer, got ${n}`);
+    }
+    const step = n < 0 ? -1 : 1;
+    let remaining = Math.abs(n);
+    let d = date;
+    while (remaining > 0) {
+      d = d.add({ days: step });
+      this.#checkInCalendars(d, `${n} school days from ${date}`);
+      if (this.isSchoolDay(d)) remaining--;
+    }
+    return d;
+  }
+
+  /** Resolve a day spec against a base date; omitted means the base itself. */
+  resolveDay(base: Temporal.PlainDate, day?: DaySpec): Temporal.PlainDate {
+    if (!day) return base;
+    switch (day.type) {
+      case 'date':
+        return Temporal.PlainDate.from(day.date);
+      case 'schoolDays':
+        return this.addSchoolDays(base, day.n);
+      case 'weeks':
+        // Taken literally — no school-day snapping; validation warns instead.
+        return base.add({ weeks: day.n });
+      case 'weekday': {
+        if (!Number.isInteger(day.weekday) || day.weekday < 1 || day.weekday > 7) {
+          throw new Error(`Invalid weekday ${day.weekday} (must be 1=Monday..7=Sunday)`);
+        }
+        // First matching day strictly after the base; never snapped.
+        return base.add({ days: ((day.weekday - base.dayOfWeek + 6) % 7) + 1 });
+      }
+      case 'week': {
+        const monday = base.subtract({ days: base.dayOfWeek - 1 }).add({ weeks: day.n });
+        if (day.edge === 'start') {
+          // First school day on or after the Monday; a week with no school
+          // days advances into the following week ("the first day back").
+          let d = monday;
+          while (!this.isSchoolDay(d)) {
+            this.#checkInCalendars(d, `start of the week of ${monday}`);
+            d = d.add({ days: 1 });
+          }
+          return d;
+        }
+        // edge === 'end': last school day on or before the Sunday. A week
+        // with no school days is an error: walking backward would land at or
+        // before the base date and guessing forward is just as wrong.
+        for (let d = monday.add({ days: 6 }); Temporal.PlainDate.compare(d, monday) >= 0; d = d.subtract({ days: 1 })) {
+          if (this.isSchoolDay(d)) return d;
+        }
+        throw new Error(`'end of week': the week of ${monday} has no school days`);
+      }
+      default:
+        throw new Error(`Unknown day spec type "${(day as { type: string }).type}"`);
+    }
+  }
+
+  /**
+   * Phase 1: bind the day spec against a base date. Runs timeWarnings on the
+   * result and reports anything it finds via onWarning (default: console.warn).
+   */
+  bindTime(
+    base: Temporal.PlainDate,
+    t: AbstractTime,
+    onWarning: (warning: string) => void = (w) => console.warn(w),
+  ): BoundTime {
+    const offset = t.offset ?? '+00:00';
+    parseOffsetMinutes(offset); // reject malformed offsets at load time
+    const date = this.resolveDay(base, t.day);
+    const bound: BoundTime = { date: date.toString(), anchor: t.anchor, offset };
+
+    const warnings = this.timeWarnings(bound);
+    if (t.day?.type === 'week' && t.day.edge === 'start') {
+      const monday = base.subtract({ days: base.dayOfWeek - 1 }).add({ weeks: t.day.n });
+      if (Temporal.PlainDate.compare(date, monday.add({ days: 6 })) > 0) {
+        warnings.push(
+          `'start of week' advanced to ${date}: the week of ${monday} has no school days`,
+        );
+      }
+    }
+    for (const w of warnings) onWarning(w);
+    return bound;
+  }
+
+  /**
+   * Sanity-check a bound time against the calendar: human-readable warnings
+   * for specs that can't carry their anchor. Empty = OK. (It cannot check a
+   * specific period — the period isn't bound yet.)
+   */
+  timeWarnings(t: BoundTime): string[] {
+    if (t.anchor === 'midnight') return []; // midnight on any date is well-defined
+    const date = Temporal.PlainDate.from(t.date);
+    if (!this.isSchoolDay(date)) {
+      return [`${t.anchor} on ${t.date}, which is not a school day`];
+    }
+    if (t.anchor === 'start_of_period' || t.anchor === 'end_of_period') {
+      const numbered = this.scheduleFor(date).some((p) => this.#periodNumber(p) !== null);
+      if (!numbered) {
+        return [`${t.anchor} on ${t.date}, which has no numbered periods`];
+      }
+    }
+    return [];
+  }
+
+  /**
+   * Phase 2: resolve a bound time to a concrete time, supplying the period
+   * if the anchor needs one. Null when the date has no schedule, no such
+   * period, or a period anchor's period is omitted — never a guess.
+   */
+  resolveTime(t: BoundTime, period?: number): Temporal.ZonedDateTime | null {
+    const offsetMinutes = parseOffsetMinutes(t.offset);
+    const anchor = this.#anchorTime(Temporal.PlainDate.from(t.date), t.anchor, period);
+    // ZonedDateTime.add applies exact elapsed time, so offsets crossing a
+    // DST transition resolve correctly.
+    return anchor ? anchor.add({ minutes: offsetMinutes }) : null;
+  }
+
+  #anchorTime(
+    date: Temporal.PlainDate,
+    anchor: TimeAnchor,
+    period?: number,
+  ): Temporal.ZonedDateTime | null {
+    const tz = this.timezone;
+    switch (anchor) {
+      case 'midnight':
+        return date.toPlainDateTime({ hour: 0 }).toZonedDateTime(tz);
+      case 'start_of_day':
+      case 'end_of_day': {
+        const periods = this.scheduleFor(date);
+        if (periods.length === 0) return null;
+        const instant = anchor === 'start_of_day' ? periods[0].start : periods[periods.length - 1].end;
+        return instant.toZonedDateTimeISO(tz);
+      }
+      case 'start_of_period':
+      case 'end_of_period': {
+        if (period === undefined) return null;
+        const p = this.periodOnDate(date, period);
+        if (!p) return null;
+        return (anchor === 'start_of_period' ? p.start : p.end).toZonedDateTimeISO(tz);
+      }
+    }
+  }
+
+  /** The numbered period on a date, per the periodNumber matcher, or null. */
+  periodOnDate(date: Temporal.PlainDate, n: number): ScheduledPeriod | null {
+    return this.scheduleFor(date).find((p) => this.#periodNumber(p) === n) ?? null;
+  }
+
+  /**
+   * The number of the period containing `instant`, or the next numbered
+   * period later the same day, or null if neither exists.
+   */
+  currentOrNextPeriodNumber(instant: Temporal.Instant = Temporal.Now.instant()): number | null {
+    const date = instant.toZonedDateTimeISO(this.timezone).toPlainDate();
+    for (const p of this.scheduleFor(date)) {
+      const n = this.#periodNumber(p);
+      if (n !== null && Temporal.Instant.compare(instant, p.end) < 0) return n;
+    }
+    return null;
   }
 }
 
