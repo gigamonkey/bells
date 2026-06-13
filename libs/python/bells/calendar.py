@@ -67,14 +67,19 @@ class Period:
     def end_instant(self, d: date, timezone: str) -> datetime:
         return _plain_to_instant(d, self.end, timezone)
 
+    # Periods are half-open intervals [start, end): a period owns its start
+    # instant but not its end (the end belongs to the following passing period,
+    # break, or after-school span). This keeps every boundary instant in exactly
+    # one interval rather than briefly falling into none.
+
     def is_after(self, instant: datetime, d: date, timezone: str) -> bool:
         return self.start_instant(d, timezone) > instant
 
     def is_before(self, instant: datetime, d: date, timezone: str) -> bool:
-        return self.end_instant(d, timezone) < instant
+        return self.end_instant(d, timezone) <= instant
 
     def contains(self, instant: datetime, d: date, timezone: str) -> bool:
-        return self.start_instant(d, timezone) < instant < self.end_instant(d, timezone)
+        return self.start_instant(d, timezone) <= instant < self.end_instant(d, timezone)
 
     def to_interval(self, d: date, timezone: str) -> "Interval":
         return Interval(

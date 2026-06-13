@@ -9,7 +9,7 @@
     { "id": "before-year-summer-bounds", "method": "summerBounds", "args": { "instant": "2025-08-01T18:00:00Z" } },
     { "id": "before-year-next-start", "method": "nextSchoolDayStart", "args": { "instant": "2025-08-01T18:00:00Z" } },
     { "id": "last-day-interval", "method": "currentInterval", "args": { "instant": "2026-06-04T17:30:00Z" } },
-    { "id": "exact-boundary-instant-is-null", "method": "currentInterval", "args": { "instant": "2026-06-04T17:00:00Z" } },
+    { "id": "period-end-instant-is-passing", "method": "currentInterval", "args": { "instant": "2026-06-04T17:00:00Z" } },
     { "id": "last-day-is-school", "method": "isSchoolDay", "args": { "date": "2026-06-04" } },
     { "id": "last-day-time-left", "method": "schoolTimeLeft", "args": { "instant": "2026-06-04T17:00:00Z" } },
     { "id": "summer-interval", "method": "currentInterval", "args": { "instant": "2026-07-01T19:00:00Z" } },

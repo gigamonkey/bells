@@ -83,6 +83,11 @@ public final class Period {
     return date.atTime(end).atZone(timezone).toInstant();
   }
 
+  // Periods are half-open intervals [start, end): a period owns its start
+  // instant but not its end (the end belongs to the following passing period,
+  // break, or after-school span). This keeps every boundary instant in exactly
+  // one interval rather than briefly falling into none.
+
   /**
    * @return whether this period starts strictly after {@code instant}
    */
@@ -91,19 +96,19 @@ public final class Period {
   }
 
   /**
-   * @return whether this period ends strictly before {@code instant}
+   * @return whether this period ends at or before {@code instant}
    */
   boolean isBefore(Instant instant, LocalDate date, ZoneId timezone) {
-    return endInstant(date, timezone).isBefore(instant);
+    return !endInstant(date, timezone).isAfter(instant);
   }
 
   /**
-   * @return whether {@code instant} falls strictly inside this period
+   * @return whether {@code instant} falls in this period's half-open range [start, end)
    */
   boolean contains(Instant instant, LocalDate date, ZoneId timezone) {
     Instant s = startInstant(date, timezone);
     Instant e = endInstant(date, timezone);
-    return s.isBefore(instant) && instant.isBefore(e);
+    return !s.isAfter(instant) && instant.isBefore(e);
   }
 
   /**

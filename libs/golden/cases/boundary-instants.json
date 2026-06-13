@@ -1,0 +1,14 @@
+{
+  "description": "Half-open [start, end) interval semantics on a normal Tuesday (2025-08-26, PDT). Every period owns its start instant but not its end, so each boundary instant belongs to exactly one interval. Period 1 15:30-16:28Z, Period 2 16:34-17:37Z, Period 3 17:43-18:41Z, Lunch 18:41-19:21Z (back-to-back with Period 3), ... Period 6 21:35-22:33Z (last). All these instants returned null before period starts were made inclusive.",
+  "calendars": ["bhs-2025-2026.json"],
+  "options": {},
+  "queries": [
+    { "id": "day-start-is-first-period", "method": "currentInterval", "args": { "instant": "2025-08-26T15:30:00Z" } },
+    { "id": "period-1-end-is-passing", "method": "currentInterval", "args": { "instant": "2025-08-26T16:28:00Z" } },
+    { "id": "passing-end-is-period-2", "method": "currentInterval", "args": { "instant": "2025-08-26T16:34:00Z" } },
+    { "id": "period-at-period-2-start", "method": "periodAt", "args": { "instant": "2025-08-26T16:34:00Z" } },
+    { "id": "back-to-back-boundary-is-lunch", "method": "currentInterval", "args": { "instant": "2025-08-26T18:41:00Z" } },
+    { "id": "last-period-end-is-after-school", "method": "currentInterval", "args": { "instant": "2025-08-26T22:33:00Z" } },
+    { "id": "one-second-before-day-start-is-before-school", "method": "currentInterval", "args": { "instant": "2025-08-26T15:29:59Z" } }
+  ]
+}

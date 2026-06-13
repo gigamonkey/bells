@@ -514,17 +514,22 @@ class Period {
     return date.toPlainDateTime(this.end).toZonedDateTime(timezone).toInstant();
   }
 
+  // Periods are half-open intervals [start, end): a period owns its start
+  // instant but not its end (the end belongs to the following passing period,
+  // break, or after-school span). This keeps every boundary instant in exactly
+  // one interval rather than briefly falling into none.
+
   isAfter(instant: Temporal.Instant, date: Temporal.PlainDate, timezone: string): boolean {
     return Temporal.Instant.compare(this.startInstant(date, timezone), instant) > 0;
   }
 
   isBefore(instant: Temporal.Instant, date: Temporal.PlainDate, timezone: string): boolean {
-    return Temporal.Instant.compare(this.endInstant(date, timezone), instant) < 0;
+    return Temporal.Instant.compare(this.endInstant(date, timezone), instant) <= 0;
   }
 
   contains(instant: Temporal.Instant, date: Temporal.PlainDate, timezone: string): boolean {
     return (
-      Temporal.Instant.compare(this.startInstant(date, timezone), instant) < 0 &&
+      Temporal.Instant.compare(this.startInstant(date, timezone), instant) <= 0 &&
       Temporal.Instant.compare(instant, this.endInstant(date, timezone)) < 0
     );
   }

@@ -22,7 +22,14 @@
     "duringSchool": true,
     "tags": []
   },
-  "exact-boundary-instant-is-null": null,
+  "period-end-instant-is-passing": {
+    "name": "Passing to Bonus Period 3",
+    "type": "passing",
+    "start": "2026-06-04T17:00:00Z",
+    "end": "2026-06-04T17:06:00Z",
+    "duringSchool": true,
+    "tags": []
+  },
   "last-day-is-school": true,
   "last-day-time-left": 13920,
   "summer-interval": null,
