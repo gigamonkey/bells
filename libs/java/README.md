@@ -90,6 +90,9 @@ Map<Integer, List<String>> tags = Map.of(
 BellSchedule bells = BellSchedule.fromJsonString(json, new Options("student", tags));
 // Or the same tags every weekday:
 //   Options.ofFlat("student", List.of("seventh"))
+// Configure which periods are "numbered" for the abstract-time API (default:
+// match /^Period (\d+)\b/ in the name):
+//   Options.defaults().withPeriodNumber(period -> ...Integer or null...)
 
 // What's happening right now?
 Interval interval = bells.currentInterval();
@@ -119,6 +122,54 @@ bells.periodsForDate();        // List<PeriodInstant>
 
 You can also build from a Jackson `JsonNode` via `BellSchedule.fromJson(node, options)`,
 or from already-parsed data via `new BellSchedule(List<CalendarData>, options)`.
+
+### Abstract times
+
+An *abstract time* describes a moment relative to the schedule — "five minutes
+before the end of the period", "start of school next Monday" — rather than as a
+wall-clock time. It has three independent parts: a *day spec* ({@link DaySpec},
+which date, possibly relative to a base date), a *time anchor* ({@link TimeAnchor}:
+a schedule-defined point in that day), and a signed `HH:MM` offset.
+
+Resolution happens in two phases, so the period can stay unbound until query time
+(a stored "start of period" resolves differently for a period-2 class than a
+period-5 class). `AbstractTimes.parseTime`/`formatTime` need no calendar:
+
+```java
+import com.gigamonkeys.bells.*;
+
+// Standalone — no calendar needed:
+AbstractTime t = AbstractTimes.parseTime("end_of_period -00:05 +1 day");
+AbstractTimes.formatTime(t);                 // canonical round-trip
+
+// Phase 1 (load time): bind the day spec against a base date. Warnings for
+// specs that don't make sense against the calendar (e.g. a school anchor on a
+// holiday) go to the consumer (the no-arg overload prints to stderr).
+BoundTime bound = bells.bindTime(baseDate, t, warning -> System.err.println(warning));
+// → BoundTime[date=2026-01-06, anchor=end_of_period, offset=-00:05]
+
+// Phase 2 (query time): resolve to a concrete moment, supplying the period if
+// the anchor needs one. null when the date has no schedule or no such period.
+bells.resolveTime(bound, 3);                 // ZonedDateTime | null
+
+// Pieces of the above, usable directly:
+bells.resolveDay(baseDate, t.day());         // LocalDate
+bells.timeWarnings(bound);                    // List<String> (empty = OK)
+bells.addSchoolDays(date, 3);                 // n school days out (n may be negative)
+bells.periodOnDate(date, 3);                  // PeriodInstant | null
+bells.currentOrNextPeriodNumber();            // Integer | null
+```
+
+The string syntax is `anchor [time-offset] [day-part]`, whitespace-separated and
+case-insensitive (e.g. `end_of_period -00:05`, `start_of_day next week`,
+`end_of_day +1 day`, `midnight +1 week`, `start_of_day 2026-01-05`). Day-part
+semantics: `±N day(s)` counts *school* days; `±N week(s)` is literal calendar
+arithmetic (no snapping); a weekday name means the first such day strictly after
+the base date, taken literally even if it's a holiday; the week boundaries
+(`start of [next] week`, `end of [next] week`) snap to the first/last school day
+of the ISO week. `start of week` on a week with no school days advances to the
+first day back (with a warning); `end of week` on such a week throws. Resolution
+that runs past the loaded calendars throws an `IndexOutOfBoundsException`.
 
 ### `Calendars`
 

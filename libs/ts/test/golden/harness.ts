@@ -10,6 +10,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { formatTime, parseTime, type BoundTime, type DaySpec } from '../../src/abstract-time.js';
 import { BellSchedule } from '../../src/bell-schedule.js';
 import type { Interval } from '../../src/calendar.js';
 import type {
@@ -27,7 +28,10 @@ export const GOLDEN_DIR = path.resolve(
 export interface GoldenQuery {
   id: string;
   method: string;
-  args: Record<string, string>;
+  // Mostly string scalars (ISO instants/dates), but the abstract-time methods
+  // carry structured args (a `day` DaySpec, a `bound` BoundTime, a numeric
+  // `period`/`n`).
+  args: Record<string, any>;
 }
 
 export interface GoldenCase {
@@ -91,8 +95,13 @@ const interval = (i: Interval | null): unknown =>
 const bounds = (b: { start: Temporal.Instant | null; end: Temporal.Instant | null } | null) =>
   b === null ? null : { start: b.start && instant(b.start), end: b.end && instant(b.end) };
 
-const periods = (ps: ScheduledPeriod[]): unknown =>
-  ps.map((p) => ({ name: p.name, start: instant(p.start), end: instant(p.end), tags: p.tags }));
+const period = (p: ScheduledPeriod | null): unknown =>
+  p === null ? null : { name: p.name, start: instant(p.start), end: instant(p.end), tags: p.tags };
+
+const periods = (ps: ScheduledPeriod[]): unknown => ps.map((p) => period(p));
+
+const zoned = (z: Temporal.ZonedDateTime | null): unknown =>
+  z === null ? null : instant(z.toInstant());
 
 const nonClassDays = (ds: NonClassDay[]): unknown =>
   ds.map((d) => ({ date: plainDate(d.date), label: d.label }));
@@ -136,6 +145,15 @@ const DISPATCH: Record<string, (b: BellSchedule, a: Args) => unknown> = {
   periodsForDate: (b, a) => periods(b.periodsForDate(I(a.instant))),
   nonClassDaysLeft: (b, a) => nonClassDays(b.nonClassDaysLeft(I(a.instant))),
   nonClassLabel: (b, a) => b.nonClassLabel(D(a.date)),
+
+  // Abstract-time API.
+  resolveDay: (b, a) => plainDate(b.resolveDay(D(a.base), a.day as DaySpec | undefined)),
+  addSchoolDays: (b, a) => plainDate(b.addSchoolDays(D(a.date), a.n)),
+  resolveTime: (b, a) => zoned(b.resolveTime(a.bound as BoundTime, a.period)),
+  periodOnDate: (b, a) => period(b.periodOnDate(D(a.date), a.n)),
+  currentOrNextPeriodNumber: (b, a) => b.currentOrNextPeriodNumber(I(a.instant)),
+  timeWarnings: (b, a) => b.timeWarnings(a.bound as BoundTime).length,
+  canonicalizeTime: (_b, a) => formatTime(parseTime(a.spec)),
 };
 
 export const runQuery = (bells: BellSchedule, q: GoldenQuery): unknown => {

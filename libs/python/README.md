@@ -67,6 +67,10 @@ bells = BellSchedule(data, {
     },
     # Or a flat list for the same tags every weekday:
     # "include_tags": ["seventh"],
+
+    # Which periods are "numbered" and what number they carry, for the
+    # abstract-time API. Default: match r"^Period (\d+)\b" in the name.
+    # "period_number": lambda period: ...int or None...,
 })
 
 # What's happening right now?
@@ -90,6 +94,57 @@ bells.next_year_start()           # datetime (raises if not loaded)
 bells.school_time_between(a, b)   # timedelta
 bells.summer_bounds()             # {"start": ..., "end": ...} | None
 ```
+
+### Abstract times
+
+An *abstract time* describes a moment relative to the schedule — "five minutes
+before the end of the period", "start of school next Monday" — rather than as a
+wall-clock time. It has three independent parts: a *day spec* (which date,
+possibly relative to a base date), a *time anchor* (a schedule-defined point in
+that day: `start_of_period`, `end_of_period`, `start_of_day`, `end_of_day`, or
+`midnight`), and a signed `HH:MM` offset.
+
+Resolution happens in two phases, so the period can stay unbound until query
+time (a stored "start of period" resolves differently for a period-2 class than
+a period-5 class). The types are plain dicts; `parse_time`/`format_time` need no
+calendar.
+
+```python
+from bells import parse_time, format_time
+
+# Standalone — no calendar needed:
+t = parse_time("end_of_period -00:05 +1 day")
+format_time(t)                     # canonical round-trip
+
+# Phase 1 (load time): bind the day spec against a base date. Warnings for
+# specs that don't make sense against the calendar (e.g. a school anchor on a
+# holiday) are reported via the callback (default: print to stderr).
+bound = bells.bind_time(base_date, t, lambda warning: print(warning))
+# → {"date": "2026-01-06", "anchor": "end_of_period", "offset": "-00:05"}
+
+# Phase 2 (query time): resolve to a concrete moment (an aware datetime in the
+# schedule's timezone), supplying the period if the anchor needs one. None when
+# the date has no schedule or no such period.
+bells.resolve_time(bound, 3)       # datetime | None
+
+# Pieces of the above, usable directly:
+bells.resolve_day(base_date, t.get("day"))   # date
+bells.time_warnings(bound)                    # list[str] (empty = OK)
+bells.add_school_days(d, 3)                    # n school days out (n may be negative)
+bells.period_on_date(d, 3)                     # period dict | None
+bells.current_or_next_period_number()          # int | None
+```
+
+The string syntax is `anchor [time-offset] [day-part]`, whitespace-separated
+and case-insensitive (e.g. `end_of_period -00:05`, `start_of_day next week`,
+`end_of_day +1 day`, `midnight +1 week`, `start_of_day 2026-01-05`). Day-part
+semantics: `±N day(s)` counts *school* days; `±N week(s)` is literal calendar
+arithmetic (no snapping); a weekday name means the first such day strictly after
+the base date, taken literally even if it's a holiday; the week boundaries
+(`start of [next] week`, `end of [next] week`) snap to the first/last school day
+of the ISO week. `start of week` on a week with no school days advances to the
+first day back (with a warning); `end of week` on such a week raises. Resolution
+that runs past the loaded calendars raises an `IndexError`.
 
 ### `Calendars`
 

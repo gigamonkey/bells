@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from bells import BellSchedule
+from bells import BellSchedule, format_time, parse_time
 
 GOLDEN_DIR = Path(__file__).resolve().parent.parent.parent / "golden"
 
@@ -74,6 +74,21 @@ def _ser_non_class_days(days):
     return [{"date": d["date"].isoformat(), "label": d["label"]} for d in days]
 
 
+def _ser_period(p):
+    if p is None:
+        return None
+    return {
+        "name": p["name"],
+        "start": _ser_instant(p["start"]),
+        "end": _ser_instant(p["end"]),
+        "tags": p["tags"],
+    }
+
+
+def _ser_zoned(dt):
+    return None if dt is None else _ser_instant(dt)
+
+
 # ── Query dispatch (camelCase protocol name → this port's API) ──────────────
 
 DISPATCH = {
@@ -104,6 +119,14 @@ DISPATCH = {
     "periodsForDate": lambda b, a: _ser_periods(b.periods_for_date(_instant(a["instant"]))),
     "nonClassDaysLeft": lambda b, a: _ser_non_class_days(b.non_class_days_left(_instant(a["instant"]))),
     "nonClassLabel": lambda b, a: b.non_class_label(_date(a["date"])),
+    # Abstract-time API.
+    "resolveDay": lambda b, a: b.resolve_day(_date(a["base"]), a.get("day")).isoformat(),
+    "addSchoolDays": lambda b, a: b.add_school_days(_date(a["date"]), a["n"]).isoformat(),
+    "resolveTime": lambda b, a: _ser_zoned(b.resolve_time(a["bound"], a.get("period"))),
+    "periodOnDate": lambda b, a: _ser_period(b.period_on_date(_date(a["date"]), a["n"])),
+    "currentOrNextPeriodNumber": lambda b, a: b.current_or_next_period_number(_instant(a["instant"])),
+    "timeWarnings": lambda b, a: len(b.time_warnings(a["bound"])),
+    "canonicalizeTime": lambda b, a: format_time(parse_time(a["spec"])),
 }
 
 

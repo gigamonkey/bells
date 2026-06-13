@@ -1,0 +1,33 @@
+{
+  "year": "2025-2026",
+  "timezone": "America/Los_Angeles",
+  "firstDay": "2025-09-02",
+  "lastDay": "2026-06-12",
+  "schedules": {
+    "NORMAL": [
+      { "name": "Period 1", "start": "8:30", "end": "9:30" },
+      { "name": "Period 2", "start": "9:36", "end": "10:36" },
+      { "name": "Lunch", "start": "10:36", "end": "11:06" },
+      { "name": "Period 3", "start": "11:12", "end": "12:12" }
+    ],
+    "SHORT": [
+      { "name": "Period 1", "start": "8:30", "end": "9:15" },
+      { "name": "Period 2", "start": "9:21", "end": "10:06" }
+    ],
+    "FINALS": [
+      { "name": "Period 1 Final", "start": "8:30", "end": "10:00" },
+      { "name": "Period 2 Final", "start": "10:15", "end": "11:45" }
+    ],
+    "ASSEMBLY": [{ "name": "Assembly", "start": "9:00", "end": "12:00" }]
+  },
+  "dates": {
+    "2025-10-31": "SHORT",
+    "2026-01-09": "ASSEMBLY",
+    "2026-06-01": "FINALS"
+  },
+  "holidays": [
+    "2025-10-13",
+    "2025-11-27", "2025-11-28",
+    "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20"
+  ]
+}

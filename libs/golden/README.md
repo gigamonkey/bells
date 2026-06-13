@@ -54,7 +54,13 @@ port's normal test run.
 - `queries[].args` — argument values by parameter name. Instants are ISO
   8601 UTC strings (`"2025-08-26T16:00:00Z"`), dates are `"YYYY-MM-DD"`.
   Which is which is fixed per method (see the dispatch tables); e.g.
-  `schoolTimeBetween` takes two instants, `schoolDaysBetween` two dates.
+  `schoolTimeBetween` takes two instants, `schoolDaysBetween` two dates. A few
+  abstract-time methods take **structured** args: a `day` is a `DaySpec`
+  object (`{"type": "schoolDays", "n": 1}`, `{"type": "week", "edge": "start",
+  "n": 1}`, etc.), and a `bound` is a `BoundTime` object (`{"date", "anchor",
+  "offset"}` where `anchor` is a wire label like `"start_of_period"`). Each
+  runner converts these to its native form (TS/Python pass the matching
+  object/dict through; Java builds `DaySpec`/`BoundTime` from the JSON).
 
 Queries must be deterministic: every method call passes explicit
 instants/dates, never "now". Methods that would throw for the given inputs
@@ -71,9 +77,19 @@ date only), `currentDayBounds`, `nextSchoolDayStart`, `previousSchoolDayEnd`,
 `previousSchoolDay`, `scheduleNameFor`, `scheduleFor`, `periodsForDate`,
 `nonClassDaysLeft`, `nonClassLabel`.
 
+Abstract-time API: `resolveDay` (→ date), `addSchoolDays` (→ date),
+`resolveTime` (→ instant or null; a `ZonedDateTime`/aware `datetime` is
+serialized to its UTC instant), `periodOnDate` (→ period or null),
+`currentOrNextPeriodNumber` (→ int or null), and `timeWarnings` (→ the warning
+**count**, since the message text — like the validator's — is not part of the
+compatibility contract). `canonicalizeTime` is a golden-only composite that
+runs `formatTime(parseTime(spec))`, pinning the string syntax cross-port.
+
 Excluded by design: the zero-argument "now" overloads and
 `Calendars.current()` (clock-dependent, and the ports' zone-defaulting APIs
-intentionally differ).
+intentionally differ). The throwing paths of the abstract-time methods
+(malformed offsets, out-of-range resolution) are covered by each port's unit
+suite, not the goldens.
 
 ## Canonical serialization
 
@@ -85,6 +101,10 @@ intentionally differ).
   default `toString`, which differ on fractional seconds.)
 
 - **Date** → `"YYYY-MM-DD"`.
+
+- **ZonedDateTime** (from `resolveTime`; an aware `datetime` in Python) → its
+  UTC **Instant** string. The wall-clock/offset view is derivable, and the
+  instant is the unambiguous absolute moment — which is what DST cases need.
 
 - **Duration** → integer seconds. (Schedule times are minute-granularity, so
   this is lossless.)

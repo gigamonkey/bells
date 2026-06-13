@@ -144,10 +144,44 @@ class GoldenTest {
       case "periodsForDate" -> periods(b.periodsForDate(instantArg(args)));
       case "nonClassDaysLeft" -> nonClassDays(b.nonClassDaysLeft(instantArg(args)));
       case "nonClassLabel" -> b.nonClassLabel(dateArg(args));
+        // Abstract-time API.
+      case "resolveDay" -> b.resolveDay(date(args, "base"), daySpec(args.get("day"))).toString();
+      case "addSchoolDays" -> b.addSchoolDays(dateArg(args), args.get("n").asInt()).toString();
+      case "resolveTime" -> zoned(b.resolveTime(boundTime(args.get("bound")), periodArg(args)));
+      case "periodOnDate" -> period(b.periodOnDate(dateArg(args), args.get("n").asInt()));
+      case "currentOrNextPeriodNumber" -> b.currentOrNextPeriodNumber(instantArg(args));
+      case "timeWarnings" -> b.timeWarnings(boundTime(args.get("bound"))).size();
+      case "canonicalizeTime" ->
+          AbstractTimes.formatTime(AbstractTimes.parseTime(args.get("spec").asText()));
       default ->
           throw new IllegalArgumentException(
               "Golden query method not in protocol: " + query.get("method").asText());
     };
+  }
+
+  private static Integer periodArg(JsonNode args) {
+    return args.has("period") ? Integer.valueOf(args.get("period").asInt()) : null;
+  }
+
+  private static DaySpec daySpec(JsonNode node) {
+    if (node == null || node.isNull()) {
+      return null;
+    }
+    return switch (node.get("type").asText()) {
+      case "date" -> new DaySpec.AbsoluteDate(node.get("date").asText());
+      case "schoolDays" -> new DaySpec.SchoolDays(node.get("n").asInt());
+      case "weeks" -> new DaySpec.Weeks(node.get("n").asInt());
+      case "weekday" -> new DaySpec.Weekday(node.get("weekday").asInt());
+      case "week" -> new DaySpec.Week(node.get("edge").asText(), node.get("n").asInt());
+      default -> throw new IllegalArgumentException("Unknown day spec type: " + node.get("type"));
+    };
+  }
+
+  private static BoundTime boundTime(JsonNode node) {
+    return new BoundTime(
+        node.get("date").asText(),
+        TimeAnchor.fromLabel(node.get("anchor").asText()),
+        node.get("offset").asText());
   }
 
   private static Instant instantArg(JsonNode args) {
@@ -214,15 +248,26 @@ class GoldenTest {
     return result;
   }
 
+  private static String zoned(java.time.ZonedDateTime z) {
+    return z == null ? null : instant(z.toInstant());
+  }
+
+  private static Map<String, Object> period(PeriodInstant p) {
+    if (p == null) {
+      return null;
+    }
+    Map<String, Object> entry = new LinkedHashMap<>();
+    entry.put("name", p.name());
+    entry.put("start", instant(p.start()));
+    entry.put("end", instant(p.end()));
+    entry.put("tags", p.tags());
+    return entry;
+  }
+
   private static List<Map<String, Object>> periods(List<PeriodInstant> periods) {
     List<Map<String, Object>> result = new ArrayList<>();
     for (PeriodInstant p : periods) {
-      Map<String, Object> entry = new LinkedHashMap<>();
-      entry.put("name", p.name());
-      entry.put("start", instant(p.start()));
-      entry.put("end", instant(p.end()));
-      entry.put("tags", p.tags());
-      result.add(entry);
+      result.add(period(p));
     }
     return result;
   }

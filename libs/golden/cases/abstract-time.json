@@ -1,0 +1,56 @@
+{
+  "description": "The abstract-time API (resolveDay, addSchoolDays, resolveTime, periodOnDate, currentOrNextPeriodNumber, timeWarnings, and parse/format round-tripping) on a synthetic year with a Monday holiday (2025-10-13), a Thanksgiving Thu-Fri pair, a full vacation week (2026-02-16..20), a SHORT day missing period 3, an ASSEMBLY day with no numbered periods, and a DST fall-back (2025-11-02). Some queries carry structured args: resolveDay/timeWarnings/resolveTime take a 'day' or 'bound' object; resolveTime takes an optional 'period'. timeWarnings is serialized to its warning count (message text is not part of the compatibility contract). canonicalizeTime runs formatTime(parseTime(spec)).",
+  "calendars": ["abstract-time.json"],
+  "options": {},
+  "queries": [
+    { "id": "resolve-day-omitted", "method": "resolveDay", "args": { "base": "2025-10-06" } },
+    { "id": "resolve-day-absolute", "method": "resolveDay", "args": { "base": "2025-10-06", "day": { "type": "date", "date": "2025-10-13" } } },
+    { "id": "resolve-day-school-plus1", "method": "resolveDay", "args": { "base": "2025-10-10", "day": { "type": "schoolDays", "n": 1 } } },
+    { "id": "resolve-day-school-minus1", "method": "resolveDay", "args": { "base": "2025-10-14", "day": { "type": "schoolDays", "n": -1 } } },
+    { "id": "resolve-day-school-plus3", "method": "resolveDay", "args": { "base": "2025-10-10", "day": { "type": "schoolDays", "n": 3 } } },
+    { "id": "resolve-day-weeks-literal", "method": "resolveDay", "args": { "base": "2025-10-06", "day": { "type": "weeks", "n": 1 } } },
+    { "id": "resolve-day-weekday-monday", "method": "resolveDay", "args": { "base": "2025-10-06", "day": { "type": "weekday", "weekday": 1 } } },
+    { "id": "resolve-day-weekday-friday", "method": "resolveDay", "args": { "base": "2025-10-06", "day": { "type": "weekday", "weekday": 5 } } },
+    { "id": "resolve-day-week-start-snaps", "method": "resolveDay", "args": { "base": "2025-10-06", "day": { "type": "week", "edge": "start", "n": 1 } } },
+    { "id": "resolve-day-week-end-snaps", "method": "resolveDay", "args": { "base": "2025-11-24", "day": { "type": "week", "edge": "end", "n": 0 } } },
+    { "id": "resolve-day-week-start-empty-advances", "method": "resolveDay", "args": { "base": "2026-02-09", "day": { "type": "week", "edge": "start", "n": 1 } } },
+
+    { "id": "add-school-days-plus2", "method": "addSchoolDays", "args": { "date": "2025-10-10", "n": 2 } },
+    { "id": "add-school-days-minus2", "method": "addSchoolDays", "args": { "date": "2025-10-14", "n": -2 } },
+    { "id": "add-school-days-zero", "method": "addSchoolDays", "args": { "date": "2025-10-13", "n": 0 } },
+
+    { "id": "resolve-time-midnight", "method": "resolveTime", "args": { "bound": { "date": "2025-10-13", "anchor": "midnight", "offset": "+00:00" } } },
+    { "id": "resolve-time-start-of-day", "method": "resolveTime", "args": { "bound": { "date": "2025-09-02", "anchor": "start_of_day", "offset": "+00:00" } } },
+    { "id": "resolve-time-end-of-day", "method": "resolveTime", "args": { "bound": { "date": "2025-09-02", "anchor": "end_of_day", "offset": "+00:00" } } },
+    { "id": "resolve-time-day-anchor-on-holiday", "method": "resolveTime", "args": { "bound": { "date": "2025-10-13", "anchor": "start_of_day", "offset": "+00:00" } } },
+    { "id": "resolve-time-period-2", "method": "resolveTime", "args": { "bound": { "date": "2025-09-02", "anchor": "start_of_period", "offset": "+00:00" }, "period": 2 } },
+    { "id": "resolve-time-period-offset", "method": "resolveTime", "args": { "bound": { "date": "2025-09-02", "anchor": "end_of_period", "offset": "-00:05" }, "period": 1 } },
+    { "id": "resolve-time-period-omitted", "method": "resolveTime", "args": { "bound": { "date": "2025-09-02", "anchor": "start_of_period", "offset": "+00:00" } } },
+    { "id": "resolve-time-no-such-period", "method": "resolveTime", "args": { "bound": { "date": "2025-10-31", "anchor": "start_of_period", "offset": "+00:00" }, "period": 3 } },
+    { "id": "resolve-time-dst-fallback", "method": "resolveTime", "args": { "bound": { "date": "2025-11-02", "anchor": "midnight", "offset": "+04:00" } } },
+
+    { "id": "period-on-date-2", "method": "periodOnDate", "args": { "date": "2025-09-02", "n": 2 } },
+    { "id": "period-on-date-final", "method": "periodOnDate", "args": { "date": "2026-06-01", "n": 1 } },
+    { "id": "period-on-date-missing", "method": "periodOnDate", "args": { "date": "2025-10-31", "n": 3 } },
+    { "id": "period-on-date-holiday", "method": "periodOnDate", "args": { "date": "2025-10-13", "n": 1 } },
+
+    { "id": "current-or-next-during-period-2", "method": "currentOrNextPeriodNumber", "args": { "instant": "2025-09-03T17:00:00Z" } },
+    { "id": "current-or-next-during-lunch", "method": "currentOrNextPeriodNumber", "args": { "instant": "2025-09-03T17:50:00Z" } },
+    { "id": "current-or-next-before-school", "method": "currentOrNextPeriodNumber", "args": { "instant": "2025-09-03T14:00:00Z" } },
+    { "id": "current-or-next-after-school", "method": "currentOrNextPeriodNumber", "args": { "instant": "2025-09-03T20:00:00Z" } },
+    { "id": "current-or-next-holiday", "method": "currentOrNextPeriodNumber", "args": { "instant": "2025-10-13T17:00:00Z" } },
+
+    { "id": "warnings-midnight", "method": "timeWarnings", "args": { "bound": { "date": "2025-10-13", "anchor": "midnight", "offset": "+00:00" } } },
+    { "id": "warnings-period-on-holiday", "method": "timeWarnings", "args": { "bound": { "date": "2025-10-13", "anchor": "start_of_period", "offset": "+00:00" } } },
+    { "id": "warnings-period-no-numbered", "method": "timeWarnings", "args": { "bound": { "date": "2026-01-09", "anchor": "start_of_period", "offset": "+00:00" } } },
+    { "id": "warnings-day-no-numbered", "method": "timeWarnings", "args": { "bound": { "date": "2026-01-09", "anchor": "start_of_day", "offset": "+00:00" } } },
+    { "id": "warnings-sensible", "method": "timeWarnings", "args": { "bound": { "date": "2025-09-02", "anchor": "start_of_period", "offset": "+00:00" } } },
+
+    { "id": "canon-weekday", "method": "canonicalizeTime", "args": { "spec": "START_OF_DAY MON" } },
+    { "id": "canon-next-week", "method": "canonicalizeTime", "args": { "spec": "start_of_day next week" } },
+    { "id": "canon-day-plural", "method": "canonicalizeTime", "args": { "spec": "end_of_day +1 days" } },
+    { "id": "canon-offset-pad", "method": "canonicalizeTime", "args": { "spec": "start_of_day +1:30" } },
+    { "id": "canon-offset-and-day", "method": "canonicalizeTime", "args": { "spec": "end_of_period -00:05 +1 day" } },
+    { "id": "canon-zero-offset", "method": "canonicalizeTime", "args": { "spec": "midnight +00:00" } }
+  ]
+}

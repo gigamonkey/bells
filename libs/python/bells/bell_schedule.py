@@ -5,11 +5,27 @@ Python counterpart of the JavaScript ``bell-schedule.js`` module.
 
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta
-from typing import Optional
+import re
+import sys
+from datetime import date, datetime, time, timedelta, timezone
+from typing import Callable, Optional
+from zoneinfo import ZoneInfo
 
+from .abstract_time import parse_offset_minutes
 from .calendar import Calendar, Interval, normalize_include_tags
 from .datetimeutil import _instant_to_date, _now_instant
+
+_PERIOD_NUMBER_RE = re.compile(r"^Period (\d+)\b")
+
+
+def _default_period_number(period: dict) -> Optional[int]:
+    """The bhs-cs heuristic for numbered periods: "Period 3", "Period 3 Final"."""
+    m = _PERIOD_NUMBER_RE.match(period["name"])
+    return int(m.group(1)) if m else None
+
+
+def _default_warn(warning: str) -> None:
+    print(warning, file=sys.stderr)
 
 
 class BellSchedule:
@@ -20,6 +36,7 @@ class BellSchedule:
         role = options.get("role") or "student"
         include_tags = normalize_include_tags(options.get("include_tags") or {})
         self._options = {"role": role, "include_tags": include_tags}
+        self._period_number = options.get("period_number") or _default_period_number
         self._calendars = [
             Calendar(d, {"role": role, "include_tags": include_tags})
             for d in calendar_data_array
@@ -292,3 +309,166 @@ class BellSchedule:
             }
             for p in sched.actual_periods()
         ]
+
+    # ── abstract times ────────────────────────────────────────────────────────
+
+    def _first_calendar_day(self) -> date:
+        return min(c.first_day for c in self._calendars)
+
+    def _last_calendar_day(self) -> date:
+        return max(c.last_day for c in self._calendars)
+
+    def _check_in_calendars(self, d: date, what: str) -> None:
+        if d < self._first_calendar_day() or d > self._last_calendar_day():
+            raise IndexError(f"Resolving {what} runs outside the loaded calendars at {d}")
+
+    def add_school_days(self, d: date, n: int) -> date:
+        """n school days from ``d`` (n may be negative; 0 = ``d`` itself)."""
+        if not isinstance(n, int) or isinstance(n, bool):
+            raise ValueError(f"School-day offset must be an integer, got {n}")
+        start = d
+        step = -1 if n < 0 else 1
+        remaining = abs(n)
+        while remaining > 0:
+            d = d + timedelta(days=step)
+            self._check_in_calendars(d, f"{n} school days from {start}")
+            if self.is_school_day(d):
+                remaining -= 1
+        return d
+
+    def resolve_day(self, base: date, day: Optional[dict] = None) -> date:
+        """Resolve a day spec against a base date; omitted means the base itself."""
+        if not day:
+            return base
+        kind = day["type"]
+        if kind == "date":
+            return date.fromisoformat(day["date"])
+        if kind == "schoolDays":
+            return self.add_school_days(base, day["n"])
+        if kind == "weeks":
+            # Taken literally — no school-day snapping; validation warns instead.
+            return base + timedelta(weeks=day["n"])
+        if kind == "weekday":
+            weekday = day["weekday"]
+            if not isinstance(weekday, int) or weekday < 1 or weekday > 7:
+                raise ValueError(f"Invalid weekday {weekday} (must be 1=Monday..7=Sunday)")
+            # First matching day strictly after the base; never snapped.
+            return base + timedelta(days=((weekday - base.isoweekday() + 6) % 7) + 1)
+        if kind == "week":
+            monday = base - timedelta(days=base.isoweekday() - 1) + timedelta(weeks=day["n"])
+            if day["edge"] == "start":
+                # First school day on or after the Monday; a week with no school
+                # days advances into the following week ("the first day back").
+                d = monday
+                while not self.is_school_day(d):
+                    self._check_in_calendars(d, f"start of the week of {monday}")
+                    d = d + timedelta(days=1)
+                return d
+            # edge == 'end': last school day on or before the Sunday. A week with
+            # no school days is an error: walking backward would land at or
+            # before the base date and guessing forward is just as wrong.
+            d = monday + timedelta(days=6)
+            while d >= monday:
+                if self.is_school_day(d):
+                    return d
+                d = d - timedelta(days=1)
+            raise ValueError(f"'end of week': the week of {monday} has no school days")
+        raise ValueError(f'Unknown day spec type "{kind}"')
+
+    def bind_time(
+        self,
+        base: date,
+        t: dict,
+        on_warning: Optional[Callable[[str], None]] = None,
+    ) -> dict:
+        """Phase 1: bind the day spec against a base date. Runs
+        :meth:`time_warnings` on the result and reports anything it finds via
+        ``on_warning`` (default: print to stderr)."""
+        if on_warning is None:
+            on_warning = _default_warn
+        offset = t.get("offset") or "+00:00"
+        parse_offset_minutes(offset)  # reject malformed offsets at load time
+        d = self.resolve_day(base, t.get("day"))
+        bound = {"date": d.isoformat(), "anchor": t["anchor"], "offset": offset}
+
+        warnings = self.time_warnings(bound)
+        day = t.get("day")
+        if day and day.get("type") == "week" and day.get("edge") == "start":
+            monday = base - timedelta(days=base.isoweekday() - 1) + timedelta(weeks=day["n"])
+            if d > monday + timedelta(days=6):
+                warnings.append(
+                    f"'start of week' advanced to {d}: the week of {monday} has no school days"
+                )
+        for w in warnings:
+            on_warning(w)
+        return bound
+
+    def time_warnings(self, t: dict) -> list[str]:
+        """Sanity-check a bound time against the calendar: human-readable
+        warnings for specs that can't carry their anchor. Empty = OK. (It cannot
+        check a specific period — the period isn't bound yet.)"""
+        anchor = t["anchor"]
+        if anchor == "midnight":
+            return []  # midnight on any date is well-defined
+        d = date.fromisoformat(t["date"])
+        if not self.is_school_day(d):
+            return [f"{anchor} on {t['date']}, which is not a school day"]
+        if anchor in ("start_of_period", "end_of_period"):
+            numbered = any(self._period_number(p) is not None for p in self.schedule_for(d))
+            if not numbered:
+                return [f"{anchor} on {t['date']}, which has no numbered periods"]
+        return []
+
+    def resolve_time(self, t: dict, period: Optional[int] = None) -> Optional[datetime]:
+        """Phase 2: resolve a bound time to a concrete moment (an aware datetime
+        in the schedule's timezone), supplying the period if the anchor needs
+        one. ``None`` when the date has no schedule, no such period, or a period
+        anchor's period is omitted — never a guess."""
+        offset_minutes = parse_offset_minutes(t["offset"])
+        anchor = self._anchor_instant(date.fromisoformat(t["date"]), t["anchor"], period)
+        if anchor is None:
+            return None
+        # Offsets are applied to the absolute instant (UTC), so offsets crossing
+        # a DST transition resolve as exact elapsed time.
+        resolved = anchor + timedelta(minutes=offset_minutes)
+        return resolved.astimezone(ZoneInfo(self.timezone))
+
+    def _anchor_instant(
+        self, d: date, anchor: str, period: Optional[int]
+    ) -> Optional[datetime]:
+        tz = self.timezone
+        if anchor == "midnight":
+            local = datetime.combine(d, time(hour=0), tzinfo=ZoneInfo(tz))
+            return local.astimezone(timezone.utc)
+        if anchor in ("start_of_day", "end_of_day"):
+            periods = self.schedule_for(d)
+            if not periods:
+                return None
+            return periods[0]["start"] if anchor == "start_of_day" else periods[-1]["end"]
+        if anchor in ("start_of_period", "end_of_period"):
+            if period is None:
+                return None
+            p = self.period_on_date(d, period)
+            if p is None:
+                return None
+            return p["start"] if anchor == "start_of_period" else p["end"]
+        return None
+
+    def period_on_date(self, d: date, n: int) -> Optional[dict]:
+        """The numbered period on a date, per the period_number matcher, or None."""
+        for p in self.schedule_for(d):
+            if self._period_number(p) == n:
+                return p
+        return None
+
+    def current_or_next_period_number(self, instant: Optional[datetime] = None) -> Optional[int]:
+        """The number of the period containing ``instant``, or the next numbered
+        period later the same day, or None if neither exists."""
+        if instant is None:
+            instant = _now_instant()
+        d = _instant_to_date(instant, self.timezone)
+        for p in self.schedule_for(d):
+            n = self._period_number(p)
+            if n is not None and instant < p["end"]:
+                return n
+        return None

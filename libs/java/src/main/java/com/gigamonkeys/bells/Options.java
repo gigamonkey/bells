@@ -3,10 +3,13 @@ package com.gigamonkeys.bells;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Configuration for a {@link BellSchedule}: the viewer's role and which optional period
- * tags to include on each weekday.
+ * Configuration for a {@link BellSchedule}: the viewer's role, which optional period
+ * tags to include on each weekday, and how to extract a period's number.
  *
  * <p>{@code includeTags} maps an ISO day-of-week number (1=Mon … 7=Sun) to the list of
  * optional tags to include that day. A flat list applies the same tags Monday–Friday.
@@ -19,16 +22,33 @@ public final class Options {
   /** The teacher role. */
   public static final String TEACHER = "teacher";
 
+  private static final Pattern DEFAULT_PERIOD_NUMBER_PATTERN = Pattern.compile("Period (\\d+)\\b");
+
+  /** The bhs-cs heuristic for numbered periods: "Period 3", "Period 3 Final". */
+  public static final Function<PeriodInstant, Integer> DEFAULT_PERIOD_NUMBER = period -> {
+    Matcher m = DEFAULT_PERIOD_NUMBER_PATTERN.matcher(period.name());
+    return m.lookingAt() ? Integer.valueOf(m.group(1)) : null;
+  };
+
   private final String role;
   private final Map<Integer, List<String>> includeTags;
+  private final Function<PeriodInstant, Integer> periodNumber;
 
   /**
    * @param role {@code "student"} (default) or {@code "teacher"}; {@code null} → student
    * @param includeTags normalized per-weekday tag map (never {@code null})
    */
   public Options(String role, Map<Integer, List<String>> includeTags) {
+    this(role, includeTags, DEFAULT_PERIOD_NUMBER);
+  }
+
+  private Options(
+      String role,
+      Map<Integer, List<String>> includeTags,
+      Function<PeriodInstant, Integer> periodNumber) {
     this.role = (role == null) ? STUDENT : role;
     this.includeTags = includeTags == null ? Map.of() : includeTags;
+    this.periodNumber = periodNumber == null ? DEFAULT_PERIOD_NUMBER : periodNumber;
   }
 
   /**
@@ -61,6 +81,17 @@ public final class Options {
   }
 
   /**
+   * Return a copy of these options with a custom period-number matcher.
+   *
+   * @param periodNumber a matcher returning a period's number, or {@code null} for non-numbered
+   *     periods (e.g. "Lunch")
+   * @return the new options
+   */
+  public Options withPeriodNumber(Function<PeriodInstant, Integer> periodNumber) {
+    return new Options(role, includeTags, periodNumber);
+  }
+
+  /**
    * @return the role ({@code "student"} or {@code "teacher"})
    */
   public String role() {
@@ -72,6 +103,13 @@ public final class Options {
    */
   public Map<Integer, List<String>> includeTags() {
     return includeTags;
+  }
+
+  /**
+   * @return the period-number matcher
+   */
+  public Function<PeriodInstant, Integer> periodNumber() {
+    return periodNumber;
   }
 
   /**
