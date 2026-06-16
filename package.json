@@ -5,10 +5,10 @@
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
-    "@peterseibel/bells": "^0.5.0",
+    "@peterseibel/bells": "^0.7.0",
     "@peterseibel/bhs-calendars": "^2.8.1",
     "cors": "^2.8.6",
-    "esbuild": "0.28.0",
+    "esbuild": "0.28.1",
     "temporal-polyfill": "^0.3.2"
   }
 }
