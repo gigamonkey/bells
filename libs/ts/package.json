@@ -1,6 +1,6 @@
 {
   "name": "@peterseibel/bells",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsc --noEmit && node --import tsx --test test/*.test.ts",
     "golden:generate": "node --import tsx scripts/generate-golden.ts",
-    "prepublishOnly": "npm run build"
+    "prepare": "npm run build"
   },
   "exports": {
     ".": {
