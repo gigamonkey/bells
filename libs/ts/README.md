@@ -227,6 +227,29 @@ const bells = await calendars.current(options);
 
 Files must be named `{year}.json` (e.g. `2025-2026.json`). In Node.js, paths are read with `fs.readFile`. Under a URL base, `fetch()` is used.
 
+### `bhs-calendars` (bundled BHS data)
+
+As an alternative to supplying your own `{year}.json` files, the companion [`@peterseibel/bhs-calendars`](https://www.npmjs.com/package/@peterseibel/bhs-calendars) package ships ready-to-use calendar data for Berkeley High and nearby middle schools. Its default export is a flat array of yearly calendar objects; group them by `id` to get one school's year sequence and hand that straight to `BellSchedule`:
+
+```js
+import allCalendars from '@peterseibel/bhs-calendars';
+import { BellSchedule } from '@peterseibel/bells';
+
+// Group every bundled year by school `id`.
+const byId = new Map();
+for (const year of allCalendars) {
+  const group = byId.get(year.id) ?? [];
+  group.push(year);
+  byId.set(year.id, group);
+}
+
+// Build a schedule for Berkeley High, years in chronological order.
+const years = byId.get('bhs').sort((a, b) => (a.firstDay < b.firstDay ? -1 : 1));
+const bells = new BellSchedule(years, options);
+```
+
+Unlike `Calendars`, the data is bundled — no filesystem or network access — but it only covers the BHS-area schools. Use `Calendars` for arbitrary `{year}.json` sources. Equivalent data packages exist for the [Python](../python) (`bhs-calendars` on PyPI) and [Java](../java) (`com.gigamonkeys:bhs-calendars`) ports.
+
 ### Validation
 
 ```js

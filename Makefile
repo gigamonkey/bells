@@ -51,6 +51,18 @@ golden-generate:
 	cd libs/ts && npm run golden:generate
 	git status --short libs/golden/expected/
 
+# Copy the canonical bhs-calendars JSON (repo-root bhs-calendars/, the npm
+# package source) into the Python and Java data packages, and regenerate the
+# Java resource index. Run after the source calendar data changes. The `*-*.json`
+# glob matches the year files and skips package.json.
+sync-calendars:
+	rm -f libs/python-calendars/bhs_calendars/data/*.json
+	cp bhs-calendars/*-*.json libs/python-calendars/bhs_calendars/data/
+	rm -f libs/java-bhs-calendars/src/main/resources/bhs-calendars/*.json
+	cp bhs-calendars/*-*.json libs/java-bhs-calendars/src/main/resources/bhs-calendars/
+	cd libs/java-bhs-calendars/src/main/resources/bhs-calendars && ls *.json | LC_ALL=C sort > index.txt
+	git status --short libs/python-calendars/bhs_calendars/data libs/java-bhs-calendars/src/main/resources/bhs-calendars
+
 release-lib:
 	cd libs/ts && npm version $(VERSION) --no-git-tag-version
 	git add libs/ts/package.json libs/ts/package-lock.json

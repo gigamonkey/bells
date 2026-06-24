@@ -162,6 +162,30 @@ bells = calendars.current(options)            # handles summer automatically
 Files must be named `{year}.json` (e.g. `2025-2026.json`). Local paths are read
 from disk; URL bases are fetched with `urllib`.
 
+### `bhs-calendars` (bundled BHS data)
+
+As an alternative to supplying your own `{year}.json` files, the companion
+`bhs-calendars` package ships ready-to-use calendar data for Berkeley High and
+nearby middle schools. `by_id()` groups the bundled years by school (each
+group's years sorted chronologically); hand one group straight to
+`BellSchedule`:
+
+```python
+from bhs_calendars import by_id, load_all
+from bells import BellSchedule
+
+years = by_id()["bhs"]                 # one school's years, oldest first
+bells = BellSchedule(years, options)
+
+all_years = load_all()                 # or the flat list of every school-year
+```
+
+Install it alongside the library (`pip install bhs-calendars`). Unlike
+`Calendars`, the data is bundled with the package — no filesystem layout or
+network access — but it only covers the BHS-area schools. Equivalent data
+packages exist for the [TypeScript](../ts) (`@peterseibel/bhs-calendars` on npm)
+and [Java](../java) (`com.gigamonkeys:bhs-calendars`) ports.
+
 ### Validation
 
 ```python

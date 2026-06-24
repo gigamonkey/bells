@@ -189,6 +189,41 @@ BellSchedule bells = calendars.current(ZoneId.of("America/Los_Angeles"), Options
 Files must be named `{year}.json` (e.g. `2025-2026.json`). Directory paths are read with
 `java.nio.file`; URL bases are fetched with `java.net.http.HttpClient`.
 
+### `bhs-calendars` (bundled BHS data)
+
+As an alternative to supplying your own `{year}.json` files, the companion `bhs-calendars`
+artifact ships ready-to-use calendar data for Berkeley High and nearby middle schools,
+parsed into `CalendarData`. `byId()` groups the bundled years by school (each group's years
+sorted chronologically); hand one group straight to `BellSchedule`:
+
+```java
+import com.gigamonkeys.bhscalendars.BhsCalendars;
+import com.gigamonkeys.bells.BellSchedule;
+import com.gigamonkeys.bells.CalendarData;
+import com.gigamonkeys.bells.Options;
+import java.util.List;
+
+List<CalendarData> years = BhsCalendars.byId().get("bhs");   // one school's years, oldest first
+BellSchedule bells = new BellSchedule(years, Options.defaults());
+
+List<CalendarData> all = BhsCalendars.loadAll();             // or the flat list of every school-year
+```
+
+Add the dependency:
+
+```xml
+<dependency>
+  <groupId>com.gigamonkeys</groupId>
+  <artifactId>bhs-calendars</artifactId>
+  <version>2.8.1</version>
+</dependency>
+```
+
+Unlike `Calendars`, the data is bundled on the classpath — no filesystem layout or network
+access — but it only covers the BHS-area schools. Equivalent data packages exist for the
+[TypeScript](../ts) (`@peterseibel/bhs-calendars` on npm) and [Python](../python)
+(`bhs-calendars` on PyPI) ports.
+
 ### Validation
 
 ```java

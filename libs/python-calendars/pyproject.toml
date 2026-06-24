@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bhs-calendars"
+version = "2.8.1"
+description = "Bundled BHS-area school bell-schedule calendar data for the bells library"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Peter Seibel" }]
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/gigamonkeys/bells"
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools]
+packages = ["bhs_calendars"]
+
+[tool.setuptools.package-data]
+bhs_calendars = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
