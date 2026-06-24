@@ -39,27 +39,15 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>
     <bells.version>0.5.0</bells.version>
-    <jackson.version>2.17.2</jackson.version>
     <junit.version>5.10.2</junit.version>
   </properties>
 
   <dependencies>
+    <!-- Brings Jackson transitively; bells uses it to parse the bundled JSON. -->
     <dependency>
       <groupId>com.gigamonkeys</groupId>
       <artifactId>bells</artifactId>
       <version>${bells.version}</version>
-    </dependency>
-
-    <!--
-      bells parses calendar JSON with Jackson internally (CalendarData). It is
-      declared here explicitly because the bells artifact's shade plugin
-      publishes a dependency-reduced POM that drops Jackson from its transitive
-      deps, so it would otherwise be missing at runtime.
-    -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
 
     <dependency>

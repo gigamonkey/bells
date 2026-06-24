@@ -85,6 +85,14 @@
             <configuration>
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>cli</shadedClassifierName>
+              <!--
+                The shaded jar is only the attached `cli` classifier; the main
+                bells artifact is unshaded and still needs its dependencies
+                (e.g. Jackson) at runtime. Don't let shade rewrite the published
+                POM to drop them, or consumers of the main jar break with
+                NoClassDefFoundError.
+              -->
+              <createDependencyReducedPom>false</createDependencyReducedPom>
               <transformers>
                 <transformer
                     implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
