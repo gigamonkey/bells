@@ -63,16 +63,22 @@ sync-calendars:
 	cd libs/java-bhs-calendars/src/main/resources/bhs-calendars && ls *.json | LC_ALL=C sort > index.txt
 	git status --short libs/python-calendars/bhs_calendars/data libs/java-bhs-calendars/src/main/resources/bhs-calendars
 
+# The three ports of each library share a version. `npm version` bumps the
+# TypeScript/npm port and computes the new number; scripts/set-version.py then
+# propagates that concrete version to the Python and Java ports. The library and
+# the bhs-calendars data package version independently of each other.
 release-lib:
 	cd libs/ts && npm version $(VERSION) --no-git-tag-version
-	git add libs/ts/package.json libs/ts/package-lock.json
+	python3 scripts/set-version.py lib "$$(node -p "require('./libs/ts/package.json').version")"
+	git add libs/ts/package.json libs/ts/package-lock.json libs/python/pyproject.toml libs/java/pom.xml libs/java-bhs-calendars/pom.xml
 	git commit -m "v$$(node -p "require('./libs/ts/package.json').version")"
 	tag="v$$(node -p "require('./libs/ts/package.json').version")" && git tag -a -m "$$tag" "$$tag"
 	git push --follow-tags
 
 release-bhs-calendars:
 	cd bhs-calendars && npm version $(VERSION) --no-git-tag-version
-	git add bhs-calendars/package.json
+	python3 scripts/set-version.py calendars "$$(node -p "require('./bhs-calendars/package.json').version")"
+	git add bhs-calendars/package.json libs/python-calendars/pyproject.toml libs/java-bhs-calendars/pom.xml
 	git commit -m "calendars-v$$(node -p "require('./bhs-calendars/package.json').version")"
 	tag="calendars-v$$(node -p "require('./bhs-calendars/package.json').version")" && git tag -a -m "$$tag" "$$tag"
 	git push --follow-tags

@@ -12,7 +12,7 @@ Maven coordinates:
 <dependency>
   <groupId>com.gigamonkeys</groupId>
   <artifactId>bells</artifactId>
-  <version>0.5.0</version>
+  <version>0.7.0</version>
 </dependency>
 ```
 
@@ -238,10 +238,10 @@ if (!result.valid()) {
 Checks include required fields, valid timezone, date-range consistency, unambiguous time
 strings, `start < end` for every period, and no overlapping non-optional periods.
 
-CLI (built as `bells-0.5.0-cli.jar` by `mvn package`):
+CLI (built as `bells-<version>-cli.jar` by `mvn package`):
 
 ```sh
-java -jar target/bells-0.5.0-cli.jar calendars.json [more.json ...]
+java -jar target/bells-*-cli.jar calendars.json [more.json ...]
 ```
 
 ## Building
