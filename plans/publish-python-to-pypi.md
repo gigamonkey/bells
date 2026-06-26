@@ -316,12 +316,19 @@ of `<year>.json` files" use case (single-school / custom setups, the server).
 - Reuse the same source JSON as the npm package (`bhs-calendars/*.json`) rather
   than duplicating it — e.g. copy at build time or symlink in the source tree —
   so the two registries never drift.
-- Give it its own version line (it already diverges from the library on npm) and
-  its own tag prefix / publish workflow, e.g. `cal-py-v*`, set up with a PyPI
-  Trusted Publisher exactly like steps 5–6 above.
+- Give it its own version line (it diverges from the library — `2.8.1` vs the
+  library's `0.7.0`) on the existing `calendars-v*` tag line; a `pypi` job in
+  `publish-calendars.yml` publishes it alongside npm (mirrors steps 5–6).
 - Decide whether to ship a thin re-export from `bells` (e.g. `bells` lists
   `bhs-calendars` as an optional/extra dependency) so `pip install bells[bhs]`
   gets both — or keep them fully independent like the npm packages.
+
+**Status (Python):** done. `libs/python-calendars` has full metadata + LICENSE,
+builds clean (`twine check` passes, all 19 calendars bundled), and a `pypi` job
+is wired into `publish-calendars.yml`. First publish of `bhs-calendars` 2.8.1
+goes via manual `workflow_dispatch` (the `calendars-v2.8.1` tag already exists,
+so the tag trigger won't re-fire) — same pattern as the library's 0.7.0. The
+Java port is deferred.
 
 ## Decisions made
 
@@ -332,8 +339,10 @@ of `<year>.json` files" use case (single-school / custom setups, the server).
 
 ## Open questions for you
 
-1. **Calendar data package** (section 9): publish `bhs-calendars` to PyPI as a
-   separate package now, or defer? If yes, confirm the flat-array loader design
-   and whether `bells` should offer it as an optional extra.
+1. **`bells[bhs]` extra**: should the `bell-schedule` package offer `bhs-calendars`
+   as an optional extra (`pip install bell-schedule[bhs]`), or keep the two fully
+   independent like the npm packages? (Currently independent.)
+2. **Java ports** of both `bells` and `bhs-calendars` to Maven Central —
+   deferred.
 </content>
 </invoke>

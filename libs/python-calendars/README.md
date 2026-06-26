@@ -2,10 +2,10 @@
 
 Bundled bell-schedule calendar data for Berkeley High School and nearby middle
 schools, as a Python distribution. This is the Python counterpart of the npm
-[`@peterseibel/bhs-calendars`](../../bhs-calendars) package and ships the same
+[`@peterseibel/bhs-calendars`](https://github.com/gigamonkey/bells/tree/main/bhs-calendars) package and ships the same
 per-year JSON.
 
-It is data, not logic — pair it with the [`bells`](../python) library to build
+It is data, not logic — pair it with the [`bells`](https://github.com/gigamonkey/bells/tree/main/libs/python) library to build
 schedules without supplying your own `{year}.json` files.
 
 ```sh
