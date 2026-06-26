@@ -31,8 +31,8 @@ the name.
 - Once chosen, update `name = "..."` in `pyproject.toml` (see step 2). Note the
   `bells-validate` console script name can stay as-is regardless.
 
-Decision needed from you: **which distribution name to register** (leaning
-`bell-schedule`). The rest of this plan assumes a placeholder `<DIST_NAME>`.
+**Decided:** the distribution name is **`bell-schedule`** (set in
+`pyproject.toml`), used throughout the rest of this plan.
 
 ## 1. Create PyPI account(s)
 
@@ -46,7 +46,7 @@ Decision needed from you: **which distribution name to register** (leaning
 Current file is minimal but functional. Before publishing, fill in metadata
 that makes the PyPI project page useful and the package installable cleanly:
 
-- `name = "<DIST_NAME>"` — the chosen available name from step 0.
+- `name = "bell-schedule"` — the chosen available name from step 0. ✅ done
 - `version` — confirm `0.5.0` is the intended first published version (or bump).
 - Add `[project]` niceties: `keywords`, `classifiers` (e.g. development status,
   `License :: OSI Approved :: MIT License`, supported `Programming Language ::
@@ -121,46 +121,53 @@ This mirrors the npm Trusted Publisher setup already in use. On PyPI:
 1. Go to your PyPI account → **Publishing** → **Add a pending publisher**
    (works even before the project exists — it's created on first upload).
 2. Fill in:
-   - **PyPI Project Name**: `<DIST_NAME>`
+   - **PyPI Project Name**: `bell-schedule`
    - **Owner**: `gigamonkey` (the GitHub account that owns the repo — your
      GitHub handle, *not* your PyPI username and not the `gigamonkeys` domain;
      it must match the `gigamonkey/bells` in the repo URL).
    - **Repository name**: `bells`
-   - **Workflow name**: `publish-python.yml` (must match the file in step 6)
-   - **Environment name**: optional but recommended, e.g. `pypi` (then also add
-     a matching `environment:` to the workflow job).
+   - **Workflow name**: `publish.yml` (the combined publish workflow — step 6).
+   - **Environment name**: leave **blank** for now. The workflow in step 6 sets
+     no environment, and the two must match. (Optional hardening later: create a
+     GitHub Environment named `pypi`, add `environment: pypi` to the `pypi` job,
+     and register the same name here.)
 
 No secrets are stored in GitHub; the workflow authenticates via OIDC.
 
-## 6. Add the GitHub Actions workflow
+## 6. Add the PyPI job to the publish workflow
 
-Create `.github/workflows/publish-python.yml`, modeled on the existing
-`publish.yml` (npm) but using PyPI's publish action. Key differences from the
-npm workflow:
+Because the three library ports are kept in version lockstep (`make release-lib`
+bumps TS + Python + Java together and tags `v*`), a single `v*` tag is one
+coordinated release. So rather than a separate `publish-python.yml` on its own
+tag, **add a `pypi` job to the existing `.github/workflows/publish.yml`** (the
+npm publish workflow, already triggered on `v*`). Both registries' Trusted
+Publishers then register the same workflow filename, `publish.yml`.
 
-- The repo already uses tag-triggered publishing (`tags: ['v*']`) for npm. A
-  single `v*` tag can't cleanly distinguish "publish npm" vs "publish PyPI". Two
-  options — **decide which**:
-  - **(a) Separate tag prefix** for Python, e.g. `py-v*`, so the two publish
-    workflows don't both fire on one tag. Simple, explicit.
-  - **(b) Shared `v*` tag** that publishes *both* npm and PyPI together, keeping
-    versions in lockstep. Requires the TS and Python versions to match per
-    release.
+Keep the filename `publish.yml` — the npm Trusted Publisher is already bound to
+it; renaming would mean reconfiguring npm on npmjs.com. The `name:` display field
+can change freely.
 
-  Pick one; the example below uses `py-v*` (option a).
+This is already implemented in the repo. The shape:
 
 ```yaml
-name: Publish Python to PyPI
+name: Publish library
 
 on:
   push:
     tags:
-      - 'py-v*'
+      - 'v*'
+  workflow_dispatch:          # manual run -> PyPI only (see npm job's `if`)
 
 jobs:
-  publish:
+  npm:
+    if: github.event_name == 'push'   # tag pushes only; npm rejects re-publishes
     runs-on: ubuntu-latest
-    environment: pypi          # only if you set an environment in step 5
+    permissions: { contents: read, id-token: write }
+    steps:
+      # ...existing setup-node + npm test + npm publish --provenance...
+
+  pypi:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write          # required for OIDC Trusted Publishing
@@ -169,16 +176,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Install build deps
-        run: python -m pip install --upgrade build
       - name: Run tests
         working-directory: libs/python
         run: |
           python -m pip install -e '.[test]'
           python -m pytest
-      - name: Build
+      - name: Build sdist + wheel
         working-directory: libs/python
-        run: python -m build
+        run: |
+          python -m pip install --upgrade build
+          python -m build
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -187,34 +194,54 @@ jobs:
 
 Notes:
 
-- `pypa/gh-action-pypi-publish` auto-detects the OIDC token; no `password:`/
-  token input needed when Trusted Publishing is configured.
-- The test step keeps the Python publish consistent with the npm workflow, which
-  runs `npm test` before publishing. The golden tests run as part of pytest, so
-  this also guards cross-port behavior parity.
-- The workflow deliberately uses stock `setup-python` + `pip`/`build`, which need
-  no extra setup on the runner and produce identical artifacts. To match the
-  local `uv` workflow instead, swap in `astral-sh/setup-uv@v5` and replace the
-  install/test/build steps with `uv run --extra test pytest` and `uv build` (the
-  final `pypa/gh-action-pypi-publish` step is unchanged either way).
+- Two independent parallel jobs share the `v*` trigger. Each carries its own
+  `id-token: write`, so each gets its own OIDC token for its registry. If one
+  registry fails you re-run just that job ("Re-run failed jobs").
+- `workflow_dispatch` + the npm job's `if` let a **manual run publish PyPI only**,
+  building whatever version is in `libs/python/pyproject.toml`. This is the path
+  to a first PyPI publish at the current version (`v0.7.0` is already tagged, so
+  the tag trigger won't re-fire) without forcing an npm re-publish.
+- `pypa/gh-action-pypi-publish` auto-detects the OIDC token; no `password:`/token
+  input needed when Trusted Publishing is configured.
+- The test step keeps PyPI consistent with the npm job, which runs `npm test`
+  before publishing. The golden tests run as part of pytest, so this also guards
+  cross-port behavior parity.
+- The job uses stock `setup-python` + `pip`/`build` (no runner setup, identical
+  artifacts). To match the local `uv` flow instead, swap in `astral-sh/setup-uv@v5`
+  with `uv run --extra test pytest` and `uv build`; the publish step is unchanged.
+- The `bhs-calendars` data packages stay on their own `publish-calendars.yml` /
+  `calendars-v*` line — they version independently of the library.
 
-## 7. Release process (per version going forward)
+## 7. Publish
 
-1. Bump `version` in `libs/python/pyproject.toml`.
-2. Commit on `main`.
-3. Tag and push: `git tag py-v0.5.0 && git push origin py-v0.5.0`
-   (or `v*` if you chose option b in step 6).
-4. Watch the Actions run; confirm the new version appears at
-   `https://pypi.org/project/<DIST_NAME>/`.
+### First publish (PyPI 0.7.0, this morning)
+
+`v0.7.0` is already tagged (npm is out), so the tag trigger won't re-fire. Use
+the manual path:
+
+1. Finish steps 1 and 5 (PyPI account + Trusted Publisher for `bell-schedule`,
+   workflow `publish.yml`, no environment).
+2. Make sure the updated `publish.yml` is on the default branch (`main`).
+3. GitHub → **Actions** → **Publish library** → **Run workflow** (on `main`).
+   Only the `pypi` job runs; it builds 0.7.0 from `libs/python/pyproject.toml`
+   and publishes.
+4. Confirm it appears at `https://pypi.org/project/bell-schedule/`.
+
+### Ongoing releases (lockstep, all ports)
+
+`make release-lib VERSION=patch|minor|major` bumps TS + Python + Java to the same
+version, commits, tags `v<x>`, and pushes. The `v*` tag fires `publish.yml`,
+which publishes **both** npm and PyPI at that version. Just watch the Actions run.
 
 ## 8. Follow-ups / housekeeping
 
 - Update `CLAUDE.md` and/or `libs/python/README.md` with the published
-  `pip install <DIST_NAME>` instructions and the release/tagging convention.
-- Consider whether the TS, Python, and (eventually) Java versions should be kept
-  in lockstep, and document that choice.
-- If you went with option (b) shared tags, update the existing npm `publish.yml`
-  docs/notes so future-you remembers one tag fans out to both registries.
+  `pip install bell-schedule` instructions and the lockstep release convention.
+- Optional hardening: add a `pypi` GitHub Environment (with required reviewers,
+  if desired), set `environment: pypi` on the job, and register it in the
+  Trusted Publisher.
+- When ready, give the `bhs-calendars` Python/Java packages (section 9) the same
+  treatment on the `publish-calendars.yml` / `calendars-v*` line.
 
 ## 9. Companion: publishing the calendar *data* (`bhs-calendars`) to PyPI
 
@@ -296,15 +323,16 @@ of `<year>.json` files" use case (single-school / custom setups, the server).
   `bhs-calendars` as an optional/extra dependency) so `pip install bells[bhs]`
   gets both — or keep them fully independent like the npm packages.
 
+## Decisions made
+
+1. **Distribution name**: `bell-schedule` (set in `pyproject.toml`).
+2. **Tag strategy**: shared `v*` — one combined `publish.yml` publishes npm +
+   PyPI in lockstep (step 6).
+3. **First version**: `0.7.0`, matching the TS line via the lockstep setup.
+
 ## Open questions for you
 
-1. **Distribution name** on PyPI (`bells` is taken) — `bell-schedule` or
-   `school-bells` are the front-runners; see step 0.
-2. **Tag strategy**: separate `py-v*` tag, or shared `v*` that publishes npm +
-   PyPI together (step 6).
-3. **First version**: publish as `0.5.0` to match the current TS line, or start
-   the Python package at its own `0.1.0`?
-4. **Calendar data package** (section 9): publish `bhs-calendars` to PyPI as a
+1. **Calendar data package** (section 9): publish `bhs-calendars` to PyPI as a
    separate package now, or defer? If yes, confirm the flat-array loader design
    and whether `bells` should offer it as an optional extra.
 </content>
