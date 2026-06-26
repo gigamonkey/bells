@@ -1,19 +1,35 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bells"
+name = "bell-schedule"
 version = "0.7.0"
 description = "A framework-agnostic library for querying school bell schedules (Python port)"
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Peter Seibel" }]
+keywords = ["bell schedule", "school", "calendar", "timetable", "bells", "education"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+]
 dependencies = []
 
 [project.urls]
+Homepage = "https://github.com/gigamonkey/bells"
 Repository = "https://github.com/gigamonkey/bells"
+"Bug Tracker" = "https://github.com/gigamonkey/bells/issues"
 
 [project.scripts]
 bells-validate = "bells.cli:main"

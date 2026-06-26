@@ -1,7 +1,7 @@
 # bells (Python)
 
 A framework-agnostic Python library for querying school bell schedules. This is
-a port of the [`@peterseibel/bells`](../ts) JavaScript library, kept
+a port of the [`@peterseibel/bells`](https://github.com/gigamonkey/bells/tree/main/libs/ts) JavaScript library, kept
 behaviorally identical to it.
 
 Where the JS library is built on the [Temporal API](https://tc39.es/proposal-temporal/),
@@ -21,7 +21,7 @@ Requires Python 3.9+ (uses `zoneinfo`). No third-party dependencies.
 
 ## Calendar data format
 
-The calendar data format is identical to the JS library — see [`../ts/README.md`](../ts/README.md)
+The calendar data format is identical to the JS library — see [`libs/ts/README.md`](https://github.com/gigamonkey/bells/blob/main/libs/ts/README.md)
 for the full field reference. Briefly, calendar data is a list of year objects:
 
 ```json
@@ -183,8 +183,8 @@ all_years = load_all()                 # or the flat list of every school-year
 Install it alongside the library (`pip install bhs-calendars`). Unlike
 `Calendars`, the data is bundled with the package — no filesystem layout or
 network access — but it only covers the BHS-area schools. Equivalent data
-packages exist for the [TypeScript](../ts) (`@peterseibel/bhs-calendars` on npm)
-and [Java](../java) (`com.gigamonkeys:bhs-calendars`) ports.
+packages exist for the [TypeScript](https://github.com/gigamonkey/bells/tree/main/libs/ts) (`@peterseibel/bhs-calendars` on npm)
+and [Java](https://github.com/gigamonkey/bells/tree/main/libs/java) (`com.gigamonkeys:bhs-calendars`) ports.
 
 ### Validation
 
