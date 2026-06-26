@@ -11,7 +11,7 @@
 
   <name>bhs-calendars</name>
   <description>Bundled BHS-area school bell-schedule calendar data for the bells library.</description>
-  <url>https://github.com/gigamonkeys/bells</url>
+  <url>https://github.com/gigamonkey/bells</url>
 
   <licenses>
     <license>
@@ -29,9 +29,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:https://github.com/gigamonkeys/bells.git</connection>
-    <developerConnection>scm:git:git@github.com:gigamonkeys/bells.git</developerConnection>
-    <url>https://github.com/gigamonkeys/bells</url>
+    <connection>scm:git:https://github.com/gigamonkey/bells.git</connection>
+    <developerConnection>scm:git:git@github.com:gigamonkey/bells.git</developerConnection>
+    <url>https://github.com/gigamonkey/bells</url>
     <tag>HEAD</tag>
   </scm>
 

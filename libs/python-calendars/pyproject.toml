@@ -13,7 +13,7 @@ authors = [{ name = "Peter Seibel" }]
 dependencies = []
 
 [project.urls]
-Repository = "https://github.com/gigamonkeys/bells"
+Repository = "https://github.com/gigamonkey/bells"
 
 [project.optional-dependencies]
 test = ["pytest"]
