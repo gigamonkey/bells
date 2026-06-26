@@ -336,13 +336,13 @@ Java port is deferred.
 2. **Tag strategy**: shared `v*` — one combined `publish.yml` publishes npm +
    PyPI in lockstep (step 6).
 3. **First version**: `0.7.0`, matching the TS line via the lockstep setup.
+4. **No `bells[bhs]` extra**: `bell-schedule` and `bhs-calendars` stay fully
+   independent on PyPI, parallel to the npm packages. (Users install both
+   explicitly if they want them.)
 
 ## Open questions for you
 
-1. **`bells[bhs]` extra**: should the `bell-schedule` package offer `bhs-calendars`
-   as an optional extra (`pip install bell-schedule[bhs]`), or keep the two fully
-   independent like the npm packages? (Currently independent.)
-2. **Java ports** of both `bells` and `bhs-calendars` to Maven Central —
+1. **Java ports** of both `bells` and `bhs-calendars` to Maven Central —
    deferred.
 </content>
 </invoke>
