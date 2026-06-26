@@ -122,7 +122,9 @@ This mirrors the npm Trusted Publisher setup already in use. On PyPI:
    (works even before the project exists — it's created on first upload).
 2. Fill in:
    - **PyPI Project Name**: `<DIST_NAME>`
-   - **Owner**: `gigamonkeys`
+   - **Owner**: `gigamonkey` (the GitHub account that owns the repo — your
+     GitHub handle, *not* your PyPI username and not the `gigamonkeys` domain;
+     it must match the `gigamonkey/bells` in the repo URL).
    - **Repository name**: `bells`
    - **Workflow name**: `publish-python.yml` (must match the file in step 6)
    - **Environment name**: optional but recommended, e.g. `pypi` (then also add
