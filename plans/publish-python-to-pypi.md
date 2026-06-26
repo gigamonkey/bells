@@ -63,24 +63,41 @@ that makes the PyPI project page useful and the package installable cleanly:
 
 ## 3. Verify a clean local build
 
-From `libs/python/`:
+From `libs/python/`. `uv build` reads the `setuptools` build backend from
+`pyproject.toml` and builds in an isolated env, so there's nothing to
+pre-install; `uvx` runs a tool in a throwaway env (no global install):
 
 ```bash
-python3 -m pip install --upgrade build twine
-python3 -m build            # produces dist/<DIST_NAME>-0.5.0-py3-none-any.whl + .tar.gz
-python3 -m twine check dist/*   # validates metadata + README rendering
+uv build                 # builds sdist + wheel into dist/ (isolated build env)
+uvx twine check dist/*   # validates metadata + README rendering
 ```
 
-Confirm the wheel contains the `bells/` package and the `bells-validate` entry
-point, and that `dist/` is gitignored (it is — see `libs/python/.gitignore`).
+This produces `dist/bell_schedule-0.7.0-py3-none-any.whl` and the matching
+`.tar.gz` (the distribution name `bell-schedule` normalizes to `bell_schedule`
+in artifact filenames). Confirm the wheel contains the `bells/` package and the
+`bells-validate` entry point, and that `dist/` is gitignored (it is — see
+`libs/python/.gitignore`).
 
-Optional sanity check in a fresh virtualenv:
+Run the test suite against the project the uv way (syncs an ephemeral env from
+`pyproject.toml`, including the `test` extra):
 
 ```bash
-python3 -m venv /tmp/pypi-test && /tmp/pypi-test/bin/pip install dist/*.whl
-/tmp/pypi-test/bin/bells-validate --help
+uv run --extra test pytest
+```
+
+Optional sanity check that the built wheel installs and imports cleanly, in a
+throwaway venv:
+
+```bash
+uv venv /tmp/pypi-test
+uv pip install --python /tmp/pypi-test dist/*.whl
+# bells-validate takes calendar file paths (no --help flag); point it at a real one:
+/tmp/pypi-test/bin/bells-validate ../../bhs-calendars/bhs-2025-2026.json   # -> "...: valid"
 /tmp/pypi-test/bin/python -c "import bells; print(bells.__file__)"
 ```
+
+(Or, just to exercise the console script from the wheel without a venv:
+`uvx --from dist/bell_schedule-0.7.0-py3-none-any.whl bells-validate ../../bhs-calendars/bhs-2025-2026.json`.)
 
 ## 4. (Recommended) Dry-run upload to TestPyPI
 
@@ -88,8 +105,11 @@ Configure a Trusted Publisher on TestPyPI (same steps as 5 below, on the
 test.pypi.org pending-publisher page), or use a temporary API token, then:
 
 ```bash
-python3 -m twine upload --repository testpypi dist/*
-pip install --index-url https://test.pypi.org/simple/ --no-deps <DIST_NAME>
+uvx twine upload --repository testpypi dist/*
+# Verify it resolves and installs from TestPyPI, in a throwaway env:
+uv venv /tmp/testpypi
+uv pip install --python /tmp/testpypi \
+  --index-url https://test.pypi.org/simple/ --no-deps bell-schedule
 ```
 
 This catches name/metadata/rendering problems without burning the real name.
@@ -170,6 +190,11 @@ Notes:
 - The test step keeps the Python publish consistent with the npm workflow, which
   runs `npm test` before publishing. The golden tests run as part of pytest, so
   this also guards cross-port behavior parity.
+- The workflow deliberately uses stock `setup-python` + `pip`/`build`, which need
+  no extra setup on the runner and produce identical artifacts. To match the
+  local `uv` workflow instead, swap in `astral-sh/setup-uv@v5` and replace the
+  install/test/build steps with `uv run --extra test pytest` and `uv build` (the
+  final `pypa/gh-action-pypi-publish` step is unchanged either way).
 
 ## 7. Release process (per version going forward)
 
