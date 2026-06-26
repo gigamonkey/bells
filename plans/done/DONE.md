@@ -1,5 +1,23 @@
 # DONE
 
+## 2026-06
+
+- [x] Publish the Python port to PyPI as `bell-schedule`, and the bundled calendar
+  data as `bhs-calendars`, via OIDC Trusted Publishing — npm and PyPI kept in
+  version lockstep. (Java/Maven Central publishing deferred.) (plan:
+  [publish-python-to-pypi](plans/done/publish-python-to-pypi.md))
+
+- [x] Abstract-time API for `@peterseibel/bells`. (plan:
+  [bells-abstract-times](plans/done/bells-abstract-times.md))
+
+- [x] Multiple-calendar support. (plan:
+  [multiple-calendars](plans/done/multiple-calendars.md))
+
+- [x] Alarms. (plan: [alarms](plans/done/alarms.md))
+
+- [x] Background alarms (Chromium / Chromebox). (plan:
+  [background-alarms](plans/done/background-alarms.md))
+
 ## Before 2026-03-
 
 - [x] Do the thing described in plans/library.md. (plan: [library-plan](plans/library-plan.md))
