@@ -75,7 +75,17 @@ release-lib:
 	tag="v$$(node -p "require('./libs/ts/package.json').version")" && git tag -a -m "$$tag" "$$tag"
 	git push --follow-tags
 
-release-bhs-calendars:
+# Validate every calendar file — the canonical npm-package source and the bundled
+# Python copy — with the same TS validator the publish workflow gates on. Fails
+# (non-zero) on any invalid calendar. The `*-YYYY-YYYY.json` glob skips
+# package.json. `release-bhs-calendars` depends on this, so a release aborts
+# before tagging/pushing if the data doesn't validate.
+validate-calendars:
+	cd libs/ts && npm install && npm run build
+	node libs/ts/dist/bin/validate.js bhs-calendars/*-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].json
+	node libs/ts/dist/bin/validate.js libs/python-calendars/bhs_calendars/data/*.json
+
+release-bhs-calendars: validate-calendars
 	cd bhs-calendars && npm version $(VERSION) --no-git-tag-version
 	python3 scripts/set-version.py calendars "$$(node -p "require('./bhs-calendars/package.json').version")"
 	git add bhs-calendars/package.json libs/python-calendars/pyproject.toml libs/java-bhs-calendars/pom.xml
