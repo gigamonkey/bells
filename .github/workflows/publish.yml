@@ -1,8 +1,9 @@
 name: Publish library
 
-# One workflow publishes every port of the bells library. The three ports are
-# kept in version lockstep (see `make release-lib`), so a single `v*` tag is one
-# coordinated release: the npm and PyPI jobs are two halves of it.
+# One workflow publishes the Typescript and Python ports of the bells library.
+# The three ports (those two plus Java) are kept in version lockstep (see `make
+# release-lib`), so a single `v*` tag is one coordinated release: the npm and
+# PyPI jobs are two halves of it.
 #
 # Both registries' Trusted Publishers are configured against THIS file's name
 # (publish.yml) — keep the filename stable so those bindings stay valid.
