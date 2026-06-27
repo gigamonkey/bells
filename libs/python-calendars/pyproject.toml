@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bhs-calendars"
-version = "2.9.1"
+version = "2.9.2"
 description = "Bundled BHS-area school bell-schedule calendar data for the bells library"
 readme = "README.md"
 requires-python = ">=3.9"
