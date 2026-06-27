@@ -4,3 +4,7 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+
+# Calendar data is copied from the canonical bhs-calendars/ at build time
+# (make sync-py-calendars); it is not committed here.
+bhs_calendars/data/

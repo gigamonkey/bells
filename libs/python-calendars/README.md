@@ -38,7 +38,12 @@ BHS-area schools.
 
 ## Data source
 
-The JSON under `bhs_calendars/data/` is copied verbatim from the canonical
-`bhs-calendars/` directory at the repository root (the npm package source). Run
-`make sync-calendars` from the repo root to refresh it after the source data
-changes.
+The single source of truth is the canonical `bhs-calendars/` directory at the
+repository root (also the npm package source). The JSON under `bhs_calendars/data/`
+is a verbatim, build-time copy of it and is **gitignored, not committed** — the
+build, test, and release flows (and CI) regenerate it so it can never drift from
+the source.
+
+When working in this repo, run `make sync-py-calendars` (or `make sync-calendars`
+for both ports) from the repo root once after checkout, and again after the source
+data changes, before building or testing this package.

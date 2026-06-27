@@ -1,1 +1,5 @@
 target/
+
+# Calendar data + index are copied from the canonical bhs-calendars/ at build
+# time (make sync-java-calendars); they are not committed here.
+src/main/resources/bhs-calendars/

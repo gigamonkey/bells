@@ -56,7 +56,12 @@ cd ../java-bhs-calendars && mvn package
 
 ## Data source
 
-The JSON under `src/main/resources/bhs-calendars/` (and the `index.txt` that
-lists it) is copied verbatim from the canonical `bhs-calendars/` directory at the
-repository root (the npm package source). Run `make sync-calendars` from the repo
-root to refresh it after the source data changes.
+The single source of truth is the canonical `bhs-calendars/` directory at the
+repository root (also the npm package source). The JSON under
+`src/main/resources/bhs-calendars/` (and the `index.txt` that lists it) is a
+verbatim, build-time copy of it and is **gitignored, not committed** — it is
+regenerated from the source so it can never drift.
+
+Run `make sync-java-calendars` (or `make sync-calendars` for both ports) from the
+repo root once after checkout, and again after the source data changes, before
+`mvn package` / `mvn test`.

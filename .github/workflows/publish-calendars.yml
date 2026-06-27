@@ -5,8 +5,10 @@ name: Publish bhs-calendars
 # `calendars-v*` tag is one coordinated release across registries.
 #
 # A shared `validate` job gates BOTH publish jobs (`needs: validate`), so an
-# invalid calendar blocks every registry. Previously only the npm job validated,
-# so bad data could fail npm yet still reach PyPI.
+# invalid calendar blocks every registry. The npm package publishes the source
+# bhs-calendars/ directly; the PyPI package's data is gitignored and copied from
+# that same source at build time (`make sync-py-calendars`), so the two can never
+# ship different data.
 #
 # Both registries' Trusted Publishers are configured against THIS file's name
 # (publish-calendars.yml) — keep the filename stable so those bindings stay valid.
@@ -36,12 +38,8 @@ jobs:
         working-directory: libs/ts
       - run: npm run build
         working-directory: libs/ts
-      - name: Validate calendar JSON (source + bundled Python copy)
-        run: |
-          node libs/ts/dist/bin/validate.js bhs-calendars/*-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].json
-          node libs/ts/dist/bin/validate.js libs/python-calendars/bhs_calendars/data/*.json
-      - name: Check bundled copies are in sync with the calendar source
-        run: make check-calendars-synced
+      - name: Validate calendar JSON (canonical source)
+        run: node libs/ts/dist/bin/validate.js bhs-calendars/*-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].json
 
   npm:
     needs: validate
@@ -71,6 +69,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
+      - name: Materialize calendar data from the canonical source
+        run: make sync-py-calendars
       - name: Run tests
         working-directory: libs/python-calendars
         run: |
