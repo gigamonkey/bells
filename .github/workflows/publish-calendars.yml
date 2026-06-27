@@ -40,6 +40,8 @@ jobs:
         run: |
           node libs/ts/dist/bin/validate.js bhs-calendars/*-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9].json
           node libs/ts/dist/bin/validate.js libs/python-calendars/bhs_calendars/data/*.json
+      - name: Check bundled copies are in sync with the calendar source
+        run: make check-calendars-synced
 
   npm:
     needs: validate
