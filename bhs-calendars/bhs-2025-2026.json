@@ -891,5 +891,25 @@
     "2025-12-22": "Winter break",
     "2026-02-13": "Presidents’ Day Weekend",
     "2026-03-30": "Spring break"
+  },
+  "annotations": {
+    "ranges": {
+      "apExams": {
+        "start": "2026-05-04",
+        "end": "2026-05-15",
+        "label": "AP Exams",
+        "kind": "testing"
+      }
+    },
+    "weeks": {
+      "5": { "label": "Q1 progress", "kind": "gradingClose" },
+      "9": { "label": "Q1", "kind": "gradingClose" },
+      "14": { "label": "S1 progress", "kind": "gradingClose" },
+      "18": { "label": "S1", "kind": "gradingClose" },
+      "23": { "label": "Q3 progress", "kind": "gradingClose" },
+      "28": { "label": "Q3", "kind": "gradingClose" },
+      "33": { "label": "S2 progress", "kind": "gradingClose" },
+      "39": { "label": "S2", "kind": "gradingClose" }
+    }
   }
 }
