@@ -144,6 +144,15 @@ class GoldenTest {
       case "periodsForDate" -> periods(b.periodsForDate(instantArg(args)));
       case "nonClassDaysLeft" -> nonClassDays(b.nonClassDaysLeft(instantArg(args)));
       case "nonClassLabel" -> b.nonClassLabel(dateArg(args));
+        // School weeks & annotations.
+      case "schoolWeeks" -> schoolWeeks(b.schoolWeeks());
+      case "schoolWeek" -> schoolWeek(b.schoolWeek(args.get("n").asInt()));
+      case "weekForDate" -> schoolWeek(b.weekForDate(dateArg(args)));
+      case "rangeAnnotations" -> annotations(b.rangeAnnotations());
+      case "weekAnnotations" -> annotations(b.weekAnnotations());
+      case "dateAnnotations" -> annotations(b.dateAnnotations());
+      case "annotationsOn" -> annotations(b.annotationsOn(dateArg(args)));
+      case "annotationsForWeek" -> annotations(b.annotationsForWeek(args.get("n").asInt()));
         // Abstract-time API.
       case "resolveDay" -> b.resolveDay(date(args, "base"), daySpec(args.get("day"))).toString();
       case "addSchoolDays" -> b.addSchoolDays(dateArg(args), args.get("n").asInt()).toString();
@@ -268,6 +277,52 @@ class GoldenTest {
     List<Map<String, Object>> result = new ArrayList<>();
     for (PeriodInstant p : periods) {
       result.add(period(p));
+    }
+    return result;
+  }
+
+  private static Map<String, Object> schoolWeek(SchoolWeek w) {
+    if (w == null) {
+      return null;
+    }
+    Map<String, Object> m = new LinkedHashMap<>();
+    m.put("number", w.number());
+    m.put("monday", w.monday().toString());
+    m.put("firstSchoolDay", w.firstSchoolDay().toString());
+    m.put("lastSchoolDay", w.lastSchoolDay().toString());
+    m.put("schoolDayCount", w.schoolDayCount());
+    return m;
+  }
+
+  private static List<Map<String, Object>> schoolWeeks(List<SchoolWeek> ws) {
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (SchoolWeek w : ws) {
+      result.add(schoolWeek(w));
+    }
+    return result;
+  }
+
+  // A resolved/active annotation: PlainDate values become date strings, a nested schoolWeek is
+  // serialized, and everything else (id, week, source, payload) passes through.
+  private static Map<String, Object> annotation(Map<String, Object> a) {
+    Map<String, Object> out = new LinkedHashMap<>();
+    for (Map.Entry<String, Object> e : a.entrySet()) {
+      Object v = e.getValue();
+      if (e.getKey().equals("schoolWeek")) {
+        out.put("schoolWeek", schoolWeek((SchoolWeek) v));
+      } else if (v instanceof LocalDate d) {
+        out.put(e.getKey(), d.toString());
+      } else {
+        out.put(e.getKey(), v);
+      }
+    }
+    return out;
+  }
+
+  private static List<Map<String, Object>> annotations(List<Map<String, Object>> arr) {
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (Map<String, Object> a : arr) {
+      result.add(annotation(a));
     }
     return result;
   }

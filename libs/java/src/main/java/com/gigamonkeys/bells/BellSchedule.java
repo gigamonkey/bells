@@ -8,6 +8,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -595,6 +596,90 @@ public final class BellSchedule {
               p.tags()));
     }
     return result;
+  }
+
+  // ─── School weeks & annotations ─────────────────────────────────────────────
+
+  // Whole-year queries operate on the sole/first calendar; date- and week-keyed
+  // queries select the calendar the same way nonClassLabel does.
+  private Calendar firstCalendar() {
+    return calendars.get(0);
+  }
+
+  /**
+   * @return the canonical school weeks of the (first) year, in chronological order
+   */
+  public List<SchoolWeek> schoolWeeks() {
+    return firstCalendar().schoolWeeks();
+  }
+
+  /**
+   * @return the number of school weeks in the (first) year
+   */
+  public int schoolWeekCount() {
+    return firstCalendar().schoolWeekCount();
+  }
+
+  /**
+   * @param n a 1-based school-week number
+   * @return the school week, or {@code null}
+   */
+  public SchoolWeek schoolWeek(int n) {
+    return firstCalendar().schoolWeek(n);
+  }
+
+  /**
+   * @param date a date
+   * @return the school week containing it, or {@code null}
+   */
+  public SchoolWeek weekForDate(LocalDate date) {
+    Calendar cal = calendarForDate(date);
+    return cal != null ? cal.weekForDate(date) : null;
+  }
+
+  /**
+   * @return the raw, unvalidated annotations structure of the (first) year
+   */
+  public Annotations annotations() {
+    return firstCalendar().annotations();
+  }
+
+  /**
+   * @return range annotations with {@code start}/{@code end} resolved to dates
+   */
+  public List<Map<String, Object>> rangeAnnotations() {
+    return firstCalendar().rangeAnnotations();
+  }
+
+  /**
+   * @return week annotations resolved to their school week, ascending by week number
+   */
+  public List<Map<String, Object>> weekAnnotations() {
+    return firstCalendar().weekAnnotations();
+  }
+
+  /**
+   * @return date annotations with the key resolved to a date
+   */
+  public List<Map<String, Object>> dateAnnotations() {
+    return firstCalendar().dateAnnotations();
+  }
+
+  /**
+   * @param date a date
+   * @return every annotation active on it, each tagged with its {@code source}
+   */
+  public List<Map<String, Object>> annotationsOn(LocalDate date) {
+    Calendar cal = calendarForDate(date);
+    return cal != null ? cal.annotationsOn(date) : List.of();
+  }
+
+  /**
+   * @param n a 1-based school-week number
+   * @return every annotation touching that week of the (first) year
+   */
+  public List<Map<String, Object>> annotationsForWeek(int n) {
+    return firstCalendar().annotationsForWeek(n);
   }
 
   // ─── Abstract times ───────────────────────────────────────────────────────────

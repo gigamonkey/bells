@@ -310,6 +310,55 @@ class BellSchedule:
             for p in sched.actual_periods()
         ]
 
+    # ── school weeks & annotations ──────────────────────────────────────────
+
+    # Whole-year queries operate on the sole/first calendar; date- and
+    # week-keyed queries select the calendar the same way non_class_label does.
+    def _first_calendar(self) -> Calendar:
+        return self._calendars[0]
+
+    def school_weeks(self) -> list[dict]:
+        """The canonical school weeks of the (first) year, in order."""
+        return self._first_calendar().school_weeks()
+
+    def school_week_count(self) -> int:
+        """Number of school weeks in the (first) year."""
+        return self._first_calendar().school_week_count()
+
+    def school_week(self, n: int) -> Optional[dict]:
+        """The school week with the given 1-based number, or None."""
+        return self._first_calendar().school_week(n)
+
+    def week_for_date(self, d: date) -> Optional[dict]:
+        """The school week containing ``d``, or None."""
+        cal = self._calendar_for_date(d)
+        return cal.week_for_date(d) if cal else None
+
+    def annotations(self) -> dict:
+        """The raw, unvalidated annotations structure of the (first) year."""
+        return self._first_calendar().annotations()
+
+    def range_annotations(self) -> list[dict]:
+        """Range annotations with ``start``/``end`` resolved to dates."""
+        return self._first_calendar().range_annotations()
+
+    def week_annotations(self) -> list[dict]:
+        """Week annotations resolved to their school week, ascending by week."""
+        return self._first_calendar().week_annotations()
+
+    def date_annotations(self) -> list[dict]:
+        """Date annotations with the key resolved to a date."""
+        return self._first_calendar().date_annotations()
+
+    def annotations_on(self, d: date) -> list[dict]:
+        """Every annotation active on ``d``, tagged with its ``source``."""
+        cal = self._calendar_for_date(d)
+        return cal.annotations_on(d) if cal else []
+
+    def annotations_for_week(self, n: int) -> list[dict]:
+        """Every annotation touching school week ``n`` of the (first) year."""
+        return self._first_calendar().annotations_for_week(n)
+
     # ── abstract times ────────────────────────────────────────────────────────
 
     def _first_calendar_day(self) -> date:

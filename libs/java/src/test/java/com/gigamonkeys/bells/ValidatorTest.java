@@ -530,4 +530,127 @@ class ValidatorTest {
       assertTrue(r.errors().contains("Calendar array mixes multiple ids: \"aaa\", \"bbb\", \"ccc\""));
     }
   }
+
+  // ─── annotations ────────────────────────────────────────────────────────────────
+
+  private static boolean anyWarning(ValidationResult r, String needle) {
+    return r.warnings().stream().anyMatch(w -> w.contains(needle));
+  }
+
+  @Nested
+  class AnnotationsTests {
+
+    @Test
+    void validBlock() {
+      JsonNode data =
+          withPatch(
+              o ->
+                  o.set(
+                      "annotations",
+                      obj(
+                          """
+                          {
+                            "ranges": {
+                              "apExams": { "start": "2026-05-04", "end": "2026-05-15",
+                                           "label": "AP Exams", "kind": "testing" }
+                            },
+                            "weeks": { "3": { "label": "Q1 progress", "kind": "gradingClose" } },
+                            "dates": { "2026-03-14": { "label": "Pi Day" } }
+                          }
+                          """)));
+      ValidationResult r = Validator.validate(data);
+      assertTrue(r.valid(), r.errors().toString());
+      assertTrue(r.warnings().isEmpty());
+    }
+
+    @Test
+    void missingAnnotationsValid() {
+      JsonNode data = withPatch(o -> o.remove("annotations"));
+      assertTrue(Validator.validate(data).valid());
+    }
+
+    @Test
+    void rangeOutOfRangeStart() {
+      JsonNode data =
+          withPatch(
+              o ->
+                  o.set(
+                      "annotations",
+                      obj("{ \"ranges\": { \"x\": { \"start\": \"2024-01-01\", \"end\": \"2026-05-15\" } } }")));
+      ValidationResult r = Validator.validate(data);
+      assertFalse(r.valid());
+      assertTrue(anyError(r, "2024-01-01"));
+    }
+
+    @Test
+    void rangeStartAfterEnd() {
+      JsonNode data =
+          withPatch(
+              o ->
+                  o.set(
+                      "annotations",
+                      obj("{ \"ranges\": { \"x\": { \"start\": \"2026-05-15\", \"end\": \"2026-05-04\" } } }")));
+      ValidationResult r = Validator.validate(data);
+      assertFalse(r.valid());
+      assertTrue(anyError(r, "after end"));
+    }
+
+    @Test
+    void nonIntegerWeekKey() {
+      JsonNode data =
+          withPatch(o -> o.set("annotations", obj("{ \"weeks\": { \"foo\": { \"label\": \"X\" } } }")));
+      ValidationResult r = Validator.validate(data);
+      assertFalse(r.valid());
+      assertTrue(anyError(r, "integer"));
+    }
+
+    @Test
+    void overflowWeekKeyWarns() {
+      JsonNode data =
+          withPatch(o -> o.set("annotations", obj("{ \"weeks\": { \"999\": { \"label\": \"Way off\" } } }")));
+      ValidationResult r = Validator.validate(data);
+      assertTrue(r.valid(), r.errors().toString());
+      assertTrue(anyWarning(r, "exceeds"));
+    }
+
+    @Test
+    void dateOutOfRange() {
+      JsonNode data =
+          withPatch(o -> o.set("annotations", obj("{ \"dates\": { \"2024-01-01\": { \"label\": \"X\" } } }")));
+      ValidationResult r = Validator.validate(data);
+      assertFalse(r.valid());
+      assertTrue(anyError(r, "2024-01-01"));
+    }
+
+    @Test
+    void weekendDateAllowed() {
+      // 2025-09-06 is a Saturday
+      JsonNode data =
+          withPatch(
+              o ->
+                  o.set(
+                      "annotations",
+                      obj("{ \"dates\": { \"2025-09-06\": { \"label\": \"Weekend thing\" } } }")));
+      assertTrue(Validator.validate(data).valid());
+    }
+
+    @Test
+    void nonObjectPayload() {
+      JsonNode data =
+          withPatch(
+              o -> o.set("annotations", obj("{ \"dates\": { \"2026-03-14\": \"just a string\" } }")));
+      ValidationResult r = Validator.validate(data);
+      assertFalse(r.valid());
+      assertTrue(anyError(r, "must be an object"));
+    }
+
+    @Test
+    void unknownBucketWarns() {
+      JsonNode data =
+          withPatch(o -> o.set("annotations", obj("{ \"bogus\": { \"whatever\": true } }")));
+      ValidationResult r = Validator.validate(data);
+      assertTrue(r.valid());
+      assertTrue(anyWarning(r, "unknown bucket"));
+    }
+  }
 }

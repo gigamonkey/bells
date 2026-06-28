@@ -11,10 +11,16 @@ import {
 } from './abstract-time.js';
 import { Calendar, normalizeIncludeTags, type Interval } from './calendar.js';
 import type {
+  ActiveAnnotation,
+  Annotations,
   BellScheduleOptions,
   NonClassDay,
+  ResolvedDateAnnotation,
+  ResolvedRangeAnnotation,
+  ResolvedWeekAnnotation,
   Role,
   ScheduledPeriod,
+  SchoolWeek,
   YearData,
 } from './types.js';
 
@@ -311,6 +317,66 @@ class BellSchedule {
       end: p.endInstant(date, cal.timezone),
       tags: p.tags,
     }));
+  }
+
+  // ─── School weeks & annotations ───────────────────────────────────────────
+
+  // Whole-year queries operate on the sole/first calendar; date- and
+  // week-keyed queries select the calendar the same way nonClassLabel does.
+  #firstCalendar(): Calendar {
+    return this.#calendars[0];
+  }
+
+  /** The canonical school weeks of the (first) year, in chronological order. */
+  schoolWeeks(): SchoolWeek[] {
+    return this.#firstCalendar().schoolWeeks();
+  }
+
+  /** Number of school weeks in the (first) year. */
+  schoolWeekCount(): number {
+    return this.#firstCalendar().schoolWeekCount();
+  }
+
+  /** The school week with the given 1-based number, or null. */
+  schoolWeek(n: number): SchoolWeek | null {
+    return this.#firstCalendar().schoolWeek(n);
+  }
+
+  /** The school week containing `date`, or null. */
+  weekForDate(date: Temporal.PlainDate): SchoolWeek | null {
+    const cal = this.#calendarForDate(date);
+    return cal ? cal.weekForDate(date) : null;
+  }
+
+  /** The raw, unvalidated annotations structure of the (first) year. */
+  annotations(): Annotations {
+    return this.#firstCalendar().annotations();
+  }
+
+  /** Range annotations with `start`/`end` resolved to PlainDates. */
+  rangeAnnotations(): ResolvedRangeAnnotation[] {
+    return this.#firstCalendar().rangeAnnotations();
+  }
+
+  /** Week annotations resolved to their school week, ascending by week. */
+  weekAnnotations(): ResolvedWeekAnnotation[] {
+    return this.#firstCalendar().weekAnnotations();
+  }
+
+  /** Date annotations with the key resolved to a PlainDate. */
+  dateAnnotations(): ResolvedDateAnnotation[] {
+    return this.#firstCalendar().dateAnnotations();
+  }
+
+  /** Every annotation active on `date`, tagged with its `source`. */
+  annotationsOn(date: Temporal.PlainDate): ActiveAnnotation[] {
+    const cal = this.#calendarForDate(date);
+    return cal ? cal.annotationsOn(date) : [];
+  }
+
+  /** Every annotation touching school week `n` of the (first) year. */
+  annotationsForWeek(n: number): ActiveAnnotation[] {
+    return this.#firstCalendar().annotationsForWeek(n);
   }
 
   // ─── Abstract times ─────────────────────────────────────────────────────────

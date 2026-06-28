@@ -17,6 +17,7 @@ import type {
   BellScheduleOptions,
   NonClassDay,
   ScheduledPeriod,
+  SchoolWeek,
   YearData,
 } from '../../src/types.js';
 
@@ -106,6 +107,36 @@ const zoned = (z: Temporal.ZonedDateTime | null): unknown =>
 const nonClassDays = (ds: NonClassDay[]): unknown =>
   ds.map((d) => ({ date: plainDate(d.date), label: d.label }));
 
+const isPlainDate = (v: unknown): v is Temporal.PlainDate => v instanceof Temporal.PlainDate;
+
+const schoolWeek = (w: SchoolWeek | null): unknown =>
+  w === null
+    ? null
+    : {
+        number: w.number,
+        monday: plainDate(w.monday),
+        firstSchoolDay: plainDate(w.firstSchoolDay),
+        lastSchoolDay: plainDate(w.lastSchoolDay),
+        schoolDayCount: w.schoolDayCount,
+      };
+
+const schoolWeeks = (ws: SchoolWeek[]): unknown => ws.map((w) => schoolWeek(w));
+
+// A resolved/active annotation: a plain object whose PlainDate values become
+// date strings and whose nested `schoolWeek` is serialized; everything else
+// (id, week, source, label, kind, arbitrary payload) passes through.
+const annotation = (a: Record<string, unknown>): unknown => {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(a)) {
+    if (k === 'schoolWeek') out[k] = schoolWeek(v as SchoolWeek | null);
+    else if (isPlainDate(v)) out[k] = plainDate(v);
+    else out[k] = v;
+  }
+  return out;
+};
+
+const annotations = (arr: Array<Record<string, unknown>>): unknown => arr.map((a) => annotation(a));
+
 // ─── Query dispatch ───────────────────────────────────────────────────────────
 
 const I = (s: string): Temporal.Instant => Temporal.Instant.from(s);
@@ -145,6 +176,17 @@ const DISPATCH: Record<string, (b: BellSchedule, a: Args) => unknown> = {
   periodsForDate: (b, a) => periods(b.periodsForDate(I(a.instant))),
   nonClassDaysLeft: (b, a) => nonClassDays(b.nonClassDaysLeft(I(a.instant))),
   nonClassLabel: (b, a) => b.nonClassLabel(D(a.date)),
+
+  // School weeks & annotations.
+  schoolWeeks: (b) => schoolWeeks(b.schoolWeeks()),
+  schoolWeek: (b, a) => schoolWeek(b.schoolWeek(a.n as unknown as number)),
+  weekForDate: (b, a) => schoolWeek(b.weekForDate(D(a.date))),
+  rangeAnnotations: (b) => annotations(b.rangeAnnotations() as Array<Record<string, unknown>>),
+  weekAnnotations: (b) => annotations(b.weekAnnotations() as Array<Record<string, unknown>>),
+  dateAnnotations: (b) => annotations(b.dateAnnotations() as Array<Record<string, unknown>>),
+  annotationsOn: (b, a) => annotations(b.annotationsOn(D(a.date)) as Array<Record<string, unknown>>),
+  annotationsForWeek: (b, a) =>
+    annotations(b.annotationsForWeek(a.n as unknown as number) as Array<Record<string, unknown>>),
 
   // Abstract-time API.
   resolveDay: (b, a) => plainDate(b.resolveDay(D(a.base), a.day as DaySpec | undefined)),

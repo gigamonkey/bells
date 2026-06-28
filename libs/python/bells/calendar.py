@@ -294,6 +294,8 @@ class Calendar:
         self.teacher_work_days = data.get("teacherWorkDays") or []
         self.break_names = data.get("breakNames") or {}
         self.non_class_days = data.get("nonClassDays") or {}
+        self._annotations = data.get("annotations") or {}
+        self._school_weeks_cache: Optional[list[dict]] = None
 
     # ── internal helpers ────────────────────────────────────────────────────
 
@@ -490,3 +492,146 @@ class Calendar:
 
     def school_time_between(self, start: datetime, end: datetime) -> timedelta:
         return self._school_time_between(start, end)
+
+    # ── school-week numbering ───────────────────────────────────────────────
+
+    def school_weeks(self) -> list[dict]:
+        """The canonical school weeks of this year, in chronological order.
+
+        A school week is a Monday-anchored ISO week containing at least one
+        school day; full-week breaks are skipped, so numbering is dense.
+        Role-aware through this calendar's configured role.
+        """
+        if self._school_weeks_cache is not None:
+            return self._school_weeks_cache
+        result: list[dict] = []
+        monday: Optional[date] = None
+        days: list[date] = []
+
+        def flush() -> None:
+            if monday is not None and days:
+                result.append(
+                    {
+                        "number": len(result) + 1,
+                        "monday": monday,
+                        "first_school_day": days[0],
+                        "last_school_day": days[-1],
+                        "school_day_count": len(days),
+                    }
+                )
+
+        d = self.first_day
+        while d <= self.last_day:
+            if self.is_school_day(d):
+                m = d - timedelta(days=d.isoweekday() - 1)
+                if monday is None or monday != m:
+                    flush()
+                    monday = m
+                    days = []
+                days.append(d)
+            d = d + timedelta(days=1)
+        flush()
+        self._school_weeks_cache = result
+        return result
+
+    def school_week_count(self) -> int:
+        """Number of school weeks in the year."""
+        return len(self.school_weeks())
+
+    def school_week(self, n: int) -> Optional[dict]:
+        """The school week with the given 1-based number, or None."""
+        if not isinstance(n, int) or isinstance(n, bool) or n < 1:
+            return None
+        weeks = self.school_weeks()
+        return weeks[n - 1] if n <= len(weeks) else None
+
+    def week_for_date(self, d: date) -> Optional[dict]:
+        """The school week containing ``d``, or None when ``d`` is outside the
+        year or falls in a week with no school days."""
+        if d < self.first_day or d > self.last_day:
+            return None
+        m = d - timedelta(days=d.isoweekday() - 1)
+        for w in self.school_weeks():
+            if w["monday"] == m:
+                return w
+        return None
+
+    # ── annotations ─────────────────────────────────────────────────────────
+
+    def annotations(self) -> dict:
+        """The raw, unvalidated annotations structure (payload verbatim)."""
+        return self._annotations
+
+    def range_annotations(self) -> list[dict]:
+        """Range annotations with ``start``/``end`` resolved to dates."""
+        result = []
+        for id_, v in (self._annotations.get("ranges") or {}).items():
+            rest = {k: val for k, val in v.items() if k not in ("start", "end")}
+            result.append(
+                {
+                    "id": id_,
+                    "start": parse_plain_date(v["start"]),
+                    "end": parse_plain_date(v["end"]),
+                    **rest,
+                }
+            )
+        return result
+
+    def week_annotations(self) -> list[dict]:
+        """Week annotations resolved to their school week, ascending by week.
+
+        ``school_week`` is None when the key exceeds the school-week count.
+        """
+        weeks = self._annotations.get("weeks") or {}
+        result = []
+        for week in sorted(int(k) for k in weeks.keys()):
+            result.append(
+                {"week": week, "school_week": self.school_week(week), **weeks[str(week)]}
+            )
+        return result
+
+    def date_annotations(self) -> list[dict]:
+        """Date annotations with the key resolved to a date."""
+        result = []
+        for k, v in (self._annotations.get("dates") or {}).items():
+            result.append({"date": parse_plain_date(k), **v})
+        return result
+
+    def annotations_on(self, d: date) -> list[dict]:
+        """Every annotation active on ``d``, tagged with its ``source``: any
+        ``ranges`` entry whose span contains the date, the ``weeks`` entry for
+        the date's school week, and the ``dates`` entry with that exact date.
+        Order: ranges, week, date."""
+        result: list[dict] = []
+        for r in self.range_annotations():
+            if r["start"] <= d <= r["end"]:
+                result.append({"source": "range", **r})
+        sw = self.week_for_date(d)
+        if sw:
+            wa = (self._annotations.get("weeks") or {}).get(str(sw["number"]))
+            if wa:
+                result.append({"source": "week", "week": sw["number"], "school_week": sw, **wa})
+        da = (self._annotations.get("dates") or {}).get(d.isoformat())
+        if da:
+            result.append({"source": "date", "date": d, **da})
+        return result
+
+    def annotations_for_week(self, n: int) -> list[dict]:
+        """Every annotation touching school week ``n``, tagged with its
+        ``source``: any ``ranges`` entry overlapping the week's school-day span,
+        the ``weeks[n]`` entry, and any ``dates`` entry inside the week.
+        Order: ranges, week, date."""
+        result: list[dict] = []
+        sw = self.school_week(n)
+        if sw:
+            for r in self.range_annotations():
+                if r["start"] <= sw["last_school_day"] and sw["first_school_day"] <= r["end"]:
+                    result.append({"source": "range", **r})
+        wa = (self._annotations.get("weeks") or {}).get(str(n))
+        if wa:
+            result.append({"source": "week", "week": n, "school_week": sw, **wa})
+        for da in self.date_annotations():
+            w = self.week_for_date(da["date"])
+            if w and w["number"] == n:
+                result.append({"source": "date", **da})
+        return result

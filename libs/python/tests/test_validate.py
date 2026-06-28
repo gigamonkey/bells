@@ -360,3 +360,100 @@ class TestMalformedInput:
         result = validate_calendar_data(data)
         assert result["valid"] is False
         assert 'Calendar array mixes multiple ids: "aaa", "bbb", "ccc"' in result["errors"]
+
+
+class TestAnnotations:
+    def test_valid_block(self):
+        data = with_patch(
+            lambda d: d.__setitem__(
+                "annotations",
+                {
+                    "ranges": {
+                        "apExams": {
+                            "start": "2026-05-04",
+                            "end": "2026-05-15",
+                            "label": "AP Exams",
+                            "kind": "testing",
+                        }
+                    },
+                    "weeks": {"3": {"label": "Q1 progress", "kind": "gradingClose"}},
+                    "dates": {"2026-03-14": {"label": "Pi Day"}},
+                },
+            )
+        )
+        result = validate_calendar_data(data)
+        assert result["valid"] is True, result["errors"]
+        assert result["warnings"] == []
+
+    def test_missing_annotations_valid(self):
+        data = with_patch(lambda d: d.pop("annotations", None))
+        assert validate_calendar_data(data)["valid"] is True
+
+    def test_range_out_of_range_start(self):
+        data = with_patch(
+            lambda d: d.__setitem__(
+                "annotations", {"ranges": {"x": {"start": "2024-01-01", "end": "2026-05-15"}}}
+            )
+        )
+        result = validate_calendar_data(data)
+        assert result["valid"] is False
+        assert any("2024-01-01" in e for e in result["errors"])
+
+    def test_range_start_after_end(self):
+        data = with_patch(
+            lambda d: d.__setitem__(
+                "annotations", {"ranges": {"x": {"start": "2026-05-15", "end": "2026-05-04"}}}
+            )
+        )
+        result = validate_calendar_data(data)
+        assert result["valid"] is False
+        assert any("after end" in e for e in result["errors"])
+
+    def test_non_integer_week_key(self):
+        data = with_patch(
+            lambda d: d.__setitem__("annotations", {"weeks": {"foo": {"label": "X"}}})
+        )
+        result = validate_calendar_data(data)
+        assert result["valid"] is False
+        assert any("integer" in e for e in result["errors"])
+
+    def test_overflow_week_key_warns(self):
+        data = with_patch(
+            lambda d: d.__setitem__("annotations", {"weeks": {"999": {"label": "Way off"}}})
+        )
+        result = validate_calendar_data(data)
+        assert result["valid"] is True, result["errors"]
+        assert any("exceeds" in w for w in result["warnings"])
+
+    def test_date_out_of_range(self):
+        data = with_patch(
+            lambda d: d.__setitem__("annotations", {"dates": {"2024-01-01": {"label": "X"}}})
+        )
+        result = validate_calendar_data(data)
+        assert result["valid"] is False
+        assert any("2024-01-01" in e for e in result["errors"])
+
+    def test_weekend_date_allowed(self):
+        # 2025-09-06 is a Saturday
+        data = with_patch(
+            lambda d: d.__setitem__(
+                "annotations", {"dates": {"2025-09-06": {"label": "Weekend thing"}}}
+            )
+        )
+        assert validate_calendar_data(data)["valid"] is True
+
+    def test_non_object_payload(self):
+        data = with_patch(
+            lambda d: d.__setitem__("annotations", {"dates": {"2026-03-14": "just a string"}})
+        )
+        result = validate_calendar_data(data)
+        assert result["valid"] is False
+        assert any("must be an object" in e for e in result["errors"])
+
+    def test_unknown_bucket_warns(self):
+        data = with_patch(
+            lambda d: d.__setitem__("annotations", {"bogus": {"whatever": True}})
+        )
+        result = validate_calendar_data(data)
+        assert result["valid"] is True
+        assert any("unknown bucket" in w for w in result["warnings"])

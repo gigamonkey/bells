@@ -277,6 +277,14 @@ public final class Validator {
       }
     }
 
+    // 4b. Annotations (optional, additive).
+    JsonNode annotations = year.get("annotations");
+    if (annotations != null) {
+      YearResult ann = validateAnnotations(annotations, label, firstDay, lastDay, holidaySet);
+      errors.addAll(ann.errors);
+      warnings.addAll(ann.warnings);
+    }
+
     // 5. Validate period times in all schedules and inline date overrides.
     List<ScheduleEntry> allSchedules = new ArrayList<>();
     Iterator<Map.Entry<String, JsonNode>> sit = schedules.fields();
@@ -415,6 +423,165 @@ public final class Validator {
     int bStart = b.start().getHour() * 60 + b.start().getMinute();
     int bEnd = b.end().getHour() * 60 + b.end().getMinute();
     return aStart < bEnd && bStart < aEnd;
+  }
+
+  // ─── Annotation validation ───────────────────────────────────────────────────────
+
+  private static YearResult validateAnnotations(
+      JsonNode annotations,
+      String label,
+      LocalDate firstDay,
+      LocalDate lastDay,
+      Set<String> holidaySet) {
+    List<String> errors = new ArrayList<>();
+    List<String> warnings = new ArrayList<>();
+
+    if (annotations == null || !annotations.isObject()) {
+      errors.add(label + ": annotations must be an object");
+      return new YearResult(errors, warnings);
+    }
+
+    Iterator<String> buckets = annotations.fieldNames();
+    while (buckets.hasNext()) {
+      String b = buckets.next();
+      if (!b.equals("ranges") && !b.equals("weeks") && !b.equals("dates")) {
+        warnings.add(label + ": annotations has unknown bucket \"" + b + "\"");
+      }
+    }
+
+    // ranges.
+    JsonNode ranges = annotations.get("ranges");
+    if (ranges != null) {
+      if (!ranges.isObject()) {
+        errors.add(label + ": annotations.ranges must be an object");
+      } else {
+        Iterator<Map.Entry<String, JsonNode>> it = ranges.fields();
+        while (it.hasNext()) {
+          Map.Entry<String, JsonNode> e = it.next();
+          String where = label + ": annotations.ranges." + e.getKey();
+          if (!checkAnnotationPayload(e.getValue(), where, errors, warnings)) {
+            continue;
+          }
+          String startText = textOrNull(e.getValue(), "start");
+          String endText = textOrNull(e.getValue(), "end");
+          LocalDate start = tryParseDate(startText);
+          LocalDate end = tryParseDate(endText);
+          if (start == null) {
+            errors.add(where + " has invalid start \"" + startText + "\"");
+          } else if (!inAnnotationRange(start, firstDay, lastDay)) {
+            errors.add(where + " start \"" + startText + "\" is outside the calendar year range");
+          }
+          if (end == null) {
+            errors.add(where + " has invalid end \"" + endText + "\"");
+          } else if (!inAnnotationRange(end, firstDay, lastDay)) {
+            errors.add(where + " end \"" + endText + "\" is outside the calendar year range");
+          }
+          if (start != null && end != null && start.isAfter(end)) {
+            errors.add(where + " start \"" + startText + "\" is after end \"" + endText + "\"");
+          }
+        }
+      }
+    }
+
+    // weeks.
+    JsonNode weeks = annotations.get("weeks");
+    if (weeks != null) {
+      if (!weeks.isObject()) {
+        errors.add(label + ": annotations.weeks must be an object");
+      } else {
+        Integer weekCount =
+            (firstDay != null && lastDay != null)
+                ? countSchoolWeeks(firstDay, lastDay, holidaySet)
+                : null;
+        Iterator<Map.Entry<String, JsonNode>> it = weeks.fields();
+        while (it.hasNext()) {
+          Map.Entry<String, JsonNode> e = it.next();
+          String key = e.getKey();
+          String where = label + ": annotations.weeks." + key;
+          if (!key.matches("\\d+") || Integer.parseInt(key) < 1) {
+            errors.add(where + " key is not an integer >= 1");
+            continue;
+          }
+          if (!checkAnnotationPayload(e.getValue(), where, errors, warnings)) {
+            continue;
+          }
+          if (weekCount != null && Integer.parseInt(key) > weekCount) {
+            warnings.add(where + " key exceeds the year's " + weekCount + " school weeks");
+          }
+        }
+      }
+    }
+
+    // dates.
+    JsonNode dates = annotations.get("dates");
+    if (dates != null) {
+      if (!dates.isObject()) {
+        errors.add(label + ": annotations.dates must be an object");
+      } else {
+        Iterator<Map.Entry<String, JsonNode>> it = dates.fields();
+        while (it.hasNext()) {
+          Map.Entry<String, JsonNode> e = it.next();
+          String key = e.getKey();
+          String where = label + ": annotations.dates." + key;
+          LocalDate d = tryParseDate(key);
+          if (d == null) {
+            errors.add(where + " key is not a valid date");
+            continue;
+          }
+          if (!inAnnotationRange(d, firstDay, lastDay)) {
+            errors.add(where + " key is outside the calendar year range");
+            continue;
+          }
+          checkAnnotationPayload(e.getValue(), where, errors, warnings);
+        }
+      }
+    }
+
+    return new YearResult(errors, warnings);
+  }
+
+  // Payload is opaque: only confirm it's an object and that label/kind, if present, are strings.
+  private static boolean checkAnnotationPayload(
+      JsonNode value, String where, List<String> errors, List<String> warnings) {
+    if (value == null || !value.isObject()) {
+      errors.add(where + " must be an object");
+      return false;
+    }
+    JsonNode label = value.get("label");
+    if (label != null && !label.isTextual()) {
+      warnings.add(where + " label should be a string");
+    }
+    JsonNode kind = value.get("kind");
+    if (kind != null && !kind.isTextual()) {
+      warnings.add(where + " kind should be a string");
+    }
+    return true;
+  }
+
+  private static boolean inAnnotationRange(LocalDate d, LocalDate firstDay, LocalDate lastDay) {
+    if (firstDay == null || lastDay == null) {
+      return true; // can't check without bounds
+    }
+    return !d.isBefore(firstDay) && !d.isAfter(lastDay);
+  }
+
+  // Count school weeks using the same Monday-anchored ISO grouping the runtime uses
+  // (student view: weekdays that aren't holidays).
+  private static int countSchoolWeeks(LocalDate firstDay, LocalDate lastDay, Set<String> holidaySet) {
+    int count = 0;
+    LocalDate monday = null;
+    for (LocalDate d = firstDay; !d.isAfter(lastDay); d = d.plusDays(1)) {
+      int dow = d.getDayOfWeek().getValue();
+      if (dow == 6 || dow == 7 || holidaySet.contains(d.toString())) {
+        continue;
+      }
+      LocalDate m = d.minusDays(dow - 1);
+      if (monday == null || !monday.equals(m)) {
+        count++;
+        monday = m;
+      }
+    }
+    return count;
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────────

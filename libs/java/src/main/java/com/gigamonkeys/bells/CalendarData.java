@@ -1,5 +1,6 @@
 package com.gigamonkeys.bells;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -34,6 +35,7 @@ public final class CalendarData {
   private final List<String> teacherWorkDays;
   private final Map<String, String> breakNames;
   private final Map<String, String> nonClassDays;
+  private final Annotations annotations;
 
   CalendarData(
       String year,
@@ -49,7 +51,8 @@ public final class CalendarData {
       List<String> holidays,
       List<String> teacherWorkDays,
       Map<String, String> breakNames,
-      Map<String, String> nonClassDays) {
+      Map<String, String> nonClassDays,
+      Annotations annotations) {
     this.year = year;
     this.id = id;
     this.name = name;
@@ -64,6 +67,7 @@ public final class CalendarData {
     this.teacherWorkDays = teacherWorkDays;
     this.breakNames = breakNames;
     this.nonClassDays = nonClassDays;
+    this.annotations = annotations;
   }
 
   // ─── Accessors ──────────────────────────────────────────────────────────────
@@ -122,6 +126,10 @@ public final class CalendarData {
 
   public Map<String, String> nonClassDays() {
     return nonClassDays;
+  }
+
+  public Annotations annotations() {
+    return annotations;
   }
 
   // ─── Parsing ────────────────────────────────────────────────────────────────
@@ -201,7 +209,49 @@ public final class CalendarData {
         stringList(node.get("holidays")),
         stringList(node.get("teacherWorkDays")),
         stringMap(node.get("breakNames")),
-        stringMap(node.get("nonClassDays")));
+        stringMap(node.get("nonClassDays")),
+        parseAnnotations(node.get("annotations")));
+  }
+
+  private static Annotations parseAnnotations(JsonNode node) {
+    if (node == null || !node.isObject()) {
+      return Annotations.empty();
+    }
+    Map<String, RangeAnnotation> ranges = new LinkedHashMap<>();
+    JsonNode rangesNode = node.get("ranges");
+    if (rangesNode != null && rangesNode.isObject()) {
+      rangesNode.fields().forEachRemaining(e -> {
+        if (e.getValue().isObject()) {
+          Map<String, Object> rest = toMap(e.getValue());
+          Object start = rest.remove("start");
+          Object end = rest.remove("end");
+          ranges.put(
+              e.getKey(),
+              new RangeAnnotation(
+                  start == null ? null : start.toString(),
+                  end == null ? null : end.toString(),
+                  rest));
+        }
+      });
+    }
+    return new Annotations(
+        ranges, parseAnnotationMap(node.get("weeks")), parseAnnotationMap(node.get("dates")));
+  }
+
+  private static Map<String, Annotation> parseAnnotationMap(JsonNode node) {
+    Map<String, Annotation> map = new LinkedHashMap<>();
+    if (node != null && node.isObject()) {
+      node.fields().forEachRemaining(e -> {
+        if (e.getValue().isObject()) {
+          map.put(e.getKey(), new Annotation(toMap(e.getValue())));
+        }
+      });
+    }
+    return map;
+  }
+
+  private static Map<String, Object> toMap(JsonNode node) {
+    return MAPPER.convertValue(node, new TypeReference<LinkedHashMap<String, Object>>() {});
   }
 
   private static List<PeriodData> parsePeriods(JsonNode array) {

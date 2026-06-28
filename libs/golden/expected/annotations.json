@@ -1,0 +1,427 @@
+{
+  "weeks": [
+    {
+      "number": 1,
+      "monday": "2025-08-11",
+      "firstSchoolDay": "2025-08-13",
+      "lastSchoolDay": "2025-08-15",
+      "schoolDayCount": 3
+    },
+    {
+      "number": 2,
+      "monday": "2025-08-18",
+      "firstSchoolDay": "2025-08-18",
+      "lastSchoolDay": "2025-08-22",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 3,
+      "monday": "2025-08-25",
+      "firstSchoolDay": "2025-08-25",
+      "lastSchoolDay": "2025-08-29",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 4,
+      "monday": "2025-09-01",
+      "firstSchoolDay": "2025-09-02",
+      "lastSchoolDay": "2025-09-05",
+      "schoolDayCount": 4
+    },
+    {
+      "number": 5,
+      "monday": "2025-09-08",
+      "firstSchoolDay": "2025-09-08",
+      "lastSchoolDay": "2025-09-12",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 6,
+      "monday": "2025-09-15",
+      "firstSchoolDay": "2025-09-15",
+      "lastSchoolDay": "2025-09-19",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 7,
+      "monday": "2025-09-22",
+      "firstSchoolDay": "2025-09-22",
+      "lastSchoolDay": "2025-09-26",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 8,
+      "monday": "2025-09-29",
+      "firstSchoolDay": "2025-09-29",
+      "lastSchoolDay": "2025-10-03",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 9,
+      "monday": "2025-10-06",
+      "firstSchoolDay": "2025-10-06",
+      "lastSchoolDay": "2025-10-10",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 10,
+      "monday": "2025-10-13",
+      "firstSchoolDay": "2025-10-13",
+      "lastSchoolDay": "2025-10-17",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 11,
+      "monday": "2025-10-20",
+      "firstSchoolDay": "2025-10-20",
+      "lastSchoolDay": "2025-10-24",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 12,
+      "monday": "2025-10-27",
+      "firstSchoolDay": "2025-10-27",
+      "lastSchoolDay": "2025-10-31",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 13,
+      "monday": "2025-11-03",
+      "firstSchoolDay": "2025-11-03",
+      "lastSchoolDay": "2025-11-07",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 14,
+      "monday": "2025-11-10",
+      "firstSchoolDay": "2025-11-10",
+      "lastSchoolDay": "2025-11-14",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 15,
+      "monday": "2025-11-17",
+      "firstSchoolDay": "2025-11-17",
+      "lastSchoolDay": "2025-11-21",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 16,
+      "monday": "2025-11-24",
+      "firstSchoolDay": "2025-11-24",
+      "lastSchoolDay": "2025-11-26",
+      "schoolDayCount": 3
+    },
+    {
+      "number": 17,
+      "monday": "2025-12-01",
+      "firstSchoolDay": "2025-12-01",
+      "lastSchoolDay": "2025-12-05",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 18,
+      "monday": "2025-12-08",
+      "firstSchoolDay": "2025-12-08",
+      "lastSchoolDay": "2025-12-12",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 19,
+      "monday": "2025-12-15",
+      "firstSchoolDay": "2025-12-15",
+      "lastSchoolDay": "2025-12-19",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 20,
+      "monday": "2025-12-22",
+      "firstSchoolDay": "2025-12-22",
+      "lastSchoolDay": "2025-12-26",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 21,
+      "monday": "2025-12-29",
+      "firstSchoolDay": "2025-12-29",
+      "lastSchoolDay": "2026-01-02",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 22,
+      "monday": "2026-01-05",
+      "firstSchoolDay": "2026-01-05",
+      "lastSchoolDay": "2026-01-09",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 23,
+      "monday": "2026-01-12",
+      "firstSchoolDay": "2026-01-12",
+      "lastSchoolDay": "2026-01-16",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 24,
+      "monday": "2026-01-19",
+      "firstSchoolDay": "2026-01-19",
+      "lastSchoolDay": "2026-01-23",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 25,
+      "monday": "2026-01-26",
+      "firstSchoolDay": "2026-01-26",
+      "lastSchoolDay": "2026-01-30",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 26,
+      "monday": "2026-02-02",
+      "firstSchoolDay": "2026-02-02",
+      "lastSchoolDay": "2026-02-06",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 27,
+      "monday": "2026-02-09",
+      "firstSchoolDay": "2026-02-09",
+      "lastSchoolDay": "2026-02-13",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 28,
+      "monday": "2026-02-16",
+      "firstSchoolDay": "2026-02-16",
+      "lastSchoolDay": "2026-02-20",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 29,
+      "monday": "2026-02-23",
+      "firstSchoolDay": "2026-02-23",
+      "lastSchoolDay": "2026-02-27",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 30,
+      "monday": "2026-03-02",
+      "firstSchoolDay": "2026-03-02",
+      "lastSchoolDay": "2026-03-06",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 31,
+      "monday": "2026-03-09",
+      "firstSchoolDay": "2026-03-09",
+      "lastSchoolDay": "2026-03-13",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 32,
+      "monday": "2026-03-16",
+      "firstSchoolDay": "2026-03-16",
+      "lastSchoolDay": "2026-03-20",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 33,
+      "monday": "2026-03-23",
+      "firstSchoolDay": "2026-03-23",
+      "lastSchoolDay": "2026-03-27",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 34,
+      "monday": "2026-03-30",
+      "firstSchoolDay": "2026-03-30",
+      "lastSchoolDay": "2026-04-03",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 35,
+      "monday": "2026-04-06",
+      "firstSchoolDay": "2026-04-06",
+      "lastSchoolDay": "2026-04-10",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 36,
+      "monday": "2026-04-13",
+      "firstSchoolDay": "2026-04-13",
+      "lastSchoolDay": "2026-04-17",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 37,
+      "monday": "2026-04-20",
+      "firstSchoolDay": "2026-04-20",
+      "lastSchoolDay": "2026-04-24",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 38,
+      "monday": "2026-04-27",
+      "firstSchoolDay": "2026-04-27",
+      "lastSchoolDay": "2026-05-01",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 39,
+      "monday": "2026-05-04",
+      "firstSchoolDay": "2026-05-04",
+      "lastSchoolDay": "2026-05-08",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 40,
+      "monday": "2026-05-11",
+      "firstSchoolDay": "2026-05-11",
+      "lastSchoolDay": "2026-05-15",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 41,
+      "monday": "2026-05-18",
+      "firstSchoolDay": "2026-05-18",
+      "lastSchoolDay": "2026-05-22",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 42,
+      "monday": "2026-05-25",
+      "firstSchoolDay": "2026-05-25",
+      "lastSchoolDay": "2026-05-29",
+      "schoolDayCount": 5
+    },
+    {
+      "number": 43,
+      "monday": "2026-06-01",
+      "firstSchoolDay": "2026-06-01",
+      "lastSchoolDay": "2026-06-04",
+      "schoolDayCount": 4
+    }
+  ],
+  "week1": {
+    "number": 1,
+    "monday": "2025-08-11",
+    "firstSchoolDay": "2025-08-13",
+    "lastSchoolDay": "2025-08-15",
+    "schoolDayCount": 3
+  },
+  "week-overflow": null,
+  "wfd-thu": {
+    "number": 1,
+    "monday": "2025-08-11",
+    "firstSchoolDay": "2025-08-13",
+    "lastSchoolDay": "2025-08-15",
+    "schoolDayCount": 3
+  },
+  "wfd-sat": {
+    "number": 1,
+    "monday": "2025-08-11",
+    "firstSchoolDay": "2025-08-13",
+    "lastSchoolDay": "2025-08-15",
+    "schoolDayCount": 3
+  },
+  "wfd-out": null,
+  "ranges": [
+    {
+      "id": "apExams",
+      "start": "2026-05-04",
+      "end": "2026-05-15",
+      "label": "AP Exams",
+      "kind": "testing"
+    }
+  ],
+  "weekann": [
+    {
+      "week": 5,
+      "schoolWeek": {
+        "number": 5,
+        "monday": "2025-09-08",
+        "firstSchoolDay": "2025-09-08",
+        "lastSchoolDay": "2025-09-12",
+        "schoolDayCount": 5
+      },
+      "label": "Q1 progress",
+      "kind": "gradingClose"
+    },
+    {
+      "week": 999,
+      "schoolWeek": null,
+      "label": "Overflow",
+      "kind": "gradingClose"
+    }
+  ],
+  "dateann": [
+    {
+      "date": "2026-03-14",
+      "label": "Pi Day"
+    }
+  ],
+  "on-ap": [
+    {
+      "source": "range",
+      "id": "apExams",
+      "start": "2026-05-04",
+      "end": "2026-05-15",
+      "label": "AP Exams",
+      "kind": "testing"
+    }
+  ],
+  "on-week5": [
+    {
+      "source": "week",
+      "week": 5,
+      "schoolWeek": {
+        "number": 5,
+        "monday": "2025-09-08",
+        "firstSchoolDay": "2025-09-08",
+        "lastSchoolDay": "2025-09-12",
+        "schoolDayCount": 5
+      },
+      "label": "Q1 progress",
+      "kind": "gradingClose"
+    }
+  ],
+  "on-piday": [
+    {
+      "source": "date",
+      "date": "2026-03-14",
+      "label": "Pi Day"
+    }
+  ],
+  "for-week39": [
+    {
+      "source": "range",
+      "id": "apExams",
+      "start": "2026-05-04",
+      "end": "2026-05-15",
+      "label": "AP Exams",
+      "kind": "testing"
+    }
+  ],
+  "for-week5": [
+    {
+      "source": "week",
+      "week": 5,
+      "schoolWeek": {
+        "number": 5,
+        "monday": "2025-09-08",
+        "firstSchoolDay": "2025-09-08",
+        "lastSchoolDay": "2025-09-12",
+        "schoolDayCount": 5
+      },
+      "label": "Q1 progress",
+      "kind": "gradingClose"
+    }
+  ],
+  "for-week31": [
+    {
+      "source": "date",
+      "date": "2026-03-14",
+      "label": "Pi Day"
+    }
+  ]
+}

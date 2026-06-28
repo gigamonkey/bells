@@ -89,6 +89,38 @@ def _ser_zoned(dt):
     return None if dt is None else _ser_instant(dt)
 
 
+def _ser_school_week(w):
+    if w is None:
+        return None
+    return {
+        "number": w["number"],
+        "monday": w["monday"].isoformat(),
+        "firstSchoolDay": w["first_school_day"].isoformat(),
+        "lastSchoolDay": w["last_school_day"].isoformat(),
+        "schoolDayCount": w["school_day_count"],
+    }
+
+
+def _ser_school_weeks(ws):
+    return [_ser_school_week(w) for w in ws]
+
+
+def _ser_annotation(a):
+    out = {}
+    for k, v in a.items():
+        if k == "school_week":
+            out["schoolWeek"] = _ser_school_week(v)
+        elif isinstance(v, date):
+            out[k] = v.isoformat()
+        else:
+            out[k] = v
+    return out
+
+
+def _ser_annotations(arr):
+    return [_ser_annotation(a) for a in arr]
+
+
 # ── Query dispatch (camelCase protocol name → this port's API) ──────────────
 
 DISPATCH = {
@@ -119,6 +151,15 @@ DISPATCH = {
     "periodsForDate": lambda b, a: _ser_periods(b.periods_for_date(_instant(a["instant"]))),
     "nonClassDaysLeft": lambda b, a: _ser_non_class_days(b.non_class_days_left(_instant(a["instant"]))),
     "nonClassLabel": lambda b, a: b.non_class_label(_date(a["date"])),
+    # School weeks & annotations.
+    "schoolWeeks": lambda b, a: _ser_school_weeks(b.school_weeks()),
+    "schoolWeek": lambda b, a: _ser_school_week(b.school_week(a["n"])),
+    "weekForDate": lambda b, a: _ser_school_week(b.week_for_date(_date(a["date"]))),
+    "rangeAnnotations": lambda b, a: _ser_annotations(b.range_annotations()),
+    "weekAnnotations": lambda b, a: _ser_annotations(b.week_annotations()),
+    "dateAnnotations": lambda b, a: _ser_annotations(b.date_annotations()),
+    "annotationsOn": lambda b, a: _ser_annotations(b.annotations_on(_date(a["date"]))),
+    "annotationsForWeek": lambda b, a: _ser_annotations(b.annotations_for_week(a["n"])),
     # Abstract-time API.
     "resolveDay": lambda b, a: b.resolve_day(_date(a["base"]), a.get("day")).isoformat(),
     "addSchoolDays": lambda b, a: b.add_school_days(_date(a["date"]), a["n"]).isoformat(),

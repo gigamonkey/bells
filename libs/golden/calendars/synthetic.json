@@ -16,5 +16,22 @@
   "weekdaySchedules": { "monday": "LATE_START" },
   "holidays": ["2025-09-01", "2025-11-27", "2025-11-28"],
   "teacherWorkDays": [],
-  "breakNames": {}
+  "breakNames": {},
+  "annotations": {
+    "ranges": {
+      "apExams": {
+        "start": "2026-05-04",
+        "end": "2026-05-15",
+        "label": "AP Exams",
+        "kind": "testing"
+      }
+    },
+    "weeks": {
+      "5": { "label": "Q1 progress", "kind": "gradingClose" },
+      "999": { "label": "Overflow", "kind": "gradingClose" }
+    },
+    "dates": {
+      "2026-03-14": { "label": "Pi Day" }
+    }
+  }
 }

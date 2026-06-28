@@ -154,6 +154,148 @@ const validateNoOverlap = (
   return { errors, warnings };
 };
 
+/**
+ * Count school weeks in [firstDay, lastDay] using the same Monday-anchored ISO
+ * grouping the runtime uses (student view: weekdays that aren't holidays).
+ */
+const countSchoolWeeks = (
+  firstDay: Temporal.PlainDate,
+  lastDay: Temporal.PlainDate,
+  holidaySet: Set<string>,
+): number => {
+  let count = 0;
+  let monday: Temporal.PlainDate | null = null;
+  for (let d = firstDay; Temporal.PlainDate.compare(d, lastDay) <= 0; d = d.add({ days: 1 })) {
+    const dow = d.dayOfWeek;
+    if (dow === 6 || dow === 7 || holidaySet.has(d.toString())) continue;
+    const m = d.subtract({ days: dow - 1 });
+    if (!monday || !monday.equals(m)) {
+      count++;
+      monday = m;
+    }
+  }
+  return count;
+};
+
+/**
+ * Validate the optional `annotations` field. Checks the anchor of each entry
+ * (key validity / in-range), never the free-form payload content.
+ */
+const validateAnnotations = (
+  annotations: any,
+  label: string,
+  firstDay: Temporal.PlainDate | null,
+  lastDay: Temporal.PlainDate | null,
+  holidaySet: Set<string>,
+): { errors: string[]; warnings: string[] } => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  const isObject = (v: any): boolean =>
+    typeof v === 'object' && v !== null && !Array.isArray(v);
+
+  if (!isObject(annotations)) {
+    errors.push(`${label}: annotations must be an object`);
+    return { errors, warnings };
+  }
+
+  for (const bucket of Object.keys(annotations)) {
+    if (bucket !== 'ranges' && bucket !== 'weeks' && bucket !== 'dates') {
+      warnings.push(`${label}: annotations has unknown bucket "${bucket}"`);
+    }
+  }
+
+  const inYear = (d: Temporal.PlainDate): boolean =>
+    !firstDay ||
+    !lastDay ||
+    (Temporal.PlainDate.compare(d, firstDay) >= 0 && Temporal.PlainDate.compare(d, lastDay) <= 0);
+
+  // Payload is opaque: only confirm it's an object and that label/kind, if
+  // present, are strings (warning).
+  const checkPayload = (value: any, where: string): boolean => {
+    if (!isObject(value)) {
+      errors.push(`${where} must be an object`);
+      return false;
+    }
+    if ('label' in value && typeof value.label !== 'string') {
+      warnings.push(`${where} label should be a string`);
+    }
+    if ('kind' in value && typeof value.kind !== 'string') {
+      warnings.push(`${where} kind should be a string`);
+    }
+    return true;
+  };
+
+  const { ranges, weeks, dates } = annotations;
+
+  if (ranges !== undefined) {
+    if (!isObject(ranges)) {
+      errors.push(`${label}: annotations.ranges must be an object`);
+    } else {
+      for (const [id, value] of Object.entries<any>(ranges)) {
+        const where = `${label}: annotations.ranges.${id}`;
+        if (!checkPayload(value, where)) continue;
+        const start = tryParseDate(value.start);
+        const end = tryParseDate(value.end);
+        if (!start) {
+          errors.push(`${where} has invalid start "${value.start}"`);
+        } else if (!inYear(start)) {
+          errors.push(`${where} start "${value.start}" is outside the calendar year range`);
+        }
+        if (!end) {
+          errors.push(`${where} has invalid end "${value.end}"`);
+        } else if (!inYear(end)) {
+          errors.push(`${where} end "${value.end}" is outside the calendar year range`);
+        }
+        if (start && end && Temporal.PlainDate.compare(start, end) > 0) {
+          errors.push(`${where} start "${value.start}" is after end "${value.end}"`);
+        }
+      }
+    }
+  }
+
+  if (weeks !== undefined) {
+    if (!isObject(weeks)) {
+      errors.push(`${label}: annotations.weeks must be an object`);
+    } else {
+      const weekCount = firstDay && lastDay ? countSchoolWeeks(firstDay, lastDay, holidaySet) : null;
+      for (const [key, value] of Object.entries<any>(weeks)) {
+        const where = `${label}: annotations.weeks.${key}`;
+        if (!/^\d+$/.test(key) || Number(key) < 1) {
+          errors.push(`${where} key is not an integer >= 1`);
+          continue;
+        }
+        if (!checkPayload(value, where)) continue;
+        if (weekCount !== null && Number(key) > weekCount) {
+          warnings.push(`${where} key exceeds the year's ${weekCount} school weeks`);
+        }
+      }
+    }
+  }
+
+  if (dates !== undefined) {
+    if (!isObject(dates)) {
+      errors.push(`${label}: annotations.dates must be an object`);
+    } else {
+      for (const [key, value] of Object.entries<any>(dates)) {
+        const where = `${label}: annotations.dates.${key}`;
+        const d = tryParseDate(key);
+        if (!d) {
+          errors.push(`${where} key is not a valid date`);
+          continue;
+        }
+        if (!inYear(d)) {
+          errors.push(`${where} key is outside the calendar year range`);
+          continue;
+        }
+        checkPayload(value, where);
+      }
+    }
+  }
+
+  return { errors, warnings };
+};
+
 /** Validate a single year data object. */
 const validateYear = (year: any, index: number): { errors: string[]; warnings: string[] } => {
   const errors: string[] = [];
@@ -289,6 +431,19 @@ const validateYear = (year: any, index: number): { errors: string[]; warnings: s
     if (typeof value !== 'string' || value.length === 0) {
       errors.push(`${label}: nonClassDays.${key} must be a non-empty string label`);
     }
+  }
+
+  // 4b. Annotations (optional, additive).
+  if (year.annotations !== undefined) {
+    const ann = validateAnnotations(
+      year.annotations,
+      label,
+      firstDay,
+      lastDay,
+      holidaySet as Set<string>,
+    );
+    errors.push(...ann.errors);
+    warnings.push(...ann.warnings);
   }
 
   // 5. Validate period times in all schedules.

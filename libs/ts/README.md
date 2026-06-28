@@ -85,6 +85,48 @@ Calendar data is an array of year objects, one per academic year:
 - `holidays` — array of holiday date strings
 - `teacherWorkDays` — holiday dates that teachers still work
 - `breakNames` — map of date string to break name (used in `"Break!"` interval labels)
+- `annotations` — optional generic annotations (see below)
+
+### Annotations
+
+The optional `annotations` field attaches extra information to a year without
+changing the schedule. It is purely additive — a calendar with no `annotations`
+behaves exactly as before. Three typed buckets:
+
+```json
+"annotations": {
+  "ranges": {
+    "apExams": { "start": "2026-05-04", "end": "2026-05-15", "label": "AP Exams", "kind": "testing" }
+  },
+  "weeks": {
+    "9":  { "label": "Q1", "kind": "gradingClose" },
+    "18": { "label": "S1", "kind": "gradingClose" }
+  },
+  "dates": {
+    "2026-03-14": { "label": "Pi Day" }
+  }
+}
+```
+
+- `ranges` — map of an arbitrary **id** → `{ start, end, ... }`. `start`/`end`
+  are inclusive `YYYY-MM-DD` dates within `[firstDay, lastDay]`, `start <= end`.
+- `weeks` — map of **school-week number** (a JSON string key) → payload. The
+  number is 1-based in the bells school-week numbering (see below).
+- `dates` — map of `YYYY-MM-DD` → payload. Unlike `nonClassDays`, a date
+  annotation may fall on **any** in-range day, including a weekend or holiday.
+
+In every bucket the value is an object; `label` and `kind` are *conventional*
+fields, and all other keys are opaque payload passed through untouched.
+Validation checks only the anchor (key validity / in-range), never the payload.
+
+#### School weeks
+
+A **school week** is a Monday-anchored ISO calendar week containing at least
+one school day. School weeks are numbered `1..n` in chronological order over
+`[firstDay, lastDay]`; full-week breaks get no number and are skipped, so the
+numbering is dense. Numbering is **role-aware** (a teacher's holidays and first
+day differ), so bind the calendar with `role: "student"` to get the numbering
+that student-facing `weeks` annotations expect.
 
 ### Time strings
 
@@ -146,6 +188,32 @@ bells.nextYearStart()             // Temporal.Instant (throws if not loaded)
 bells.schoolTimeBetween(a, b)     // Temporal.Duration
 bells.summerBounds()              // { start, end } | null
 ```
+
+### School weeks & annotations
+
+```js
+// School-week numbering (see "Annotations" above):
+bells.schoolWeeks()               // SchoolWeek[] in chronological order
+bells.schoolWeekCount()           // number
+bells.schoolWeek(9)               // SchoolWeek | null (by 1-based number)
+bells.weekForDate(date)           // SchoolWeek | null (null off-year / no-school week)
+
+// Resolved annotation accessors (raw keys → real dates / SchoolWeeks):
+bells.rangeAnnotations()          // [{ id, start, end, label?, kind?, ...payload }]
+bells.weekAnnotations()           // [{ week, schoolWeek, label?, kind?, ...payload }]
+bells.dateAnnotations()           // [{ date, label?, kind?, ...payload }]
+bells.annotations()               // the raw, unvalidated annotations structure
+
+// Unified helpers — every annotation active on a day / touching a week,
+// each tagged with its source ('range' | 'week' | 'date'):
+bells.annotationsOn(date)         // dates entry on that date, ranges spanning it, the week's entry
+bells.annotationsForWeek(9)       // the weeks[9] entry, ranges overlapping the week's school days, dates inside it
+```
+
+A `SchoolWeek` is `{ number, monday, firstSchoolDay, lastSchoolDay, schoolDayCount }`.
+For `annotationsForWeek`, a range counts as touching the week when it overlaps
+the week's **school-day span** (`firstSchoolDay`…`lastSchoolDay`), not the raw
+Mon–Sun span.
 
 ### Abstract times
 

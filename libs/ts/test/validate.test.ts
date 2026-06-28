@@ -391,6 +391,99 @@ describe('validateCalendarData', () => {
     });
   });
 
+  describe('annotations', () => {
+    it('valid annotations block → valid', () => {
+      const data = withPatch((d) => {
+        d.annotations = {
+          ranges: {
+            apExams: { start: '2026-05-04', end: '2026-05-15', label: 'AP Exams', kind: 'testing' },
+          },
+          weeks: { 3: { label: 'Q1 progress', kind: 'gradingClose' } },
+          dates: { '2026-03-14': { label: 'Pi Day' } },
+        };
+      });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, true, JSON.stringify(result.errors));
+      assert.deepStrictEqual(result.warnings, []);
+    });
+
+    it('missing annotations → valid', () => {
+      const data = withPatch((d) => { delete d.annotations; });
+      assert.strictEqual(validateCalendarData(data).valid, true);
+    });
+
+    it('range with out-of-range start → error', () => {
+      const data = withPatch((d) => {
+        d.annotations = { ranges: { x: { start: '2024-01-01', end: '2026-05-15' } } };
+      });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes('2024-01-01')));
+    });
+
+    it('range with start after end → error', () => {
+      const data = withPatch((d) => {
+        d.annotations = { ranges: { x: { start: '2026-05-15', end: '2026-05-04' } } };
+      });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes('after end')));
+    });
+
+    it('non-integer week key → error', () => {
+      const data = withPatch((d) => {
+        d.annotations = { weeks: { foo: { label: 'X' } } };
+      });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes('integer')));
+    });
+
+    it('overflow week key → warning, still valid', () => {
+      const data = withPatch((d) => {
+        d.annotations = { weeks: { 999: { label: 'Way off' } } };
+      });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, true, JSON.stringify(result.errors));
+      assert.ok(result.warnings.some((w) => w.includes('exceeds')));
+    });
+
+    it('date out of range → error', () => {
+      const data = withPatch((d) => {
+        d.annotations = { dates: { '2024-01-01': { label: 'X' } } };
+      });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes('2024-01-01')));
+    });
+
+    it('weekend date annotation is allowed (unlike nonClassDays) → valid', () => {
+      // 2025-09-06 is a Saturday
+      const data = withPatch((d) => {
+        d.annotations = { dates: { '2025-09-06': { label: 'Weekend thing' } } };
+      });
+      assert.strictEqual(validateCalendarData(data).valid, true);
+    });
+
+    it('non-object payload → error', () => {
+      const data = withPatch((d) => {
+        d.annotations = { dates: { '2026-03-14': 'just a string' } };
+      });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes('must be an object')));
+    });
+
+    it('unknown bucket → warning, still valid', () => {
+      const data = withPatch((d) => {
+        d.annotations = { bogus: { whatever: true } };
+      });
+      const result = validateCalendarData(data);
+      assert.strictEqual(result.valid, true);
+      assert.ok(result.warnings.some((w) => w.includes('unknown bucket')));
+    });
+  });
+
   describe('edge cases', () => {
     it('null data → invalid', () => {
       const result = validateCalendarData(null);

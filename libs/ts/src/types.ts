@@ -32,7 +32,76 @@ export interface YearData {
   teacherWorkDays?: string[];
   breakNames?: Record<string, string>;
   nonClassDays?: Record<string, string>;
+  annotations?: Annotations;
 }
+
+/**
+ * A free-form annotation payload. `label` and `kind` are conventional fields;
+ * any other keys are opaque and passed through untouched.
+ */
+export interface Annotation {
+  label?: string;
+  kind?: string;
+  [key: string]: unknown;
+}
+
+/** A range annotation: an inclusive `start`/`end` span plus free-form payload. */
+export interface RangeAnnotation extends Annotation {
+  start: string;
+  end: string;
+}
+
+/**
+ * Optional generic annotations attached to a calendar year. Three typed
+ * buckets keyed by, respectively, an arbitrary id, a school-week number, and a
+ * `YYYY-MM-DD` date. Purely additive: a calendar without `annotations` behaves
+ * exactly as before.
+ */
+export interface Annotations {
+  ranges?: Record<string, RangeAnnotation>;
+  weeks?: Record<string, Annotation>;
+  dates?: Record<string, Annotation>;
+}
+
+/**
+ * A canonical school week: a Monday-anchored ISO week containing at least one
+ * school day. School weeks are numbered 1..n in chronological order; full-week
+ * breaks get no number and are skipped, so the numbering is dense.
+ */
+export interface SchoolWeek {
+  number: number;
+  monday: Temporal.PlainDate;
+  firstSchoolDay: Temporal.PlainDate;
+  lastSchoolDay: Temporal.PlainDate;
+  schoolDayCount: number;
+}
+
+/** A `ranges` annotation with its `start`/`end` resolved to PlainDates. */
+export interface ResolvedRangeAnnotation extends Annotation {
+  id: string;
+  start: Temporal.PlainDate;
+  end: Temporal.PlainDate;
+}
+
+/** A `weeks` annotation with its key resolved to a school week (or null). */
+export interface ResolvedWeekAnnotation extends Annotation {
+  week: number;
+  schoolWeek: SchoolWeek | null;
+}
+
+/** A `dates` annotation with its key resolved to a PlainDate. */
+export interface ResolvedDateAnnotation extends Annotation {
+  date: Temporal.PlainDate;
+}
+
+/** Which bucket an annotation came from, in a unified-helper result. */
+export type AnnotationSource = 'range' | 'week' | 'date';
+
+/** A resolved annotation tagged with the bucket it came from. */
+export type ActiveAnnotation =
+  | (ResolvedRangeAnnotation & { source: 'range' })
+  | (ResolvedWeekAnnotation & { source: 'week' })
+  | (ResolvedDateAnnotation & { source: 'date' });
 
 /** A period with its time strings resolved to Temporal.PlainTime. */
 export interface ResolvedPeriod {

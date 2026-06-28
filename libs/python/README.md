@@ -95,6 +95,36 @@ bells.school_time_between(a, b)   # timedelta
 bells.summer_bounds()             # {"start": ..., "end": ...} | None
 ```
 
+### School weeks & annotations
+
+A calendar year may carry an optional `annotations` field — generic extra
+information (an AP-testing date range, grading-period closes keyed by
+school-week number, ad-hoc dates) that doesn't change the schedule. See the
+[TypeScript README](../ts/README.md#annotations) for the data format; it is
+identical across ports. The query API (snake_case here):
+
+```python
+# School-week numbering (Monday-anchored ISO weeks with >=1 school day,
+# numbered 1..n; role-aware — bind role="student" for grading numbering):
+bells.school_weeks()              # list[SchoolWeek dict] in chronological order
+bells.school_week_count()         # int
+bells.school_week(9)              # SchoolWeek dict | None (by 1-based number)
+bells.week_for_date(d)            # SchoolWeek dict | None
+
+# Resolved annotation accessors (raw keys -> real dates / school weeks):
+bells.range_annotations()         # [{"id", "start", "end", "label"?, "kind"?, ...}]
+bells.week_annotations()          # [{"week", "school_week", "label"?, "kind"?, ...}]
+bells.date_annotations()          # [{"date", "label"?, "kind"?, ...}]
+bells.annotations()               # the raw, unvalidated annotations dict
+
+# Unified helpers (each entry tagged with "source": "range"|"week"|"date"):
+bells.annotations_on(d)           # everything active on date d
+bells.annotations_for_week(9)     # everything touching school week 9
+```
+
+A `SchoolWeek` is a dict `{"number", "monday", "first_school_day",
+"last_school_day", "school_day_count"}`.
+
 ### Abstract times
 
 An *abstract time* describes a moment relative to the schedule — "five minutes

@@ -5,12 +5,19 @@
 
 import { parsePlainDate, resolveScheduleTimes, daysBetween, noon, includesWeekend } from './datetime.js';
 import type {
+  ActiveAnnotation,
+  Annotation,
+  Annotations,
   IncludeTags,
   IntervalType,
   NonClassDay,
   PeriodData,
+  ResolvedDateAnnotation,
   ResolvedPeriod,
+  ResolvedRangeAnnotation,
+  ResolvedWeekAnnotation,
   Role,
+  SchoolWeek,
   YearData,
 } from './types.js';
 
@@ -55,6 +62,8 @@ class Calendar {
   teacherWorkDays: string[];
   breakNames: Record<string, string>;
   nonClassDays: Record<string, string>;
+  #annotations: Annotations;
+  #schoolWeeksCache: SchoolWeek[] | null = null;
 
   #noonInstant(date: Temporal.PlainDate): Temporal.Instant {
     return noon(date).toZonedDateTime(this.timezone).toInstant();
@@ -132,6 +141,7 @@ class Calendar {
     this.teacherWorkDays = data.teacherWorkDays || [];
     this.breakNames = data.breakNames || {};
     this.nonClassDays = data.nonClassDays || {};
+    this.#annotations = data.annotations || {};
   }
 
   isInCalendar(instant: Temporal.Instant): boolean {
@@ -320,6 +330,166 @@ class Calendar {
    */
   schoolTimeBetween(start: Temporal.Instant, end: Temporal.Instant): Temporal.Duration {
     return this.#schoolTimeBetween(start, end);
+  }
+
+  // ─── School-week numbering ────────────────────────────────────────────────
+
+  /**
+   * The canonical school weeks of this year, in chronological order. A school
+   * week is a Monday-anchored ISO week containing at least one school day;
+   * full-week breaks are skipped, so numbering is dense. Role-aware through this
+   * calendar's configured role (holidays/firstDay differ for teachers).
+   */
+  schoolWeeks(): SchoolWeek[] {
+    if (this.#schoolWeeksCache) return this.#schoolWeeksCache;
+    const result: SchoolWeek[] = [];
+    let monday: Temporal.PlainDate | null = null;
+    let days: Temporal.PlainDate[] = [];
+    const flush = () => {
+      if (monday && days.length > 0) {
+        result.push({
+          number: result.length + 1,
+          monday,
+          firstSchoolDay: days[0],
+          lastSchoolDay: days[days.length - 1],
+          schoolDayCount: days.length,
+        });
+      }
+    };
+    for (
+      let d = this.firstDay;
+      Temporal.PlainDate.compare(d, this.lastDay) <= 0;
+      d = d.add({ days: 1 })
+    ) {
+      if (!this.isSchoolDay(d)) continue;
+      const m = d.subtract({ days: d.dayOfWeek - 1 });
+      if (!monday || !monday.equals(m)) {
+        flush();
+        monday = m;
+        days = [];
+      }
+      days.push(d);
+    }
+    flush();
+    this.#schoolWeeksCache = result;
+    return result;
+  }
+
+  /** Number of school weeks in the year. */
+  schoolWeekCount(): number {
+    return this.schoolWeeks().length;
+  }
+
+  /** The school week with the given 1-based number, or null if out of range. */
+  schoolWeek(n: number): SchoolWeek | null {
+    if (!Number.isInteger(n) || n < 1) return null;
+    return this.schoolWeeks()[n - 1] ?? null;
+  }
+
+  /**
+   * The school week containing `date`, or null when `date` is outside the year
+   * or falls in a week with no school days.
+   */
+  weekForDate(date: Temporal.PlainDate): SchoolWeek | null {
+    if (
+      Temporal.PlainDate.compare(date, this.firstDay) < 0 ||
+      Temporal.PlainDate.compare(date, this.lastDay) > 0
+    ) {
+      return null;
+    }
+    const m = date.subtract({ days: date.dayOfWeek - 1 });
+    return this.schoolWeeks().find((w) => w.monday.equals(m)) ?? null;
+  }
+
+  // ─── Annotations ──────────────────────────────────────────────────────────
+
+  /** The raw, unvalidated annotations structure (payload verbatim). */
+  annotations(): Annotations {
+    return this.#annotations;
+  }
+
+  /** Range annotations with `start`/`end` resolved to PlainDates. */
+  rangeAnnotations(): ResolvedRangeAnnotation[] {
+    return Object.entries(this.#annotations.ranges || {}).map(([id, v]) => {
+      const { start, end, ...rest } = v;
+      return { id, start: parsePlainDate(start), end: parsePlainDate(end), ...rest };
+    });
+  }
+
+  /**
+   * Week annotations resolved to their school week, in ascending week order.
+   * `schoolWeek` is null when the key exceeds the year's school-week count.
+   */
+  weekAnnotations(): ResolvedWeekAnnotation[] {
+    return Object.keys(this.#annotations.weeks || {})
+      .map((k) => Number(k))
+      .sort((a, b) => a - b)
+      .map((week) => ({
+        week,
+        schoolWeek: this.schoolWeek(week),
+        ...(this.#annotations.weeks as Record<string, Annotation>)[String(week)],
+      }));
+  }
+
+  /** Date annotations with the key resolved to a PlainDate. */
+  dateAnnotations(): ResolvedDateAnnotation[] {
+    return Object.entries(this.#annotations.dates || {}).map(([k, v]) => ({
+      date: parsePlainDate(k),
+      ...v,
+    }));
+  }
+
+  /**
+   * Every annotation active on `date`, tagged with its `source`: any `ranges`
+   * entry whose span contains the date, the `weeks` entry for the date's school
+   * week, and the `dates` entry with that exact date. Order: ranges, week, date.
+   */
+  annotationsOn(date: Temporal.PlainDate): ActiveAnnotation[] {
+    const result: ActiveAnnotation[] = [];
+    for (const r of this.rangeAnnotations()) {
+      if (
+        Temporal.PlainDate.compare(r.start, date) <= 0 &&
+        Temporal.PlainDate.compare(date, r.end) <= 0
+      ) {
+        result.push({ source: 'range', ...r });
+      }
+    }
+    const sw = this.weekForDate(date);
+    if (sw) {
+      const wa = (this.#annotations.weeks || {})[String(sw.number)];
+      if (wa) result.push({ source: 'week', week: sw.number, schoolWeek: sw, ...wa });
+    }
+    const da = (this.#annotations.dates || {})[date.toString()];
+    if (da) result.push({ source: 'date', date, ...da });
+    return result;
+  }
+
+  /**
+   * Every annotation touching school week `n`, tagged with its `source`: any
+   * `ranges` entry overlapping the week's school-day span, the `weeks[n]` entry,
+   * and any `dates` entry inside the week. Order: ranges, week, date.
+   */
+  annotationsForWeek(n: number): ActiveAnnotation[] {
+    const result: ActiveAnnotation[] = [];
+    const sw = this.schoolWeek(n);
+    if (sw) {
+      for (const r of this.rangeAnnotations()) {
+        if (
+          Temporal.PlainDate.compare(r.start, sw.lastSchoolDay) <= 0 &&
+          Temporal.PlainDate.compare(sw.firstSchoolDay, r.end) <= 0
+        ) {
+          result.push({ source: 'range', ...r });
+        }
+      }
+    }
+    const wa = (this.#annotations.weeks || {})[String(n)];
+    if (wa) result.push({ source: 'week', week: n, schoolWeek: sw, ...wa });
+    for (const d of this.dateAnnotations()) {
+      if (this.weekForDate(d.date)?.number === n) {
+        result.push({ source: 'date', ...d });
+      }
+    }
+    return result;
   }
 }
 

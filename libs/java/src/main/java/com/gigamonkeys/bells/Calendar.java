@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +34,8 @@ public final class Calendar {
   private final List<String> teacherWorkDays;
   private final Map<String, String> breakNames;
   private final Map<String, String> nonClassDays;
+  private final Annotations annotations;
+  private List<SchoolWeek> schoolWeeksCache;
 
   /**
    * @param data one year's calendar data
@@ -54,6 +58,7 @@ public final class Calendar {
     this.teacherWorkDays = data.teacherWorkDays();
     this.breakNames = data.breakNames();
     this.nonClassDays = data.nonClassDays();
+    this.annotations = data.annotations();
   }
 
   // ─── Accessors used by Schedule ───────────────────────────────────────────────
@@ -429,5 +434,233 @@ public final class Calendar {
 
   private Instant noonInstant(LocalDate date) {
     return DateTimes.noon(date).atZone(timezone).toInstant();
+  }
+
+  // ─── School-week numbering ────────────────────────────────────────────────────
+
+  /**
+   * The canonical school weeks of this year, in chronological order. A school week is a
+   * Monday-anchored ISO week containing at least one school day; full-week breaks are
+   * skipped, so numbering is dense. Role-aware through this calendar's configured role.
+   *
+   * @return the school weeks
+   */
+  public List<SchoolWeek> schoolWeeks() {
+    if (schoolWeeksCache != null) {
+      return schoolWeeksCache;
+    }
+    List<SchoolWeek> result = new ArrayList<>();
+    LocalDate monday = null;
+    List<LocalDate> days = new ArrayList<>();
+    for (LocalDate d = firstDay; !d.isAfter(lastDay); d = d.plusDays(1)) {
+      if (!isSchoolDay(d)) {
+        continue;
+      }
+      LocalDate m = d.minusDays(d.getDayOfWeek().getValue() - 1);
+      if (monday == null || !monday.equals(m)) {
+        if (monday != null && !days.isEmpty()) {
+          result.add(
+              new SchoolWeek(
+                  result.size() + 1, monday, days.get(0), days.get(days.size() - 1), days.size()));
+        }
+        monday = m;
+        days = new ArrayList<>();
+      }
+      days.add(d);
+    }
+    if (monday != null && !days.isEmpty()) {
+      result.add(
+          new SchoolWeek(
+              result.size() + 1, monday, days.get(0), days.get(days.size() - 1), days.size()));
+    }
+    schoolWeeksCache = result;
+    return result;
+  }
+
+  /**
+   * @return the number of school weeks in the year
+   */
+  public int schoolWeekCount() {
+    return schoolWeeks().size();
+  }
+
+  /**
+   * @param n a 1-based school-week number
+   * @return the school week, or {@code null} if out of range
+   */
+  public SchoolWeek schoolWeek(int n) {
+    if (n < 1) {
+      return null;
+    }
+    List<SchoolWeek> weeks = schoolWeeks();
+    return n <= weeks.size() ? weeks.get(n - 1) : null;
+  }
+
+  /**
+   * @param date a date
+   * @return the school week containing it, or {@code null} when it is outside the year or
+   *     falls in a week with no school days
+   */
+  public SchoolWeek weekForDate(LocalDate date) {
+    if (date.isBefore(firstDay) || date.isAfter(lastDay)) {
+      return null;
+    }
+    LocalDate m = date.minusDays(date.getDayOfWeek().getValue() - 1);
+    for (SchoolWeek w : schoolWeeks()) {
+      if (w.monday().equals(m)) {
+        return w;
+      }
+    }
+    return null;
+  }
+
+  // ─── Annotations ──────────────────────────────────────────────────────────────
+
+  /**
+   * @return the raw, unvalidated annotations structure (payload verbatim)
+   */
+  public Annotations annotations() {
+    return annotations;
+  }
+
+  /**
+   * @return range annotations with {@code start}/{@code end} resolved to {@code LocalDate}s,
+   *     each as a map of {@code id}, {@code start}, {@code end}, plus pass-through payload
+   */
+  public List<Map<String, Object>> rangeAnnotations() {
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (Map.Entry<String, RangeAnnotation> e : annotations.ranges().entrySet()) {
+      RangeAnnotation r = e.getValue();
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("id", e.getKey());
+      m.put("start", LocalDate.parse(r.start()));
+      m.put("end", LocalDate.parse(r.end()));
+      m.putAll(r.rest());
+      result.add(m);
+    }
+    return result;
+  }
+
+  /**
+   * @return week annotations resolved to their school week, ascending by week number;
+   *     {@code schoolWeek} is {@code null} when the key exceeds the school-week count
+   */
+  public List<Map<String, Object>> weekAnnotations() {
+    List<Integer> nums = new ArrayList<>();
+    for (String k : annotations.weeks().keySet()) {
+      nums.add(Integer.valueOf(k));
+    }
+    Collections.sort(nums);
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (int week : nums) {
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("week", week);
+      m.put("schoolWeek", schoolWeek(week));
+      m.putAll(annotations.weeks().get(String.valueOf(week)).payload());
+      result.add(m);
+    }
+    return result;
+  }
+
+  /**
+   * @return date annotations with the key resolved to a {@code LocalDate}
+   */
+  public List<Map<String, Object>> dateAnnotations() {
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (Map.Entry<String, Annotation> e : annotations.dates().entrySet()) {
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("date", LocalDate.parse(e.getKey()));
+      m.putAll(e.getValue().payload());
+      result.add(m);
+    }
+    return result;
+  }
+
+  /**
+   * Every annotation active on {@code date}, tagged with its {@code source}: any {@code ranges}
+   * entry whose span contains the date, the {@code weeks} entry for the date's school week, and
+   * the {@code dates} entry with that exact date. Order: ranges, week, date.
+   *
+   * @param date a date
+   * @return the active annotations
+   */
+  public List<Map<String, Object>> annotationsOn(LocalDate date) {
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (Map<String, Object> r : rangeAnnotations()) {
+      LocalDate start = (LocalDate) r.get("start");
+      LocalDate end = (LocalDate) r.get("end");
+      if (!start.isAfter(date) && !date.isAfter(end)) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("source", "range");
+        m.putAll(r);
+        result.add(m);
+      }
+    }
+    SchoolWeek sw = weekForDate(date);
+    if (sw != null) {
+      Annotation wa = annotations.weeks().get(String.valueOf(sw.number()));
+      if (wa != null) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("source", "week");
+        m.put("week", sw.number());
+        m.put("schoolWeek", sw);
+        m.putAll(wa.payload());
+        result.add(m);
+      }
+    }
+    Annotation da = annotations.dates().get(date.toString());
+    if (da != null) {
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("source", "date");
+      m.put("date", date);
+      m.putAll(da.payload());
+      result.add(m);
+    }
+    return result;
+  }
+
+  /**
+   * Every annotation touching school week {@code n}, tagged with its {@code source}: any
+   * {@code ranges} entry overlapping the week's school-day span, the {@code weeks[n]} entry, and
+   * any {@code dates} entry inside the week. Order: ranges, week, date.
+   *
+   * @param n a 1-based school-week number
+   * @return the touching annotations
+   */
+  public List<Map<String, Object>> annotationsForWeek(int n) {
+    List<Map<String, Object>> result = new ArrayList<>();
+    SchoolWeek sw = schoolWeek(n);
+    if (sw != null) {
+      for (Map<String, Object> r : rangeAnnotations()) {
+        LocalDate start = (LocalDate) r.get("start");
+        LocalDate end = (LocalDate) r.get("end");
+        if (!start.isAfter(sw.lastSchoolDay()) && !sw.firstSchoolDay().isAfter(end)) {
+          Map<String, Object> m = new LinkedHashMap<>();
+          m.put("source", "range");
+          m.putAll(r);
+          result.add(m);
+        }
+      }
+    }
+    Annotation wa = annotations.weeks().get(String.valueOf(n));
+    if (wa != null) {
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("source", "week");
+      m.put("week", n);
+      m.put("schoolWeek", sw);
+      m.putAll(wa.payload());
+      result.add(m);
+    }
+    for (Map<String, Object> da : dateAnnotations()) {
+      LocalDate d = (LocalDate) da.get("date");
+      SchoolWeek w = weekForDate(d);
+      if (w != null && w.number() == n) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("source", "date");
+        m.putAll(da);
+        result.add(m);
+      }
+    }
+    return result;
   }
 }

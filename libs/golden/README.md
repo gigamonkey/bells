@@ -77,6 +77,11 @@ date only), `currentDayBounds`, `nextSchoolDayStart`, `previousSchoolDayEnd`,
 `previousSchoolDay`, `scheduleNameFor`, `scheduleFor`, `periodsForDate`,
 `nonClassDaysLeft`, `nonClassLabel`.
 
+School weeks & annotations: `schoolWeeks` (→ SchoolWeek[]), `schoolWeek` (takes
+`n` → SchoolWeek or null), `weekForDate` (takes `date` → SchoolWeek or null),
+`rangeAnnotations`, `weekAnnotations`, `dateAnnotations` (→ resolved annotation
+lists), `annotationsOn` (takes `date`), and `annotationsForWeek` (takes `n`).
+
 Abstract-time API: `resolveDay` (→ date), `addSchoolDays` (→ date),
 `resolveTime` (→ instant or null; a `ZonedDateTime`/aware `datetime` is
 serialized to its UTC instant), `periodOnDate` (→ period or null),
@@ -120,6 +125,16 @@ suite, not the goldens.
   → `{ "name", "start", "end", "tags" }`.
 
 - **NonClassDay** → `{ "date", "label" }`.
+
+- **SchoolWeek** → `{ "number", "monday", "firstSchoolDay", "lastSchoolDay",
+  "schoolDayCount" }` with the three dates as `YYYY-MM-DD`. A `null` school week
+  serializes to JSON `null`.
+
+- **Resolved/active annotation** → a plain object: structural keys (`id`,
+  `week`, `date`, `start`, `end`, `source`) plus the pass-through payload
+  (`label`, `kind`, anything else). Any `PlainDate` value becomes `YYYY-MM-DD`;
+  a nested `schoolWeek` is serialized as a SchoolWeek (or `null`). Key order is
+  not significant (comparisons are order-independent).
 
 - **No result** (`null`/`None`/Java `null`) → JSON `null`.
 

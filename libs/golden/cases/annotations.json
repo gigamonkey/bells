@@ -1,0 +1,22 @@
+{
+  "description": "Generic annotations (ranges/weeks/dates) and canonical school-week numbering",
+  "calendars": ["synthetic.json"],
+  "options": { "role": "student" },
+  "queries": [
+    { "id": "weeks", "method": "schoolWeeks", "args": {} },
+    { "id": "week1", "method": "schoolWeek", "args": { "n": 1 } },
+    { "id": "week-overflow", "method": "schoolWeek", "args": { "n": 999 } },
+    { "id": "wfd-thu", "method": "weekForDate", "args": { "date": "2025-08-14" } },
+    { "id": "wfd-sat", "method": "weekForDate", "args": { "date": "2025-08-16" } },
+    { "id": "wfd-out", "method": "weekForDate", "args": { "date": "2025-07-01" } },
+    { "id": "ranges", "method": "rangeAnnotations", "args": {} },
+    { "id": "weekann", "method": "weekAnnotations", "args": {} },
+    { "id": "dateann", "method": "dateAnnotations", "args": {} },
+    { "id": "on-ap", "method": "annotationsOn", "args": { "date": "2026-05-06" } },
+    { "id": "on-week5", "method": "annotationsOn", "args": { "date": "2025-09-08" } },
+    { "id": "on-piday", "method": "annotationsOn", "args": { "date": "2026-03-14" } },
+    { "id": "for-week39", "method": "annotationsForWeek", "args": { "n": 39 } },
+    { "id": "for-week5", "method": "annotationsForWeek", "args": { "n": 5 } },
+    { "id": "for-week31", "method": "annotationsForWeek", "args": { "n": 31 } }
+  ]
+}

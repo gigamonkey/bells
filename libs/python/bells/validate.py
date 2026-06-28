@@ -7,7 +7,8 @@ consistent.
 
 from __future__ import annotations
 
-from datetime import date
+import re
+from datetime import date, timedelta
 from typing import Optional
 from zoneinfo import ZoneInfo
 
@@ -158,6 +159,121 @@ def _validate_no_overlap(periods: list[dict], schedule_label: str) -> dict:
     return {"errors": errors, "warnings": warnings}
 
 
+def _count_school_weeks(first_day: date, last_day: date, holiday_set: set) -> int:
+    """Count school weeks in [first_day, last_day] using the same Monday-anchored
+    ISO grouping the runtime uses (student view: weekdays that aren't holidays)."""
+    count = 0
+    monday = None
+    d = first_day
+    while d <= last_day:
+        dow = d.isoweekday()
+        if dow == 6 or dow == 7 or d.isoformat() in holiday_set:
+            d = d + timedelta(days=1)
+            continue
+        m = d - timedelta(days=dow - 1)
+        if monday is None or monday != m:
+            count += 1
+            monday = m
+        d = d + timedelta(days=1)
+    return count
+
+
+def _validate_annotations(annotations, label, first_day, last_day, holiday_set) -> dict:
+    """Validate the optional ``annotations`` field. Checks the anchor of each
+    entry (key validity / in-range), never the free-form payload content."""
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    if not isinstance(annotations, dict):
+        errors.append(f"{label}: annotations must be an object")
+        return {"errors": errors, "warnings": warnings}
+
+    for bucket in annotations.keys():
+        if bucket not in ("ranges", "weeks", "dates"):
+            warnings.append(f'{label}: annotations has unknown bucket "{bucket}"')
+
+    def in_year(d: date) -> bool:
+        if not first_day or not last_day:
+            return True
+        return first_day <= d <= last_day
+
+    def check_payload(value, where: str) -> bool:
+        if not isinstance(value, dict):
+            errors.append(f"{where} must be an object")
+            return False
+        if "label" in value and not isinstance(value["label"], str):
+            warnings.append(f"{where} label should be a string")
+        if "kind" in value and not isinstance(value["kind"], str):
+            warnings.append(f"{where} kind should be a string")
+        return True
+
+    ranges = annotations.get("ranges")
+    if ranges is not None:
+        if not isinstance(ranges, dict):
+            errors.append(f"{label}: annotations.ranges must be an object")
+        else:
+            for id_, value in ranges.items():
+                where = f"{label}: annotations.ranges.{id_}"
+                if not check_payload(value, where):
+                    continue
+                start = _try_parse_date(value.get("start"))
+                end = _try_parse_date(value.get("end"))
+                if not start:
+                    errors.append(f'{where} has invalid start "{value.get("start")}"')
+                elif not in_year(start):
+                    errors.append(
+                        f'{where} start "{value.get("start")}" is outside the calendar year range'
+                    )
+                if not end:
+                    errors.append(f'{where} has invalid end "{value.get("end")}"')
+                elif not in_year(end):
+                    errors.append(
+                        f'{where} end "{value.get("end")}" is outside the calendar year range'
+                    )
+                if start and end and start > end:
+                    errors.append(
+                        f'{where} start "{value.get("start")}" is after end "{value.get("end")}"'
+                    )
+
+    weeks = annotations.get("weeks")
+    if weeks is not None:
+        if not isinstance(weeks, dict):
+            errors.append(f"{label}: annotations.weeks must be an object")
+        else:
+            week_count = (
+                _count_school_weeks(first_day, last_day, holiday_set)
+                if (first_day and last_day)
+                else None
+            )
+            for key, value in weeks.items():
+                where = f"{label}: annotations.weeks.{key}"
+                if not re.fullmatch(r"\d+", key) or int(key) < 1:
+                    errors.append(f"{where} key is not an integer >= 1")
+                    continue
+                if not check_payload(value, where):
+                    continue
+                if week_count is not None and int(key) > week_count:
+                    warnings.append(f"{where} key exceeds the year's {week_count} school weeks")
+
+    dates = annotations.get("dates")
+    if dates is not None:
+        if not isinstance(dates, dict):
+            errors.append(f"{label}: annotations.dates must be an object")
+        else:
+            for key, value in dates.items():
+                where = f"{label}: annotations.dates.{key}"
+                d = _try_parse_date(key)
+                if not d:
+                    errors.append(f"{where} key is not a valid date")
+                    continue
+                if not in_year(d):
+                    errors.append(f"{where} key is outside the calendar year range")
+                    continue
+                check_payload(value, where)
+
+    return {"errors": errors, "warnings": warnings}
+
+
 def _validate_year(year: dict, index: int) -> dict:
     """Validate a single year data object."""
     errors: list[str] = []
@@ -277,6 +393,14 @@ def _validate_year(year: dict, index: int) -> dict:
             )
         if not isinstance(value, str) or len(value) == 0:
             errors.append(f"{label}: nonClassDays.{key} must be a non-empty string label")
+
+    # 4b. Annotations (optional, additive).
+    if "annotations" in year:
+        ann = _validate_annotations(
+            year.get("annotations"), label, first_day, last_day, holiday_set
+        )
+        errors.extend(ann["errors"])
+        warnings.extend(ann["warnings"])
 
     # 5. Validate period times in all schedules.
     all_schedules = []
