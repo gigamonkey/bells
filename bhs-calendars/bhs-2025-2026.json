@@ -901,8 +901,8 @@
         "kind": "testing"
       },
       "ibExams": {
-        "start": "2026-04-25",
-        "end": "2026-05-21",
+        "start": "2026-04-24",
+        "end": "2026-05-20",
         "label": "IB Exams",
         "kind": "testing"
       }

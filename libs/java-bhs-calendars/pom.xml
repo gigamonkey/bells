@@ -6,7 +6,7 @@
 
   <groupId>com.gigamonkeys</groupId>
   <artifactId>bhs-calendars</artifactId>
-  <version>2.11.0</version>
+  <version>2.11.1</version>
   <packaging>jar</packaging>
 
   <name>bhs-calendars</name>

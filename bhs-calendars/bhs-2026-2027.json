@@ -347,8 +347,8 @@
         "kind": "testing"
       },
       "ibExams": {
-        "start": "2027-04-26",
-        "end": "2027-05-21",
+        "start": "2027-04-23",
+        "end": "2027-05-19",
         "label": "IB Exams",
         "kind": "testing"
       }
