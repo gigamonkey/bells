@@ -345,6 +345,12 @@
         "end": "2027-05-14",
         "label": "AP Exams",
         "kind": "testing"
+      },
+      "ibExams": {
+        "start": "2027-04-26",
+        "end": "2027-05-21",
+        "label": "IB Exams",
+        "kind": "testing"
       }
     },
     "weeks": {
