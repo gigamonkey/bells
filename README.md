@@ -17,11 +17,14 @@ Click the QR code icon to get a big QR code to easily share the app with your fr
 The repo contains:
 
 - **The web app** (repo root) — `bells.js`, `calendar.js`, `datetime.js`, `dom.js`, `index.html`, `style.css`, bundled to `out.js` by esbuild.
-- **`libs/`** — framework-agnostic ports of the schedule logic in three languages:
+- **`libs/`** — framework-agnostic ports of the schedule logic, kept in version lockstep:
   - **`libs/ts/`** — the `@peterseibel/bells` npm package (TypeScript); the reference implementation used by the web app and server.
-  - **`libs/python/`** — a Python port (see `libs/python/DIVERGENCES.md` for where it differs from the TS reference).
-  - **`libs/java/`** — a Java port built on `java.time`.
-- **`bhs-calendars/`** — the `@peterseibel/bhs-calendars` npm package: per-year BHS calendar JSON.
+  - **`libs/python/`** — the `bell-schedule` PyPI package (Python port; see `libs/python/DIVERGENCES.md` for where it differs from the TS reference).
+  - **`libs/java/`** — a Java port built on `java.time` (not yet published to Maven Central).
+- **Calendar data** — per-year BHS-area calendar JSON, published as data packages versioned independently of the library:
+  - **`bhs-calendars/`** — the canonical source, and the `@peterseibel/bhs-calendars` npm package.
+  - **`libs/python-calendars/`** — the `bhs-calendars` PyPI package (bundles a build-time copy of the canonical JSON; see "Working on the calendar data" below).
+  - **`libs/java-bhs-calendars/`** — the `com.gigamonkeys:bhs-calendars` Maven artifact (not yet published).
 - **`server/`** — an Express REST API (`@peterseibel/bells` over HTTP); has its own `package.json`.
 
 ### Running the web app locally
@@ -61,27 +64,16 @@ The library uses `Temporal` as a global; tests install a polyfill. Consumers mus
 
 ### Publishing
 
-Publishing is automated via GitHub Actions with npm Trusted Publisher (OIDC) — no token needed. The workflow (`.github/workflows/publish.yml`) fires on `v*` tags and runs `npm publish --provenance --access public` from `libs/ts/`.
-
-The `release-lib` make target does the version bump, tag, and push:
+The three library ports share one version. `make release-lib` bumps all three (TypeScript via `npm version`, then Python and Java via `scripts/set-version.py`), commits the version files, tags `vX.Y.Z`, and pushes:
 
 ```sh
-make release-lib      # patch bump; commits libs/ts/package.json, tags vX.Y.Z, pushes
+make release-lib                 # patch bump (default)
+make release-lib VERSION=minor   # or: major, or an explicit version like 1.4.2
 ```
 
-For a minor or major bump, run the steps manually:
+The `v*` tag fires `.github/workflows/publish.yml`, which publishes **both** registries via Trusted Publisher (OIDC — no tokens): the `@peterseibel/bells` npm package and the `bell-schedule` PyPI package, each gated on its own test run. (Java/Maven Central is not yet wired up.)
 
-```sh
-cd libs/ts
-npm version minor --no-git-tag-version   # or: major
-cd ..
-git add libs/ts/package.json libs/ts/package-lock.json
-git commit -m "v$(node -p "require('./libs/ts/package.json').version")"
-git tag "v$(node -p "require('./libs/ts/package.json').version")"
-git push --follow-tags
-```
-
-Once the Action completes, bump the dep in the root and in `server/`:
+Once the Action completes, bump the npm dep in the root and in `server/`:
 
 ```sh
 npm install @peterseibel/bells@latest
@@ -90,35 +82,34 @@ cd server && npm install @peterseibel/bells@latest
 
 ---
 
-## Working on `@peterseibel/bhs-calendars` (the `bhs-calendars/` package)
+## Working on the calendar data (`bhs-calendars`)
 
-Each academic year is its own JSON file (e.g. `bhs-calendars/bhs-2025-2026.json`). The schema is documented in [libs/ts/README.md](libs/ts/README.md#calendar-data-format). Validate before publishing:
+Each academic year is its own JSON file (e.g. `bhs-calendars/bhs-2025-2026.json`); the schema is documented in [libs/ts/README.md](libs/ts/README.md#calendar-data-format).
+
+**`bhs-calendars/` at the repo root is the single source of truth** — both the npm package and the canonical data. The Python (`libs/python-calendars/`) and Java (`libs/java-bhs-calendars/`) data packages bundle a verbatim, build-time copy of this JSON; those copies are **gitignored, not committed**, so they can't drift from the source. Regenerate them with:
 
 ```sh
-cd libs/ts && npx bells-validate ../../bhs-calendars/bhs-2025-2026.json
+make sync-calendars        # both ports (or: sync-py-calendars / sync-java-calendars)
+```
+
+Run that once after checkout, and again after editing the source, before building or testing those packages. Validate edits with the same checker CI gates on:
+
+```sh
+make validate-calendars    # builds the TS validator, checks every year's JSON
 ```
 
 ### Publishing
 
-Publishing is automated via GitHub Actions with npm Trusted Publisher (OIDC), the same as the `libs/ts/` package. The workflow (`.github/workflows/publish-calendars.yml`) fires on `calendars-v*` tags, validates every year's JSON with `bells-validate`, and then runs `npm publish --provenance --access public` from `bhs-calendars/`.
+The calendar data versions independently of the library, on its own `calendars-v*` tag line. `make release-bhs-calendars` validates the canonical JSON, bumps every port in lockstep (npm via `npm version`, then the Python and Java data packages), commits, tags `calendars-vX.Y.Z`, and pushes:
 
 ```sh
-make release-calendars    # patch bump; commits, tags calendars-vX.Y.Z, pushes
+make release-bhs-calendars                 # patch bump (default)
+make release-bhs-calendars VERSION=minor   # or: major, or an explicit version
 ```
 
-For a minor or major bump, run the steps manually:
+The `calendars-v*` tag fires `.github/workflows/publish-calendars.yml`. A shared `validate` job (the canonical JSON must pass `bells-validate`) gates **both** publishes, so invalid data blocks every registry: the `@peterseibel/bhs-calendars` npm package and the `bhs-calendars` PyPI package (whose data is synced from the source at build time). Manual `workflow_dispatch` publishes PyPI only.
 
-```sh
-cd bhs-calendars
-npm version minor --no-git-tag-version    # or: major
-cd ..
-git add bhs-calendars/package.json
-git commit -m "calendars-v$(node -p "require('./bhs-calendars/package.json').version")"
-git tag "calendars-v$(node -p "require('./bhs-calendars/package.json').version")"
-git push --follow-tags
-```
-
-Once the Action completes, bump the dep in the root and in `server/`:
+Once the Action completes, bump the npm dep in the root and in `server/`:
 
 ```sh
 npm install @peterseibel/bhs-calendars@latest
