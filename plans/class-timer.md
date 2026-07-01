@@ -1,9 +1,11 @@
 # Class Timer — a period-anchored lesson timer PWA
 
-> **Alternate design:** `plans/class-timer-in-bells.md` builds the same
-> functionality into the existing bells app instead of a sibling PWA. The core
-> model (this document's main contribution) is identical in both; they differ
-> only in packaging and UI integration.
+> **Superseded by decision:** the chosen design is
+> `plans/class-timer-in-bells.md` — the same functionality as a *mode within
+> the bells app* with its own dedicated display, rather than a sibling PWA.
+> This document remains the authoritative treatment of the core routine/chunk
+> model (referenced from there) and the record of the sibling-app packaging
+> alternative.
 
 ## Motivation
 

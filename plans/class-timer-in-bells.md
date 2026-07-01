@@ -1,11 +1,13 @@
-# Class Timer as a feature of the bells app (alternate to the sibling PWA)
+# Class Timer as a mode of the bells app (chosen design)
 
 ## Relationship to `class-timer.md`
 
 This is the alternate design to `plans/class-timer.md`, which proposes a
 **sibling PWA** at its own URL with its own manifest and service worker. Here
 the same functionality is instead **built into the existing bell-schedule
-app** — a new feature alongside alarms, not a new app.
+app** as a **mode with its own dedicated display**, switched by a header
+icon. **This is the chosen direction** — the sibling-PWA plan is kept for its
+core-model treatment and as a record of the alternative.
 
 The **core model is identical** and is not repeated here — see
 `class-timer.md` for the full treatment of:
@@ -60,8 +62,9 @@ Costs, honestly stated:
   the code (small — the model is tiny and the editor is comparable to the
   alarm editor).
 
-- The main display gets a second claimant (see **Display integration**, the
-  one genuinely new design problem in this plan).
+- The app grows a second full-screen display and a mode flag (see **Timer
+  mode and its dedicated display**) — though the mode-switch idiom already
+  exists in the `#main`/`#summer`/`#noCalendar` swapping.
 
 - One shared service-worker cache means a timer bug fix redeploys the whole
   app (in practice this is how the app already ships).
@@ -72,59 +75,84 @@ Costs, honestly stated:
   load/save routines, `resolveChunks(routine, interval)`,
   `activeChunk(chunks, instant)`, elapsed/remaining. No DOM, unit-testable.
 
-- **`timer.js`** — the feature module, patterned line-for-line on
-  `alarms.js`'s integration contract:
+- **`timer.js`** — the feature module, patterned on `alarms.js`'s
+  integration contract:
 
-  - `setupTimer(getBellSchedule)` — wire the header icon, the routines popup,
-    and the editor; called once at startup next to `setupAlarms`.
+  - `setupTimer(getBellSchedule)` — wire the mode-switch icon, the routines
+    popup, and the editor; called once at startup next to `setupAlarms`.
+
+  - `isTimerMode()` / `toggleTimerMode()` — the mode flag, persisted in
+    `localStorage` (important: the app force-reloads every 24 hours, so a
+    classroom device left in timer mode must come back in timer mode).
 
   - `tickTimer(instant, interval)` — called from `update()` each second
-    (right beside `tickAlarms(instant)`); computes the active chunk for the
-    current interval and updates the timer display region. Returns the active
-    chunk (or null) so `bells.js` can let it influence the background color.
+    (right beside `tickAlarms(instant)`). Always computes the active chunk
+    (chimes fire regardless of mode); renders the dedicated display when
+    timer mode is on.
 
   - `updateTimerVisibility()` — analogous to `updateTeacherModeVisibility`,
     if we decide to gate the feature (see Open decisions).
 
 `bells.js` changes are deliberately minimal: one import, one `setupTimer`
-call, one `tickTimer` call in `update()`, and a small hook in the
-background-color logic.
+call, and a mode dispatch in `update()` — timer mode renders the timer
+display, bells mode runs the existing path untouched.
 
-## Display integration
+## Timer mode and its dedicated display
 
-This is the real design work. Today `#main` shows: period name/times,
-`#left` (period countdown), `#periodbar`, `#today` + `#todaybar`, and the
-end-of-year `#countdown` block. The chunk display must join this without
-crowding a screen that's often glanced at from across a room.
+The timer is a **mode**: a header icon toggles between the normal bells
+display and a dedicated timer display that owns the whole screen. This gives
+the lesson view room to breathe (it's glanced at from across a classroom)
+instead of squeezing chunk info between the existing countdown elements, and
+it leaves the bells display byte-for-byte untouched for everyone else.
 
-**Approach: an auto-appearing chunk section, not a mode.**
+**Mode switch.**
 
-- Add a `#chunk` display block between `#periodbar` and `#today`:
-  chunk **label** (large), **elapsed / to go** line (tap to toggle emphasis,
-  same as `#left`'s `togo` toggle), and a `#chunkbar` progress bar.
+- A new icon in `#icons` (a segmented-circle/timer glyph) toggles the mode;
+  it gets a visually "active" state while timer mode is on. All the other
+  header icons (config, schedule, alarms, QR) remain available in both modes.
 
-- The section renders **only when the current interval is a `period` whose
-  name matches a routine's `scopeNames`**; otherwise it's empty and takes no
-  space, and the app looks exactly as it does today. No new global mode, no
-  tabs, nothing to switch — walking into a period with a routine makes the
-  segments appear, which matches the "never needs starting" philosophy of the
-  core design.
+- Implementation follows the app's existing display-swap idiom: `#main`,
+  `#summer`, and `#noCalendar` are already mutually exclusive `div`s toggled
+  via `style.display`. Timer mode adds a `#timer-main` sibling; `update()`
+  dispatches on the mode flag to decide which one renders. Summer and
+  no-calendar states behave the same in both modes.
 
-- A small **next-chunk** line ("Exit ticket in 4:12") under the chunk bar,
-  mirroring how the year-countdown block stacks small lines.
+- The mode persists in `localStorage` and survives the 24-hour auto-reload,
+  so a device parked in timer mode stays there.
 
-**Background color.** Both features want the container background: bells uses
-blue/red/purple for period phase, and the sibling plan gave chunks a color
-tint. Resolution: when a chunk is active, the **chunk's color wins** as the
-base tint, and the existing last-minutes red warning applies to the *chunk*
-boundary rather than the period boundary (the chunk transition is what the
-teacher is pacing against; the period-end red still takes over inside the
-final fixed segment anyway, since its end coincides with the period's). When
-no chunk is active, current behavior is untouched.
+**The dedicated display** (in a scoped period with a routine):
+
+- Active chunk **label**, large — the primary element.
+
+- **Elapsed / to go** in the chunk (tap to toggle emphasis, same as `#left`'s
+  `togo` toggle) and a full-width `#chunkbar` progress bar.
+
+- The **whole routine as a list** — each chunk with its resolved times for
+  this occurrence, completed ones dimmed, the active one highlighted, the
+  elastic middle shown at its actual stretched length. The dedicated screen
+  has room for this, and it's the at-a-glance lesson map the compact design
+  couldn't afford.
+
+- A small **period line** at the bottom: period name, start–end times, and
+  the period countdown — so switching to timer mode never loses the one thing
+  the bells display was for.
+
+**Idle states in timer mode** (passing period, unscoped period, before/after
+school): show the current interval name and a countdown to the next scoped
+period's first chunk, plus a preview of the routine that will run then. The
+display is never blank; it answers "when does my next planned lesson start."
+
+**Background color.** In timer mode the **chunk's color** is the base tint,
+with the last-minutes red warning keyed to the *chunk* boundary rather than
+the period's (the chunk transition is what the teacher is pacing against;
+period-end red still effectively applies in the final fixed segment, whose
+end coincides with the period's). Bells mode keeps today's colors untouched.
 
 **Chunk transitions.** Reuse `alarms.js`'s `playChime`/`showBanner` directly
 (export them or lift them into a shared module) for an optional soft chime at
-each chunk boundary — configurable per routine. This is where integration
+each chunk boundary — configurable per routine, and fired from `tickTimer`
+regardless of which mode is showing (a teacher who flips back to the bells
+view mid-lesson still wants the pacing chime). This is where integration
 visibly beats the sibling app: the machinery, its audio-unlock handling, and
 its notification plumbing are already resident.
 
@@ -187,16 +215,17 @@ covers `out.js`/`index.html`/`style.css` changes.
 
 ## Phasing
 
-1. **Model + hidden wiring.** `timer-routines.js` with tests; `tickTimer`
-   wired into `update()` rendering the chunk section for a hardcoded routine
-   (no editor yet). Ship dark — with no routines defined, nothing changes for
-   any user.
+1. **Model + mode shell.** `timer-routines.js` with tests; the mode icon,
+   persisted mode flag, and `#timer-main` display rendering active chunk,
+   elapsed/to-go, chunk bar, and the routine list for a hardcoded routine (no
+   editor yet). With no routines defined and the mode off, nothing changes
+   for any user.
 
 2. **Editor + persistence.** Routines popup, editor, `localStorage`,
-   short-schedule warnings, header icon.
+   short-schedule warnings.
 
-3. **Polish.** Chunk-transition chime (shared with alarms), chunk color /
-   background precedence, next-chunk line, Test/preview button.
+3. **Polish.** Chunk-transition chime (shared with alarms), chunk-keyed
+   background color, idle-state preview, Test/preview button.
 
 ## Open decisions
 
@@ -210,8 +239,7 @@ covers `out.js`/`index.html`/`style.css` changes.
   chunks can be shorter than that. Leaning: `min(10 min, 20% of chunk
   length)` with a 1-minute floor, tuned during phase 3.
 
-- **Which plan to build.** If both apps are truly for the same user at the
-  same moment, this plan is less work and less surface (recommendation). The
-  sibling plan wins only if the timer should have its own identity —
-  shareable URL, separate install, non-BHS audiences someday. Because
-  `timer-routines.js` is common to both, the decision is cheap to revisit.
+- ~~**Which plan to build.**~~ Decided: this one — a mode within the bells
+  app with its own dedicated display and a mode-switch icon. The sibling-PWA
+  plan remains cheap to revive later because `timer-routines.js` is common to
+  both.
