@@ -19,6 +19,7 @@ import {
 import { timestring, hhmmss, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 import { setupAlarms, tickAlarms, updateTeacherModeVisibility } from './alarms.js';
+import { setupTimer, tickTimer, renderTimer, isTimerMode } from './timer.js';
 
 // This variable and the next function can be used in testing but aren't
 // otherwise used.
@@ -88,13 +89,13 @@ let togo = true;
 
 /**
  * To handle local PWA install state
-*/
+ */
 let installPrompt = null;
 
 /**
  * Keep track of online state
-*/
-let onlineState = {lan: true, network: true};
+ */
+let onlineState = { lan: true, network: true };
 
 const setupConfigPanel = () => {
   $('#apple').onclick = (e) => {
@@ -349,12 +350,18 @@ const update = () => {
   const bellSchedule = getBellSchedule();
 
   tickAlarms(instant);
+  tickTimer(instant);
 
   // summerBounds returns null when we are inside a school year; non-null during summer.
   const summerInfo = bellSchedule.summerBounds(instant);
   if (summerInfo !== null) {
+    $('#timer-main').style.display = 'none';
     summerCountdown(instant, bellSchedule, summerInfo);
+  } else if (isTimerMode()) {
+    renderTimer(t, instant, bellSchedule);
+    updateYearProgressFromSchedule(instant, bellSchedule);
   } else {
+    $('#timer-main').style.display = 'none';
     normalCountdown(t, instant, bellSchedule);
   }
 
@@ -396,7 +403,11 @@ const normalCountdown = (t, instant, bellSchedule) => {
 };
 
 const countdownText = (duration) => {
-  const { hours, minutes, seconds } = duration.round({ largestUnit: 'hours', smallestUnit: 'seconds', roundingMode: 'trunc' });
+  const { hours, minutes, seconds } = duration.round({
+    largestUnit: 'hours',
+    smallestUnit: 'seconds',
+    roundingMode: 'trunc',
+  });
   if (hours < 24) {
     return hhmmss(duration);
   } else {
@@ -463,7 +474,8 @@ const updateTodayProgress = (t, instant, bellSchedule) => {
   const startMillis = toMillis(bounds.start);
   const endMillis = toMillis(bounds.end);
   const tMillis = t.getTime();
-  $('#today').innerHTML = hhmmss(togo ? instant.until(bounds.end) : bounds.start.until(instant)) + ' ' + (togo ? 'to go' : 'done');
+  $('#today').innerHTML =
+    hhmmss(togo ? instant.until(bounds.end) : bounds.start.until(instant)) + ' ' + (togo ? 'to go' : 'done');
   updateProgressBar('todaybar', startMillis, endMillis, tMillis);
 };
 
@@ -502,6 +514,14 @@ const updateYearProgress = (done, total) => {
   };
 };
 
+// Keep the bottom-bar year percentage live in timer mode, where the normal
+// countdown path (which usually feeds it) doesn't run.
+const updateYearProgressFromSchedule = (instant, bellSchedule) => {
+  const totalMillis = durationToMillis(bellSchedule.totalSchoolTime(instant));
+  const millisLeft = durationToMillis(bellSchedule.schoolTimeLeft(instant));
+  updateYearProgress(totalMillis - millisLeft, totalMillis);
+};
+
 const updateCountdown = (t, instant, bellSchedule) => {
   const interval = bellSchedule.currentInterval(instant);
   const inSchool = interval ? interval.duringSchool : false;
@@ -536,8 +556,11 @@ const updateCountdown = (t, instant, bellSchedule) => {
     // that's the last day. Simpler: check if bounds.end matches endOfYear.
     // We can't get endOfYear directly from BellSchedule, so approximate:
     // last day = when schoolDaysLeft would be 0 after end of today.
-    return left <= 1 && Temporal.Instant.compare(instant, bounds.end) < 0 &&
-      bellSchedule.schoolDaysLeft(bounds.end.add({ seconds: 1 })) === 0;
+    return (
+      left <= 1 &&
+      Temporal.Instant.compare(instant, bounds.end) < 0 &&
+      bellSchedule.schoolDaysLeft(bounds.end.add({ seconds: 1 })) === 0
+    );
   })();
 
   $('#countdown').replaceChildren();
@@ -548,7 +571,7 @@ const updateCountdown = (t, instant, bellSchedule) => {
       $('#countdown').append($('<p>', `${days(left, 'school')} left in the year${countingToday}`));
       if (classDays > 0 && nonClassGroups.length > 0) {
         $('#countdown').append(
-          $('<p>', `${days(classDays, 'class')} until ${nonClassGroups[0].label}s${countingToday}`)
+          $('<p>', `${days(classDays, 'class')} until ${nonClassGroups[0].label}s${countingToday}`),
         );
       }
       for (const g of nonClassGroups) {
@@ -644,9 +667,9 @@ const updateSwVersionDisplay = async () => {
 
 const forceReload = async () => {
   try {
-    const regs = await navigator.serviceWorker?.getRegistrations?.() ?? [];
+    const regs = (await navigator.serviceWorker?.getRegistrations?.()) ?? [];
     await Promise.all(regs.map((r) => r.unregister()));
-    const keys = await caches?.keys?.() ?? [];
+    const keys = (await caches?.keys?.()) ?? [];
     await Promise.all(keys.map((k) => caches.delete(k)));
   } catch (error) {
     console.warn('forceReload cleanup failed', error);
@@ -654,19 +677,17 @@ const forceReload = async () => {
   location.reload();
 };
 
-const isStandalone = () =>
-  window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
 const isIOSSafari = () => {
   const ua = navigator.userAgent;
-  return /iPad|iPhone|iPod/.test(ua) && !(/CriOS|FxiOS|Chrome/.test(ua));
+  return /iPad|iPhone|iPod/.test(ua) && !/CriOS|FxiOS|Chrome/.test(ua);
 };
 
 const handleLocalInstallSetup = () => {
-
-  const installArea = $(".local-install");
-  const installButton = $(".local-install > button");
-  const iosInstallArea = $(".ios-install");
+  const installArea = $('.local-install');
+  const installButton = $('.local-install > button');
+  const iosInstallArea = $('.ios-install');
 
   // Already running as an installed PWA — hide all install UI.
   if (isStandalone()) return;
@@ -674,10 +695,10 @@ const handleLocalInstallSetup = () => {
   // iOS Safari: show manual install instructions.
   if (isIOSSafari()) {
     if (iosInstallArea) {
-      iosInstallArea.removeAttribute("hidden");
-      const installLink = $(".ios-install-link");
+      iosInstallArea.removeAttribute('hidden');
+      const installLink = $('.ios-install-link');
       if (installLink) {
-        installLink.addEventListener("click", () => {
+        installLink.addEventListener('click', () => {
           $('#popup-ios-install').classList.add('active');
         });
       }
@@ -690,47 +711,45 @@ const handleLocalInstallSetup = () => {
 
   const disableInAppInstallPrompt = () => {
     installPrompt = null;
-    installArea.setAttribute("hidden", "");
-  }
+    installArea.setAttribute('hidden', '');
+  };
 
-  window.addEventListener("beforeinstallprompt", (event) => {
+  window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     installPrompt = event;
-    installArea.removeAttribute("hidden");
+    installArea.removeAttribute('hidden');
   });
 
-  window.addEventListener("appinstalled", () => {
+  window.addEventListener('appinstalled', () => {
     disableInAppInstallPrompt();
   });
 
-  installButton.addEventListener("click", async () => {
+  installButton.addEventListener('click', async () => {
     if (!installPrompt) return;
     const result = await installPrompt.prompt();
     disableInAppInstallPrompt();
     // console.log(`Install prompt was: ${result.outcome}`);
   });
-
 };
 
 const setupOnlineDisplay = () => {
-
   const updateOnlineNotification = () => {
-    if(onlineState.lan && onlineState.network) $(".no-wifi").setAttribute("hidden", "");
-    else $(".no-wifi").removeAttribute("hidden");
-  }
+    if (onlineState.lan && onlineState.network) $('.no-wifi').setAttribute('hidden', '');
+    else $('.no-wifi').removeAttribute('hidden');
+  };
 
   setInterval(async () => {
-    await fetch("./online-check.txt")
+    await fetch('./online-check.txt')
       .then(async (res) => {
-        let content = await res.text()
-        onlineState.network = content === "online" && res.ok;
+        let content = await res.text();
+        onlineState.network = content === 'online' && res.ok;
       })
-      .catch(e => onlineState.network = false);
+      .catch((e) => (onlineState.network = false));
     updateOnlineNotification();
-  }, 60_000)
+  }, 60_000);
 
   const handleNetworkChange = () => {
-    console.log("Online status update: ", navigator.onLine ? "online" : "offline");
+    console.log('Online status update: ', navigator.onLine ? 'online' : 'offline');
     onlineState.lan = navigator.onLine;
     updateOnlineNotification();
   };
@@ -738,8 +757,7 @@ const setupOnlineDisplay = () => {
   window.addEventListener('online', handleNetworkChange);
   window.addEventListener('offline', handleNetworkChange);
   handleNetworkChange();
-
-}
+};
 
 const versionEl = $('#version > p');
 versionEl.innerText = version;
@@ -749,10 +767,10 @@ versionEl.onclick = (e) => {
 
 setupConfigPanel();
 setupAlarms(getBellSchedule);
+setupTimer(getBellSchedule, () => update());
 
 // Close popups via close button or clicking the backdrop
 for (const overlay of $$('.popup-overlay')) {
-
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) overlay.classList.remove('active');
   });
@@ -776,8 +794,8 @@ const reloadAt = toInstant(now()).add({ hours: 24 });
 update();
 
 if (document.readyState === 'loading') {
-  window.addEventListener("DOMContentLoaded", () => {
-    handleLocalInstallSetup()
+  window.addEventListener('DOMContentLoaded', () => {
+    handleLocalInstallSetup();
     setupOnlineDisplay();
   });
 } else {

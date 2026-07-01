@@ -673,4 +673,144 @@ span.togo {
   margin-top: 10px;
 }
 
+/* Class timer */
+
+#timer-icon {
+  cursor: pointer;
+}
+
+#icons #timer-icon.active {
+  fill: white;
+  background: rgba(64, 64, 128, 1);
+  border-radius: 3px;
+}
+
+#timer-main {
+  text-align: center;
+  padding: 10px;
+  margin: 0;
+}
+
+#chunk-label {
+  font-size: 48px;
+  font-weight: 900;
+}
+
+#chunk-next {
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+#timer-chunks {
+  display: table;
+  margin: 12px auto 0;
+  font-size: min(20px, 3.5vw);
+}
+
+.timer-chunk-row {
+  display: table-row;
+}
+
+.timer-chunk-row span {
+  display: table-cell;
+  padding: 2px 12px;
+  text-align: left;
+}
+
+.timer-chunk-row.done {
+  opacity: 0.4;
+}
+
+.timer-chunk-row.active {
+  font-weight: 900;
+}
+
+#timer-period-line {
+  font-size: 18px;
+  padding-top: 16px;
+  opacity: 0.8;
+}
+
+#timer-actions {
+  margin-top: 16px;
+}
+
+.routine-preview {
+  font-size: 13px;
+  color: rgba(64, 64, 128, 1);
+  padding: 0 10px;
+}
+
+.routine-preview p {
+  margin: 2px 0;
+  white-space: pre;
+}
+
+#routine-editor {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(64, 64, 128, 0.3);
+  border-radius: 4px;
+  background: rgba(64, 64, 128, 0.04);
+}
+
+#routine-editor h3 {
+  margin: 0 0 10px;
+  color: rgba(64, 64, 128, 1);
+  font-size: 16px;
+}
+
+.routine-segments-title {
+  font-size: 14px;
+  color: rgba(64, 64, 128, 1);
+  margin: 10px 0 6px;
+}
+
+.chunk-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.chunk-row input[type="text"] {
+  flex: 1;
+  min-width: 70px;
+  padding: 4px 6px;
+  font-size: 14px;
+}
+
+.chunk-row select {
+  padding: 4px 2px;
+  font-size: 13px;
+}
+
+.chunk-row input[type="color"] {
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(64, 64, 128, 0.4);
+  border-radius: 3px;
+  background: none;
+}
+
+.routine-add-row {
+  margin: 4px 0 8px;
+}
+
+.routine-status {
+  font-size: 12px;
+  color: rgba(64, 64, 128, 0.9);
+}
+
+.routine-status p {
+  margin: 3px 0;
+}
+
+.routine-status .warn,
+.routine-status p.warn {
+  color: #a00000;
+}
+
 /* --- */

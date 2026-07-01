@@ -150,9 +150,11 @@ function updatePermissionStatus() {
   if (p === 'granted') {
     permissionStatusEl.textContent = 'On-screen notifications enabled for alarms fired while this window is hidden.';
   } else if (p === 'denied') {
-    permissionStatusEl.textContent = 'Notifications disabled — alarms will still chime, but no on-screen alert will appear when the window is hidden.';
+    permissionStatusEl.textContent =
+      'Notifications disabled — alarms will still chime, but no on-screen alert will appear when the window is hidden.';
   } else {
-    permissionStatusEl.textContent = 'Grant notification permission to see an on-screen alert when an alarm fires while the window is hidden. (Will ask when you save an alarm.)';
+    permissionStatusEl.textContent =
+      'Grant notification permission to see an on-screen alert when an alarm fires while the window is hidden. (Will ask when you save an alarm.)';
   }
   permissionStatusEl.style.display = 'block';
 }
@@ -222,9 +224,10 @@ function computeFirings(date, bellSchedule) {
     }
     for (const period of periods) {
       if (!periodMatchesScope(period, alarm)) continue;
-      const fireAt = alarm.anchor === 'before-end'
-        ? period.end.subtract({ seconds: alarm.offset })
-        : period.start.add({ seconds: alarm.offset });
+      const fireAt =
+        alarm.anchor === 'before-end'
+          ? period.end.subtract({ seconds: alarm.offset })
+          : period.start.add({ seconds: alarm.offset });
       out.push({ alarm, period, fireAt });
     }
   }
@@ -235,11 +238,7 @@ function computeFirings(date, bellSchedule) {
 function getFirings(bellSchedule, instant) {
   const date = instant.toZonedDateTimeISO(bellSchedule.timezone).toPlainDate();
   const dateStr = date.toString();
-  if (
-    cachedFirings &&
-    cachedDate === dateStr &&
-    cachedAlarmsVersion === alarmsVersion
-  ) {
+  if (cachedFirings && cachedDate === dateStr && cachedAlarmsVersion === alarmsVersion) {
     return { firings: cachedFirings, dateStr };
   }
   cachedFirings = computeFirings(date, bellSchedule);
@@ -314,7 +313,9 @@ function speak(text) {
 
 function cancelSpeech() {
   if (typeof speechSynthesis === 'undefined') return;
-  try { speechSynthesis.cancel(); } catch {}
+  try {
+    speechSynthesis.cancel();
+  } catch {}
 }
 
 function showBanner(labelText, { speakText = '', dedupKey = '' } = {}) {
@@ -566,11 +567,7 @@ function openEditor(existing) {
 
   const offsetWrap = document.createElement('span');
   offsetWrap.className = 'alarm-offset-wrap';
-  offsetWrap.append(
-    mins, document.createTextNode(' min '),
-    secs, document.createTextNode(' sec '),
-    recurringLbl,
-  );
+  offsetWrap.append(mins, document.createTextNode(' min '), secs, document.createTextNode(' sec '), recurringLbl);
   addField('Offset', offsetWrap);
 
   const anchorWrap = document.createElement('span');
@@ -725,11 +722,18 @@ function setupAlarmPopup() {
   updateAudioWarning();
   updatePermissionStatus();
 
-  document.addEventListener('click', () => {
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume().then(updateAudioWarning).catch(() => {});
-    }
-  }, { capture: true });
+  document.addEventListener(
+    'click',
+    () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx
+          .resume()
+          .then(updateAudioWarning)
+          .catch(() => {});
+      }
+    },
+    { capture: true },
+  );
 }
 
 function togglePopup(id) {
@@ -764,4 +768,4 @@ function setupAlarms(getBellScheduleFnArg) {
   reconcileNotifications();
 }
 
-export { setupAlarms, tickAlarms, updateTeacherModeVisibility };
+export { setupAlarms, tickAlarms, updateTeacherModeVisibility, playChime, showBanner };

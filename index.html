@@ -35,6 +35,11 @@
           "M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z">
           </path>
         </g></svg>
+        <svg id="timer-icon" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+        <path d="M0 0h24v24H0z" fill="none"></path>
+        <path d=
+        "M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z">
+        </path></svg>
         <svg id="bell-icon" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
           <path d="M0 0h24v24H0z" fill="none"></path>
           <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path>
@@ -56,6 +61,17 @@
       <div id="today" class="display"></div>
       <div id="todaybar" class="bar"></div>
       <div id="countdown"></div>
+    </div>
+    <div id="timer-main" style="display:none">
+      <div id="chunk-label" class="display"></div>
+      <div id="chunk-left" class="display"></div>
+      <div id="chunkbar" class="bar"></div>
+      <div id="chunk-next" class="display"></div>
+      <div id="timer-chunks"></div>
+      <div id="timer-period-line"></div>
+      <div id="timer-actions">
+        <button id="routines-edit" class="alarm-btn">Routines…</button>
+      </div>
     </div>
     <div id="bottom-bar">
       <div id="version">
@@ -150,6 +166,17 @@
         <button id="alarm-add" class="alarm-btn alarm-save">Add alarm</button>
       </div>
       <div id="alarm-editor" style="display:none"></div>
+    </div>
+  </div>
+  <div id="popup-routines" class="popup-overlay">
+    <div class="popup">
+      <span class="popup-close">&times;</span>
+      <h2 class="alarm-title">Routines</h2>
+      <div id="routine-list"></div>
+      <div class="alarm-list-actions">
+        <button id="routine-add" class="alarm-btn alarm-save">Add routine</button>
+      </div>
+      <div id="routine-editor" style="display:none"></div>
     </div>
   </div>
   <div id="popup-qr" class="popup-overlay">
