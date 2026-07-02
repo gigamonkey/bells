@@ -391,8 +391,8 @@ const renderIdle = (instant, interval, bellSchedule) => {
   const occurrence = nextScopedOccurrence(bellSchedule, instant);
   if (occurrence) {
     const { routine, period } = occurrence;
-    $('#chunk-label').innerText = `${routine.name} — ${period.name}`;
-    $('#chunk-left').innerText = `starts in ${countdownText(instant.until(period.start))}`;
+    $('#chunk-label').innerText = `${period.name}: ${routine.name}`;
+    $('#chunk-left').innerText = `Starts in ${countdownText(instant.until(period.start))}`;
     $('#chunk-next').innerText = '';
     renderChunkList(resolveChunks(routine, period), null, tz);
   } else {
