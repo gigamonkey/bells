@@ -114,8 +114,10 @@ it leaves the bells display byte-for-byte untouched for everyone else.
 - Implementation follows the app's existing display-swap idiom: `#main`,
   `#summer`, and `#noCalendar` are already mutually exclusive `div`s toggled
   via `style.display`. Timer mode adds a `#timer-main` sibling; `update()`
-  dispatches on the mode flag to decide which one renders. Summer and
-  no-calendar states behave the same in both modes.
+  dispatches on the mode flag to decide which one renders. Timer mode wins
+  even during summer/no-calendar: otherwise the icon appears dead all summer
+  and the routine editor is unreachable. Its idle display shows the summer
+  state and counts down across the break to the next scoped period.
 
 - The mode persists in `localStorage` and survives the 24-hour auto-reload,
   so a device parked in timer mode stays there.

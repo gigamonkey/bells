@@ -216,16 +216,21 @@ const nextScopedOccurrence = (bellSchedule, instant) => {
 
   let value = null;
   let date = instant.toZonedDateTimeISO(tz).toPlainDate();
-  outer: for (let i = 0; i < 15; i++) {
-    for (const p of bellSchedule.scheduleFor(date)) {
-      if (Temporal.Instant.compare(p.start, instant) <= 0) continue;
-      const routine = routineForPeriod(routines, p.name);
-      if (routine) {
-        value = { routine, period: p };
-        break outer;
+  // nextSchoolDay throws once we're past all calendar data.
+  try {
+    outer: for (let i = 0; i < 15; i++) {
+      for (const p of bellSchedule.scheduleFor(date)) {
+        if (Temporal.Instant.compare(p.start, instant) <= 0) continue;
+        const routine = routineForPeriod(routines, p.name);
+        if (routine) {
+          value = { routine, period: p };
+          break outer;
+        }
       }
+      date = bellSchedule.nextSchoolDay(date);
     }
-    date = bellSchedule.nextSchoolDay(date);
+  } catch {
+    // Ran out of calendar; no upcoming occurrence.
   }
   idleCache = { version: routinesVersion, dateStr, value };
   return value;
@@ -233,9 +238,12 @@ const nextScopedOccurrence = (bellSchedule, instant) => {
 
 const renderIdle = (instant, interval, bellSchedule) => {
   const tz = bellSchedule.timezone;
-  $('#chunk-label').innerText = interval ? interval.name : '';
+  // A null interval means no calendar covers this instant: summer (or we've
+  // run out of calendar data entirely).
+  const summer = !interval && bellSchedule.summerBounds(instant) !== null;
+  $('#chunk-label').innerText = interval ? interval.name : summer ? 'Summer vacation!' : 'No calendar data';
   setBar('chunkbar', 0, 1, 0);
-  $('#container').style.background = 'rgba(64, 0, 64, 0.25)';
+  $('#container').style.background = summer ? 'rgba(255, 0, 128, 0.25)' : 'rgba(64, 0, 64, 0.25)';
 
   const occurrence = nextScopedOccurrence(bellSchedule, instant);
   if (occurrence) {
@@ -261,10 +269,14 @@ const renderIdle = (instant, interval, bellSchedule) => {
 const allPeriodNames = () => {
   if (!getBellScheduleFn) return [];
   const bellSchedule = getBellScheduleFn();
-  const today = Temporal.Now.plainDateISO(bellSchedule.timezone);
-  const date = bellSchedule.isSchoolDay(today) ? today : bellSchedule.nextSchoolDay(today);
   const names = new Set();
-  for (const p of bellSchedule.scheduleFor(date)) names.add(p.name);
+  try {
+    const today = Temporal.Now.plainDateISO(bellSchedule.timezone);
+    const date = bellSchedule.isSchoolDay(today) ? today : bellSchedule.nextSchoolDay(today);
+    for (const p of bellSchedule.scheduleFor(date)) names.add(p.name);
+  } catch {
+    // Past all calendar data; offer only names already in use.
+  }
   return [...names];
 };
 
@@ -275,11 +287,15 @@ const allPeriodNames = () => {
 const nextOccurrenceOfPeriod = (bellSchedule, instant, name) => {
   const tz = bellSchedule.timezone;
   let date = instant.toZonedDateTimeISO(tz).toPlainDate();
-  for (let i = 0; i < 20; i++) {
-    for (const p of bellSchedule.scheduleFor(date)) {
-      if (p.name === name && Temporal.Instant.compare(p.end, instant) > 0) return p;
+  try {
+    for (let i = 0; i < 20; i++) {
+      for (const p of bellSchedule.scheduleFor(date)) {
+        if (p.name === name && Temporal.Instant.compare(p.end, instant) > 0) return p;
+      }
+      date = bellSchedule.nextSchoolDay(date);
     }
-    date = bellSchedule.nextSchoolDay(date);
+  } catch {
+    // Past all calendar data.
   }
   return null;
 };

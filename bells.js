@@ -353,13 +353,19 @@ const update = () => {
   tickTimer(instant);
 
   // summerBounds returns null when we are inside a school year; non-null during summer.
+  // Timer mode wins even in summer: its idle display counts down to the next
+  // scoped period (across the break) and is how you reach the routine editor.
   const summerInfo = bellSchedule.summerBounds(instant);
-  if (summerInfo !== null) {
+  if (isTimerMode()) {
+    renderTimer(t, instant, bellSchedule);
+    if (summerInfo !== null) {
+      updateYearProgress(summerInfo.start ? 1 : 0, 1);
+    } else {
+      updateYearProgressFromSchedule(instant, bellSchedule);
+    }
+  } else if (summerInfo !== null) {
     $('#timer-main').style.display = 'none';
     summerCountdown(instant, bellSchedule, summerInfo);
-  } else if (isTimerMode()) {
-    renderTimer(t, instant, bellSchedule);
-    updateYearProgressFromSchedule(instant, bellSchedule);
   } else {
     $('#timer-main').style.display = 'none';
     normalCountdown(t, instant, bellSchedule);
