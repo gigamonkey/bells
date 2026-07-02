@@ -251,8 +251,8 @@ const setupTimeTravel = () => {
     if (!input.value) return;
     const [datePart, timePart] = input.value.split('T');
     const [y, m, d] = datePart.split('-').map(Number);
-    const [hh, mm] = timePart.split(':').map(Number);
-    setOffset(y, m, d, hh, mm, 0);
+    const [hh, mm, ss] = timePart.split(':').map(Number);
+    setOffset(y, m, d, hh, mm, ss || 0);
     updateTimeTravelStatus();
     update();
   };
@@ -414,9 +414,11 @@ const update = () => {
     }
   } else if (summerInfo !== null) {
     $('#timer-main').style.display = 'none';
+    $('#container').classList.remove('chunk-flash');
     summerCountdown(instant, bellSchedule, summerInfo);
   } else {
     $('#timer-main').style.display = 'none';
+    $('#container').classList.remove('chunk-flash');
     normalCountdown(t, instant, bellSchedule);
   }
 

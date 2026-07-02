@@ -161,18 +161,22 @@ const renderActive = (t, instant, interval, routine, bellSchedule) => {
     $('#chunk-left').innerText = time + ' ' + (togoChunk ? 'to go' : 'done');
     setBar('chunkbar', chunk.start.epochMilliseconds, chunk.end.epochMilliseconds, t.getTime());
 
-    // Chunk color as the base tint; red as the chunk boundary approaches. The
+    // Chunk color as the base tint; red as the chunk boundary approaches (the
     // warning window scales with the chunk: a fifth of its length, capped at
-    // ten minutes, never less than one minute.
+    // ten minutes, never less than one minute); flashing once a second for
+    // the final ten seconds. The chunk-flash animation overrides the inline
+    // background while the class is on.
     const chunkSecs = (chunk.end.epochMilliseconds - chunk.start.epochMilliseconds) / 1000;
     const leftSecs = (chunk.end.epochMilliseconds - t.getTime()) / 1000;
     const warnSecs = Math.max(60, Math.min(600, chunkSecs / 5));
     $('#container').style.background = leftSecs < warnSecs ? 'rgba(255, 0, 0, 0.5)' : hexToRgba(chunk.color, 0.25);
+    $('#container').classList.toggle('chunk-flash', leftSecs <= 10);
   } else {
     $('#chunk-label').innerText = 'Between segments';
     $('#chunk-left').innerText = next ? countdownText(instant.until(next.start)) + ' to go' : '';
     setBar('chunkbar', 0, 1, 0);
     $('#container').style.background = 'rgba(64, 0, 64, 0.25)';
+    $('#container').classList.remove('chunk-flash');
   }
 
   $('#chunk-next').innerText = next ? `Next: ${next.label} at ${timestring(next.start, tz)}` : '';
@@ -244,6 +248,7 @@ const renderIdle = (instant, interval, bellSchedule) => {
   $('#chunk-label').innerText = interval ? interval.name : summer ? 'Summer vacation!' : 'No calendar data';
   setBar('chunkbar', 0, 1, 0);
   $('#container').style.background = summer ? 'rgba(255, 0, 128, 0.25)' : 'rgba(64, 0, 64, 0.25)';
+  $('#container').classList.remove('chunk-flash');
 
   const occurrence = nextScopedOccurrence(bellSchedule, instant);
   if (occurrence) {
