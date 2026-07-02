@@ -20,12 +20,15 @@ import {
 /*
  * The class-timer feature: a mode of the app (toggled by the header timer
  * icon) with its own full-screen display, plus the routines popup/editor.
+ * While the mode is on the page heading reads "Period timer" (see
+ * updateTitle in bells.js), which is what makes the mode visually obvious.
  * Follows the alarms.js integration contract: setupTimer() at startup,
  * tickTimer(instant) every tick for chunk-transition chimes regardless of
  * mode, and renderTimer() when the mode is on.
  */
 
 const MODE_KEY = 'timerMode';
+const SELECTED_KEY = 'timerSelectedRoutine';
 const CHUNK_COLORS = ['#4000ff', '#008040', '#b05a00', '#800080', '#006080', '#a00040'];
 
 let routines = loadRoutines();
@@ -42,12 +45,14 @@ let lastChunkKey = null;
 // Cache for the next-scoped-occurrence search used by the idle display.
 let idleCache = null;
 
+// Cache for the current-or-next-period search used by the routine buttons.
+let nextPeriodCache = null;
+
 const isTimerMode = () => timerMode;
 
 const toggleTimerMode = () => {
   timerMode = !timerMode;
   localStorage.setItem(MODE_KEY, String(timerMode));
-  $('#timer-icon').classList.toggle('active', timerMode);
   if (requestUpdateFn) requestUpdateFn();
 };
 
@@ -69,6 +74,40 @@ const saveAndRefresh = () => {
   routinesVersion++;
   idleCache = null;
   if (requestUpdateFn) requestUpdateFn();
+};
+
+/*
+ * Which routine to run for a specific period occurrence. Normally the first
+ * enabled routine scoped to the period name, but the routine buttons on the
+ * timer display can pick a different applicable routine (or none) for one
+ * occurrence. The choice is keyed to the exact occurrence, so it expires on
+ * its own; only the latest choice is kept.
+ */
+let selectedRoutine = (() => {
+  try {
+    const v = JSON.parse(localStorage.getItem(SELECTED_KEY));
+    return v && typeof v.periodKey === 'string' ? v : null;
+  } catch {
+    return null;
+  }
+})();
+
+const occurrenceKey = (period) => `${period.name}|${period.start.epochMilliseconds}`;
+
+const selectRoutine = (period, routineId) => {
+  selectedRoutine = { periodKey: occurrenceKey(period), routineId };
+  localStorage.setItem(SELECTED_KEY, JSON.stringify(selectedRoutine));
+  idleCache = null;
+  if (requestUpdateFn) requestUpdateFn();
+};
+
+const routineForOccurrence = (period) => {
+  if (selectedRoutine && selectedRoutine.periodKey === occurrenceKey(period)) {
+    if (selectedRoutine.routineId === null) return null;
+    const r = routines.find((r) => r.id === selectedRoutine.routineId && r.enabled !== false);
+    if (r) return r;
+  }
+  return routineForPeriod(routines, period.name);
 };
 
 const newId = () => Math.random().toString(36).slice(2, 10);
@@ -124,7 +163,7 @@ const tickTimer = (instant) => {
   let chunk = null;
   let key = null;
   if (interval && interval.type === 'period') {
-    routine = routineForPeriod(routines, interval.name);
+    routine = routineForOccurrence(interval);
     if (routine) {
       chunk = activeChunk(resolveChunks(routine, interval), instant);
       if (chunk) key = `${routine.id}|${chunk.id}|${interval.start.epochMilliseconds}`;
@@ -154,13 +193,14 @@ const renderTimer = (t, instant, bellSchedule) => {
   $('#timer-main').style.display = 'block';
 
   const interval = bellSchedule.currentInterval(instant);
-  const routine = interval && interval.type === 'period' ? routineForPeriod(routines, interval.name) : null;
+  const routine = interval && interval.type === 'period' ? routineForOccurrence(interval) : null;
 
   if (routine) {
     renderActive(t, instant, interval, routine, bellSchedule);
   } else {
     renderIdle(instant, interval, bellSchedule);
   }
+  renderRoutineButtons(bellSchedule, instant, interval);
 };
 
 const renderActive = (t, instant, interval, routine, bellSchedule) => {
@@ -239,7 +279,7 @@ const nextScopedOccurrence = (bellSchedule, instant) => {
     outer: for (let i = 0; i < 15; i++) {
       for (const p of bellSchedule.scheduleFor(date)) {
         if (Temporal.Instant.compare(p.start, instant) <= 0) continue;
-        const routine = routineForPeriod(routines, p.name);
+        const routine = routineForOccurrence(p);
         if (routine) {
           value = { routine, period: p };
           break outer;
@@ -252,6 +292,91 @@ const nextScopedOccurrence = (bellSchedule, instant) => {
   }
   idleCache = { version: routinesVersion, dateStr, value };
   return value;
+};
+
+const hasApplicableRoutine = (periodName) =>
+  routines.some((r) => r.enabled !== false && (r.scopeNames || []).includes(periodName));
+
+/*
+ * The period the routine buttons apply to: the current period if any routine
+ * is scoped to it, otherwise the next period some routine is scoped to
+ * (scanning up to 15 school days out). Scoping is checked by name, ignoring
+ * the per-occurrence selection, so a toggled-off routine's buttons stay
+ * visible and it can be turned back on. Cached like idleCache since it runs
+ * every second.
+ */
+const routineButtonsPeriod = (bellSchedule, instant, interval) => {
+  if (interval && interval.type === 'period' && hasApplicableRoutine(interval.name)) return interval;
+  const tz = bellSchedule.timezone;
+  const dateStr = instant.toZonedDateTimeISO(tz).toPlainDate().toString();
+  if (
+    nextPeriodCache &&
+    nextPeriodCache.version === routinesVersion &&
+    nextPeriodCache.dateStr === dateStr &&
+    (!nextPeriodCache.period || Temporal.Instant.compare(nextPeriodCache.period.start, instant) > 0)
+  ) {
+    return nextPeriodCache.period;
+  }
+
+  let period = null;
+  let date = instant.toZonedDateTimeISO(tz).toPlainDate();
+  try {
+    outer: for (let i = 0; i < 15; i++) {
+      for (const p of bellSchedule.scheduleFor(date)) {
+        if (Temporal.Instant.compare(p.start, instant) <= 0) continue;
+        if (hasApplicableRoutine(p.name)) {
+          period = p;
+          break outer;
+        }
+      }
+      date = bellSchedule.nextSchoolDay(date);
+    }
+  } catch {
+    // Ran out of calendar; no upcoming period.
+  }
+  nextPeriodCache = { version: routinesVersion, dateStr, period };
+  return period;
+};
+
+/*
+ * One button per enabled routine scoped to the current-or-next period.
+ * Tapping a button runs that routine for this occurrence of the period;
+ * tapping the one already running turns routines off for the occurrence.
+ */
+const renderRoutineButtons = (bellSchedule, instant, interval) => {
+  const label = $('#routine-buttons-label');
+  const grid = $('#routine-buttons');
+  const period = routineButtonsPeriod(bellSchedule, instant, interval);
+  const applicable = period
+    ? routines.filter((r) => r.enabled !== false && (r.scopeNames || []).includes(period.name))
+    : [];
+
+  grid.replaceChildren();
+  if (applicable.length === 0) {
+    label.innerText = '';
+    return;
+  }
+
+  const tz = bellSchedule.timezone;
+  const isCurrent = interval && interval.type === 'period' && occurrenceKey(interval) === occurrenceKey(period);
+  const today = instant.toZonedDateTimeISO(tz).toPlainDate();
+  const periodDate = period.start.toZonedDateTimeISO(tz).toPlainDate();
+  const when = isCurrent
+    ? ''
+    : Temporal.PlainDate.compare(periodDate, today) === 0
+      ? ' (next)'
+      : ` (${periodDate.toLocaleString('en-US', { weekday: 'short' })} ${periodDate.month}/${periodDate.day})`;
+  label.innerText = `Routines for ${period.name}${when}`;
+
+  const active = routineForOccurrence(period);
+  for (const routine of applicable) {
+    const btn = $('<button>', routine.name);
+    btn.className = 'routine-btn';
+    const isActive = active !== null && active.id === routine.id;
+    btn.classList.toggle('selected', isActive);
+    btn.onclick = () => selectRoutine(period, isActive ? null : routine.id);
+    grid.appendChild(btn);
+  }
 };
 
 const renderIdle = (instant, interval, bellSchedule) => {
@@ -643,7 +768,6 @@ const setupTimer = (getBellScheduleFnArg, requestUpdateFnArg) => {
   getBellScheduleFn = getBellScheduleFnArg;
   requestUpdateFn = requestUpdateFnArg;
 
-  $('#timer-icon').classList.toggle('active', timerMode);
   $('#timer-icon').onclick = toggleTimerMode;
   updateTimerTeacherVisibility();
   $('#routines-edit').onclick = openRoutinesPopup;

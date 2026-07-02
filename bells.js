@@ -170,10 +170,13 @@ const setupConfigPanel = () => {
 };
 
 /**
- * Set the page heading to the active calendar's display name.
+ * Set the page heading: "Period timer" while timer mode is on (that heading,
+ * not an icon highlight, is what marks the mode), otherwise the active
+ * calendar's display name.
  */
 const updateTitle = () => {
-  $('#title').innerText = getSelectedCalendarName();
+  const title = isTimerMode() ? 'Period timer' : getSelectedCalendarName();
+  if ($('#title').innerText !== title) $('#title').innerText = title;
 };
 
 /**
@@ -401,6 +404,7 @@ const update = () => {
 
   tickAlarms(instant);
   tickTimer(instant);
+  updateTitle();
 
   // summerBounds returns null when we are inside a school year; non-null during summer.
   // Timer mode wins even in summer: its idle display counts down to the next

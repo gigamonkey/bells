@@ -718,12 +718,6 @@ span.togo {
   cursor: pointer;
 }
 
-#icons #timer-icon.active {
-  fill: white;
-  background: rgba(64, 64, 128, 1);
-  border-radius: 3px;
-}
-
 #timer-main {
   text-align: center;
   padding: 10px;
@@ -784,6 +778,45 @@ span.togo {
 
 #timer-actions {
   margin-top: 16px;
+}
+
+#routine-buttons-label {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+#routine-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 14px;
+  max-width: 520px;
+}
+
+.routine-btn {
+  padding: 10px 14px;
+  font-size: 16px;
+  color: rgba(64, 64, 128, 1);
+  background: white;
+  border: 1px solid rgba(64, 64, 128, 0.6);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.routine-btn:hover {
+  background: rgba(64, 64, 128, 0.08);
+}
+
+.routine-btn.selected {
+  color: white;
+  background: rgba(64, 64, 128, 1);
+  font-weight: bold;
+}
+
+.routine-btn.selected:hover {
+  background: rgba(64, 64, 128, 0.85);
 }
 
 .routine-preview {
