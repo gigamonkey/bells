@@ -383,8 +383,8 @@ const renderIdle = (instant, interval, bellSchedule) => {
   const tz = bellSchedule.timezone;
   // A null interval means no calendar covers this instant: summer (or we've
   // run out of calendar data entirely).
-  const summer = !interval && bellSchedule.summerBounds(instant) !== null;
-  setBar('chunkbar', 0, 1, 0);
+  const summerInfo = !interval ? bellSchedule.summerBounds(instant) : null;
+  const summer = summerInfo !== null;
   $('#container').style.background = summer ? 'rgba(255, 0, 128, 0.25)' : 'rgba(64, 0, 64, 0.25)';
   $('#container').classList.remove('chunk-flash');
 
@@ -394,8 +394,17 @@ const renderIdle = (instant, interval, bellSchedule) => {
     $('#chunk-label').innerText = `${period.name}: ${routine.name}`;
     $('#chunk-left').innerText = `Starts in ${countdownText(instant.until(period.start))}`;
     $('#chunk-next').innerText = '';
+    // Progress toward the routine's start, measured from the start of the
+    // current interval (or of summer, when there's no interval).
+    const from = interval ? interval.start : summerInfo.start;
+    if (from) {
+      setBar('chunkbar', from.epochMilliseconds, period.start.epochMilliseconds, instant.epochMilliseconds);
+    } else {
+      setBar('chunkbar', 0, 1, 0);
+    }
     renderChunkList(resolveChunks(routine, period), null, tz);
   } else {
+    setBar('chunkbar', 0, 1, 0);
     $('#chunk-label').innerText = 'Period timer';
     $('#chunk-left').innerText = '';
     $('#chunk-next').innerText =
