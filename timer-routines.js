@@ -171,20 +171,15 @@ const compileRows = (rows) => {
 };
 
 /*
- * Parse the hand-authored JSON form of a routine (documented in ROUTINES.md)
- * into editor fields. The segment list maps onto editor rows: "minutes"
- * segments anchor to the period start unless "from" is "end", and a segment
- * with "elastic": true absorbs whatever the fixed segments leave over.
- * Returns { name, scopeNames, chime, rows } on success or { error } with a
- * message; rows come back without ids (the editor assigns them).
+ * Parse one routine in the hand-authored JSON form (documented in
+ * ROUTINES.md), already JSON-parsed, into editor fields. The segment list
+ * maps onto editor rows: "minutes" segments anchor to the period start
+ * unless "from" is "end", and a segment with "elastic": true absorbs
+ * whatever the fixed segments leave over. Returns { name, scopeNames,
+ * chime, rows } on success or { error } with a message; rows come back
+ * without ids (the caller assigns them).
  */
-const parseRoutineJson = (text) => {
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch (e) {
-    return { error: `Not valid JSON: ${e.message}` };
-  }
+const parseRoutineObject = (data) => {
   if (data === null || typeof data !== 'object' || Array.isArray(data)) {
     return { error: 'Expected a JSON object like {"name": …, "segments": […]}.' };
   }
@@ -235,6 +230,30 @@ const parseRoutineJson = (text) => {
 };
 
 /*
+ * Parse a pasted/fetched JSON text: either one routine object or an array of
+ * them. Returns { single } for an object (destined for the editor), or
+ * { routines } for an array (each in the same editor-field form), or
+ * { error }.
+ */
+const parseRoutinesJson = (text) => {
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    return { error: `Not valid JSON: ${e.message}` };
+  }
+  if (Array.isArray(data)) {
+    if (data.length === 0) return { error: 'The routine array is empty.' };
+    const parsed = data.map(parseRoutineObject);
+    const bad = parsed.findIndex((p) => p.error);
+    if (bad >= 0) return { error: `Routine ${bad + 1}: ${parsed[bad].error}` };
+    return { routines: parsed };
+  }
+  const one = parseRoutineObject(data);
+  return one.error ? one : { single: one };
+};
+
+/*
  * Total seconds of the fixed (non-elastic) segments — what the period must be
  * at least as long as for the plan to fit.
  */
@@ -267,7 +286,7 @@ export {
   chunkSeconds,
   toEditorRows,
   compileRows,
-  parseRoutineJson,
+  parseRoutinesJson,
   fixedSeconds,
   formatSeconds,
   describeRoutine,

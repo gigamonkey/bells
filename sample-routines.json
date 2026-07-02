@@ -1,0 +1,53 @@
+[
+  {
+    "name": "Standard lesson",
+    "periods": ["Period 1", "Period 2", "Period 3", "Period 4", "Period 5", "Period 6"],
+    "segments": [
+      { "label": "Do Now", "minutes": 8, "color": "#4000ff" },
+      { "label": "Mini-lesson", "minutes": 15, "color": "#008040" },
+      { "label": "Work time", "elastic": true, "color": "#006080" },
+      { "label": "Wrap up", "minutes": 5, "from": "end", "color": "#b05a00" }
+    ]
+  },
+  {
+    "name": "Lab day",
+    "periods": ["Period 2", "Period 4"],
+    "segments": [
+      { "label": "Safety brief", "minutes": 5, "color": "#800080" },
+      { "label": "Set up", "minutes": 10, "color": "#4000ff" },
+      { "label": "Experiment", "elastic": true, "color": "#008040" },
+      { "label": "Clean up", "minutes": 10, "from": "end", "color": "#b05a00" },
+      { "label": "Debrief", "minutes": 5, "from": "end", "color": "#a00040" }
+    ]
+  },
+  {
+    "name": "Test day",
+    "periods": ["Period 1", "Period 3", "Period 5"],
+    "chime": false,
+    "segments": [
+      { "label": "Instructions", "minutes": 5, "color": "#4000ff" },
+      { "label": "Testing", "elastic": true, "color": "#006080" },
+      { "label": "Collect & breathe", "minutes": 5, "from": "end", "color": "#008040" }
+    ]
+  },
+  {
+    "name": "Socratic seminar",
+    "periods": ["Period 2", "Period 6"],
+    "segments": [
+      { "label": "Prep notes", "minutes": 10, "color": "#4000ff" },
+      { "label": "Inner circle", "minutes": 20, "color": "#008040" },
+      { "label": "Outer circle", "elastic": true, "color": "#800080" },
+      { "label": "Reflection", "minutes": 8, "from": "end", "color": "#b05a00" }
+    ]
+  },
+  {
+    "name": "Writing workshop",
+    "periods": ["Period 4", "Period 5"],
+    "segments": [
+      { "label": "Prompt & plan", "minutes": 7.5, "color": "#4000ff" },
+      { "label": "Drafting", "elastic": true, "color": "#006080" },
+      { "label": "Peer review", "minutes": 15, "from": "end", "color": "#008040" },
+      { "label": "Share out", "minutes": 5, "from": "end", "color": "#a00040" }
+    ]
+  }
+]

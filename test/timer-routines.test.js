@@ -8,10 +8,11 @@ import {
   nextChunk,
   toEditorRows,
   compileRows,
-  parseRoutineJson,
+  parseRoutinesJson,
   fixedSeconds,
   formatSeconds,
 } from '../timer-routines.js';
+import { readFileSync } from 'node:fs';
 
 const instant = (s) => Temporal.Instant.from(s);
 
@@ -159,8 +160,8 @@ test('compileRows rejects bad ordering and non-positive lengths', () => {
   assert.ok(compileRows([{ id: 'a', label: 'Do Now', mode: 'start', seconds: 0 }]).error);
 });
 
-test('parseRoutineJson parses the documented form into editor fields', () => {
-  const parsed = parseRoutineJson(`{
+test('parseRoutinesJson parses the documented single-routine form into editor fields', () => {
+  const { single: parsed, error } = parseRoutinesJson(`{
     "name": "Block lesson",
     "periods": ["Period 1", "Period 3", "Period 1"],
     "segments": [
@@ -170,7 +171,7 @@ test('parseRoutineJson parses the documented form into editor fields', () => {
       { "label": "Exit ticket", "minutes": 10, "from": "end" }
     ]
   }`);
-  assert.equal(parsed.error, undefined);
+  assert.equal(error, undefined);
   assert.equal(parsed.name, 'Block lesson');
   assert.deepEqual(parsed.scopeNames, ['Period 1', 'Period 3']);
   assert.equal(parsed.chime, true);
@@ -185,34 +186,56 @@ test('parseRoutineJson parses the documented form into editor fields', () => {
   );
 });
 
-test('parseRoutineJson defaults and optional fields', () => {
-  const parsed = parseRoutineJson('{"name": "N", "chime": false, "segments": [{"label": "A", "minutes": 5}]}');
+test('parseRoutinesJson defaults and optional fields', () => {
+  const parsed = parseRoutinesJson('{"name": "N", "chime": false, "segments": [{"label": "A", "minutes": 5}]}');
   assert.equal(parsed.error, undefined);
-  assert.deepEqual(parsed.scopeNames, []);
-  assert.equal(parsed.chime, false);
+  assert.deepEqual(parsed.single.scopeNames, []);
+  assert.equal(parsed.single.chime, false);
 });
 
-test('parseRoutineJson rejects malformed input with a message', () => {
-  assert.ok(parseRoutineJson('not json').error);
-  assert.ok(parseRoutineJson('[1, 2]').error);
-  assert.ok(parseRoutineJson('{"segments": [{"label": "A", "minutes": 5}]}').error);
-  assert.ok(parseRoutineJson('{"name": "N"}').error);
-  assert.ok(parseRoutineJson('{"name": "N", "segments": []}').error);
-  assert.ok(parseRoutineJson('{"name": "N", "periods": "Period 1", "segments": [{"label": "A", "minutes": 5}]}').error);
-  assert.ok(parseRoutineJson('{"name": "N", "segments": [{"label": "A"}]}').error);
-  assert.ok(parseRoutineJson('{"name": "N", "segments": [{"label": "A", "minutes": -5}]}').error);
-  assert.ok(parseRoutineJson('{"name": "N", "segments": [{"label": "A", "minutes": 5, "from": "middle"}]}').error);
-  assert.ok(parseRoutineJson('{"name": "N", "segments": [{"label": "A", "minutes": 5, "color": "blue"}]}').error);
+test('parseRoutinesJson parses an array of routines', () => {
+  const parsed = parseRoutinesJson(`[
+    {"name": "A", "segments": [{"label": "One", "minutes": 5}]},
+    {"name": "B", "segments": [{"label": "Two", "elastic": true}]}
+  ]`);
+  assert.equal(parsed.error, undefined);
+  assert.equal(parsed.single, undefined);
+  assert.deepEqual(
+    parsed.routines.map((r) => r.name),
+    ['A', 'B'],
+  );
+});
+
+test('parseRoutinesJson reports which array element is bad', () => {
+  const parsed = parseRoutinesJson('[{"name": "A", "segments": [{"label": "One", "minutes": 5}]}, {"name": "B"}]');
+  assert.match(parsed.error, /^Routine 2:/);
+  assert.ok(parseRoutinesJson('[]').error);
+  assert.ok(parseRoutinesJson('[1, 2]').error);
+});
+
+test('parseRoutinesJson rejects malformed input with a message', () => {
+  const bad = (text) => assert.ok(parseRoutinesJson(text).error);
+  bad('not json');
+  bad('{"segments": [{"label": "A", "minutes": 5}]}');
+  bad('{"name": "N"}');
+  bad('{"name": "N", "segments": []}');
+  bad('{"name": "N", "periods": "Period 1", "segments": [{"label": "A", "minutes": 5}]}');
+  bad('{"name": "N", "segments": [{"label": "A"}]}');
+  bad('{"name": "N", "segments": [{"label": "A", "minutes": -5}]}');
+  bad('{"name": "N", "segments": [{"label": "A", "minutes": 5, "from": "middle"}]}');
+  bad('{"name": "N", "segments": [{"label": "A", "minutes": 5, "color": "blue"}]}');
   // Ordering violations are caught by the row compiler.
-  assert.ok(
-    parseRoutineJson(
-      '{"name": "N", "segments": [{"label": "A", "minutes": 5, "from": "end"}, {"label": "B", "minutes": 5}]}',
-    ).error,
-  );
-  assert.ok(
-    parseRoutineJson('{"name": "N", "segments": [{"label": "A", "elastic": true}, {"label": "B", "elastic": true}]}')
-      .error,
-  );
+  bad('{"name": "N", "segments": [{"label": "A", "minutes": 5, "from": "end"}, {"label": "B", "minutes": 5}]}');
+  bad('{"name": "N", "segments": [{"label": "A", "elastic": true}, {"label": "B", "elastic": true}]}');
+});
+
+test('sample-routines.json parses as an array of routines', () => {
+  const parsed = parseRoutinesJson(readFileSync(new URL('../sample-routines.json', import.meta.url), 'utf8'));
+  assert.equal(parsed.error, undefined);
+  assert.ok(parsed.routines.length >= 5);
+  for (const r of parsed.routines) {
+    assert.ok(r.scopeNames.length > 0, `${r.name} is scoped to at least one period`);
+  }
 });
 
 test('fixedSeconds and formatSeconds', () => {

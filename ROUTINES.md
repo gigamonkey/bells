@@ -7,14 +7,17 @@ current segment, its countdown, and a chime at each segment change.
 
 Besides configuring a routine in the editor UI, you can paste a JSON blob:
 in timer mode tap **Routines… → Add routine → Paste JSON or URL…**, paste,
-and tap **Load**. The parsed routine fills the editor fields so you can
-review or tweak it before hitting **Save**.
+and tap **Load**. A single routine object fills the editor fields so you
+can review or tweak it before hitting **Save**. A JSON *array* of routine
+objects skips the editor and adds them all to the list as is (you can still
+edit each one afterwards) — see `sample-routines.json`, published next to
+the app, for an array you can try.
 
 Instead of the JSON itself you can paste an `http(s)://` URL; **Load**
-fetches it and parses the response body as the routine JSON. The URL must
-be reachable from the browser, and if it's on a different host that host
-must allow cross-origin requests (CORS) — a raw file on GitHub or a Gist
-works, for example.
+fetches it and parses the response body the same way. The URL must be
+reachable from the browser, and if it's on a different host that host must
+allow cross-origin requests (CORS) — a raw file on GitHub or a Gist works,
+for example.
 
 ## Example
 

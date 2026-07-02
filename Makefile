@@ -5,6 +5,7 @@ files += manifest.json
 files += online-check.txt
 files += out.js
 files += out.js.map
+files += sample-routines.json
 files += style.css
 files += sw.js
 

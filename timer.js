@@ -12,7 +12,7 @@ import {
   nextChunk,
   toEditorRows,
   compileRows,
-  parseRoutineJson,
+  parseRoutinesJson,
   fixedSeconds,
   formatSeconds,
   describeRoutine,
@@ -531,8 +531,18 @@ const renderRoutineList = () => {
   }
 };
 
+/*
+ * Build a full stored routine from parseRoutinesJson's editor-field form,
+ * assigning ids and palette colors. compileRows can't fail here: the parser
+ * already ran it on the same rows.
+ */
+const routineFromParsed = ({ name, scopeNames, chime, rows }) => {
+  const withIds = rows.map((r, i) => ({ ...r, id: newId(), color: r.color || CHUNK_COLORS[i % CHUNK_COLORS.length] }));
+  return { id: newId(), name, scopeNames, chime, enabled: true, chunks: compileRows(withIds).chunks };
+};
+
 // `preset` pre-fills a new routine's fields from a parsed JSON blob (see
-// parseRoutineJson); its rows arrive without ids or (possibly) colors.
+// parseRoutinesJson); its rows arrive without ids or (possibly) colors.
 const openRoutineEditor = (existing, preset) => {
   const editor = $('#routine-editor');
   const isNew = !existing;
@@ -597,12 +607,21 @@ const openRoutineEditor = (existing, preset) => {
           loadBtn.disabled = false;
         }
       }
-      const parsed = parseRoutineJson(text);
+      const parsed = parseRoutinesJson(text);
       if (parsed.error) {
         jsonError.innerText = parsed.error;
         return;
       }
-      openRoutineEditor(null, { ...parsed, jsonText: ta.value });
+      // An array of routines is added as is; a single routine loads into the
+      // editor for review first.
+      if (parsed.routines) {
+        routines.push(...parsed.routines.map(routineFromParsed));
+        saveAndRefresh();
+        renderRoutineList();
+        closeRoutineEditor();
+        return;
+      }
+      openRoutineEditor(null, { ...parsed.single, jsonText: ta.value });
     };
     details.append($('<summary>', 'Paste JSON or URL…'), ta, loadBtn, jsonError);
     editor.appendChild(details);
