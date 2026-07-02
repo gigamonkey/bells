@@ -1,5 +1,6 @@
 import { Temporal } from '@js-temporal/polyfill';
 import { $ } from './dom.js';
+import { isTeacher } from './calendar.js';
 import { timestring, hhmmss } from './datetime.js';
 import { playChime, showBanner } from './alarms.js';
 import {
@@ -48,6 +49,19 @@ const toggleTimerMode = () => {
   localStorage.setItem(MODE_KEY, String(timerMode));
   $('#timer-icon').classList.toggle('active', timerMode);
   if (requestUpdateFn) requestUpdateFn();
+};
+
+// The timer is teacher-facing, so like the bell icon the timer icon is shown
+// only in teacher mode. Since the icon is the only way in or out of timer
+// mode, switching to student view while the timer is up also drops out of
+// timer mode rather than stranding the display with no way back.
+const updateTimerTeacherVisibility = () => {
+  const teacher = isTeacher();
+  $('#timer-icon').style.display = teacher ? '' : 'none';
+  if (!teacher) {
+    if (timerMode) toggleTimerMode();
+    $('#popup-routines').classList.remove('active');
+  }
 };
 
 const saveAndRefresh = () => {
@@ -631,6 +645,7 @@ const setupTimer = (getBellScheduleFnArg, requestUpdateFnArg) => {
 
   $('#timer-icon').classList.toggle('active', timerMode);
   $('#timer-icon').onclick = toggleTimerMode;
+  updateTimerTeacherVisibility();
   $('#routines-edit').onclick = openRoutinesPopup;
   $('#routine-add').onclick = () => openRoutineEditor(null);
 
@@ -640,4 +655,4 @@ const setupTimer = (getBellScheduleFnArg, requestUpdateFnArg) => {
   };
 };
 
-export { setupTimer, tickTimer, renderTimer, isTimerMode };
+export { setupTimer, tickTimer, renderTimer, isTimerMode, updateTimerTeacherVisibility };

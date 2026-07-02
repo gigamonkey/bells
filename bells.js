@@ -19,7 +19,7 @@ import {
 import { timestring, hhmmss, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 import { setupAlarms, tickAlarms, updateTeacherModeVisibility } from './alarms.js';
-import { setupTimer, tickTimer, renderTimer, isTimerMode } from './timer.js';
+import { setupTimer, tickTimer, renderTimer, isTimerMode, updateTimerTeacherVisibility } from './timer.js';
 
 // Time-travel offset for debugging, settable from the console or from the
 // Advanced section of the config popup. Resetting reloadAt keeps the 24-hour
@@ -108,6 +108,7 @@ const setupConfigPanel = () => {
   $('#apple').onclick = (e) => {
     toggleTeacher(e);
     updateTeacherModeVisibility();
+    updateTimerTeacherVisibility();
     update();
   };
   $('#qr').onclick = toggleQR;
