@@ -770,10 +770,11 @@ span.togo {
   opacity: 0.8;
 }
 
-/* Once-a-second background flash for the last ten seconds of a chunk. The
-   animation's background wins over the inline style while the class is on. */
+/* Background flash for the last ten seconds of a chunk: one second on, one
+   second off. The animation's background wins over the inline style while
+   the class is on. */
 #container.chunk-flash {
-  animation: chunk-flash 1s infinite;
+  animation: chunk-flash 2s infinite;
 }
 
 @keyframes chunk-flash {
