@@ -22,13 +22,10 @@ version.js:
 	echo "export const version = \"$$(./version.sh)\";" > version.js
 
 build: version.js
-	npx esbuild bells.js --sourcemap --bundle --format=esm --outfile=out.js
-	@hash="$$(cat out.js style.css index.html manifest.json | shasum | awk '{print $$1}' | cut -c1-12)"; \
-	sed "s|__CACHE_NAME__|bells-$$hash|" sw.js.template > sw.js; \
-	echo "Generated sw.js with cache_name bells-$$hash"
+	node build.mjs
 
 watch: version.js
-	npx esbuild bells.js --watch --sourcemap --bundle --format=esm --outfile=out.js
+	node build.mjs --watch
 
 pretty:
 	npx prettier -w --print-width 120 *.js
