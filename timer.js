@@ -12,6 +12,7 @@ import {
   nextChunk,
   toEditorRows,
   compileRows,
+  parseRoutineJson,
   fixedSeconds,
   formatSeconds,
   describeRoutine,
@@ -530,7 +531,9 @@ const renderRoutineList = () => {
   }
 };
 
-const openRoutineEditor = (existing) => {
+// `preset` pre-fills a new routine's fields from a parsed JSON blob (see
+// parseRoutineJson); its rows arrive without ids or (possibly) colors.
+const openRoutineEditor = (existing, preset) => {
   const editor = $('#routine-editor');
   const isNew = !existing;
   const draft = existing
@@ -540,17 +543,50 @@ const openRoutineEditor = (existing) => {
         chime: existing.chime !== false,
         scopeNames: [...(existing.scopeNames || [])],
       }
-    : { id: newId(), name: '', chime: true, scopeNames: [] };
+    : {
+        id: newId(),
+        name: preset ? preset.name : '',
+        chime: preset ? preset.chime : true,
+        scopeNames: preset ? [...preset.scopeNames] : [],
+      };
   let rows = existing
     ? toEditorRows(existing.chunks)
-    : [
-        { id: newId(), label: 'Do Now', color: CHUNK_COLORS[0], mode: 'start', seconds: 600 },
-        { id: newId(), label: 'Work time', color: CHUNK_COLORS[1], mode: 'elastic', seconds: 0 },
-        { id: newId(), label: 'Wrap up', color: CHUNK_COLORS[2], mode: 'end', seconds: 300 },
-      ];
+    : preset
+      ? preset.rows.map((r, i) => ({ ...r, id: newId(), color: r.color || CHUNK_COLORS[i % CHUNK_COLORS.length] }))
+      : [
+          { id: newId(), label: 'Do Now', color: CHUNK_COLORS[0], mode: 'start', seconds: 600 },
+          { id: newId(), label: 'Work time', color: CHUNK_COLORS[1], mode: 'elastic', seconds: 0 },
+          { id: newId(), label: 'Wrap up', color: CHUNK_COLORS[2], mode: 'end', seconds: 300 },
+        ];
 
   editor.replaceChildren();
   editor.appendChild($('<h3>', isNew ? 'New routine' : 'Edit routine'));
+
+  // Alternative to configuring by hand: paste the JSON form (ROUTINES.md)
+  // and load it into the editor fields for review before saving.
+  if (isNew) {
+    const details = $('<details>');
+    details.className = 'routine-json';
+    const ta = $('<textarea>');
+    ta.rows = 8;
+    ta.placeholder = '{"name": "Block lesson", "periods": ["Period 1"], "segments": […]} — see ROUTINES.md';
+    ta.value = preset?.jsonText ?? '';
+    details.open = ta.value !== '';
+    const loadBtn = $('<button>', 'Load');
+    loadBtn.className = 'alarm-btn';
+    const jsonError = $('<div>');
+    jsonError.className = 'routine-json-error';
+    loadBtn.onclick = () => {
+      const parsed = parseRoutineJson(ta.value);
+      if (parsed.error) {
+        jsonError.innerText = parsed.error;
+        return;
+      }
+      openRoutineEditor(null, { ...parsed, jsonText: ta.value });
+    };
+    details.append($('<summary>', 'Paste JSON…'), ta, loadBtn, jsonError);
+    editor.appendChild(details);
+  }
 
   const addField = (labelText, input) => {
     const wrap = $('<div>');

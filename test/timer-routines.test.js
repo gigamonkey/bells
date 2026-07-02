@@ -8,6 +8,7 @@ import {
   nextChunk,
   toEditorRows,
   compileRows,
+  parseRoutineJson,
   fixedSeconds,
   formatSeconds,
 } from '../timer-routines.js';
@@ -156,6 +157,62 @@ test('compileRows rejects bad ordering and non-positive lengths', () => {
     ]).error,
   );
   assert.ok(compileRows([{ id: 'a', label: 'Do Now', mode: 'start', seconds: 0 }]).error);
+});
+
+test('parseRoutineJson parses the documented form into editor fields', () => {
+  const parsed = parseRoutineJson(`{
+    "name": "Block lesson",
+    "periods": ["Period 1", "Period 3", "Period 1"],
+    "segments": [
+      { "label": "Do Now", "minutes": 10, "color": "#4000ff" },
+      { "label": "Mini-lesson", "minutes": 7.5 },
+      { "label": "Group work", "elastic": true },
+      { "label": "Exit ticket", "minutes": 10, "from": "end" }
+    ]
+  }`);
+  assert.equal(parsed.error, undefined);
+  assert.equal(parsed.name, 'Block lesson');
+  assert.deepEqual(parsed.scopeNames, ['Period 1', 'Period 3']);
+  assert.equal(parsed.chime, true);
+  assert.deepEqual(
+    parsed.rows.map((r) => [r.label, r.mode, r.seconds, r.color]),
+    [
+      ['Do Now', 'start', 600, '#4000ff'],
+      ['Mini-lesson', 'start', 450, undefined],
+      ['Group work', 'elastic', 0, undefined],
+      ['Exit ticket', 'end', 600, undefined],
+    ],
+  );
+});
+
+test('parseRoutineJson defaults and optional fields', () => {
+  const parsed = parseRoutineJson('{"name": "N", "chime": false, "segments": [{"label": "A", "minutes": 5}]}');
+  assert.equal(parsed.error, undefined);
+  assert.deepEqual(parsed.scopeNames, []);
+  assert.equal(parsed.chime, false);
+});
+
+test('parseRoutineJson rejects malformed input with a message', () => {
+  assert.ok(parseRoutineJson('not json').error);
+  assert.ok(parseRoutineJson('[1, 2]').error);
+  assert.ok(parseRoutineJson('{"segments": [{"label": "A", "minutes": 5}]}').error);
+  assert.ok(parseRoutineJson('{"name": "N"}').error);
+  assert.ok(parseRoutineJson('{"name": "N", "segments": []}').error);
+  assert.ok(parseRoutineJson('{"name": "N", "periods": "Period 1", "segments": [{"label": "A", "minutes": 5}]}').error);
+  assert.ok(parseRoutineJson('{"name": "N", "segments": [{"label": "A"}]}').error);
+  assert.ok(parseRoutineJson('{"name": "N", "segments": [{"label": "A", "minutes": -5}]}').error);
+  assert.ok(parseRoutineJson('{"name": "N", "segments": [{"label": "A", "minutes": 5, "from": "middle"}]}').error);
+  assert.ok(parseRoutineJson('{"name": "N", "segments": [{"label": "A", "minutes": 5, "color": "blue"}]}').error);
+  // Ordering violations are caught by the row compiler.
+  assert.ok(
+    parseRoutineJson(
+      '{"name": "N", "segments": [{"label": "A", "minutes": 5, "from": "end"}, {"label": "B", "minutes": 5}]}',
+    ).error,
+  );
+  assert.ok(
+    parseRoutineJson('{"name": "N", "segments": [{"label": "A", "elastic": true}, {"label": "B", "elastic": true}]}')
+      .error,
+  );
 });
 
 test('fixedSeconds and formatSeconds', () => {

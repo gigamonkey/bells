@@ -171,6 +171,70 @@ const compileRows = (rows) => {
 };
 
 /*
+ * Parse the hand-authored JSON form of a routine (documented in ROUTINES.md)
+ * into editor fields. The segment list maps onto editor rows: "minutes"
+ * segments anchor to the period start unless "from" is "end", and a segment
+ * with "elastic": true absorbs whatever the fixed segments leave over.
+ * Returns { name, scopeNames, chime, rows } on success or { error } with a
+ * message; rows come back without ids (the editor assigns them).
+ */
+const parseRoutineJson = (text) => {
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    return { error: `Not valid JSON: ${e.message}` };
+  }
+  if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+    return { error: 'Expected a JSON object like {"name": …, "segments": […]}.' };
+  }
+  if (typeof data.name !== 'string' || !data.name.trim()) {
+    return { error: 'The routine needs a "name" (a non-empty string).' };
+  }
+  const periods = data.periods ?? [];
+  if (!Array.isArray(periods) || periods.some((p) => typeof p !== 'string')) {
+    return { error: '"periods" must be an array of period names.' };
+  }
+  if (data.chime !== undefined && typeof data.chime !== 'boolean') {
+    return { error: '"chime" must be true or false.' };
+  }
+  if (!Array.isArray(data.segments) || data.segments.length === 0) {
+    return { error: 'The routine needs a non-empty "segments" array.' };
+  }
+
+  const rows = [];
+  for (const [i, s] of data.segments.entries()) {
+    const where = `Segment ${i + 1}`;
+    if (s === null || typeof s !== 'object' || Array.isArray(s)) {
+      return { error: `${where} must be an object.` };
+    }
+    if (typeof s.label !== 'string' || !s.label.trim()) {
+      return { error: `${where} needs a "label".` };
+    }
+    if (s.color !== undefined && !/^#[0-9a-f]{6}$/i.test(s.color)) {
+      return { error: `${where}: "color" must be a six-digit hex color like "#4000ff".` };
+    }
+    let mode = 'elastic';
+    let seconds = 0;
+    if (s.elastic !== true) {
+      if (s.from !== undefined && s.from !== 'start' && s.from !== 'end') {
+        return { error: `${where}: "from" must be "start" or "end".` };
+      }
+      if (typeof s.minutes !== 'number' || !(s.minutes > 0)) {
+        return { error: `${where} needs "minutes" (a positive number) or "elastic": true.` };
+      }
+      mode = s.from === 'end' ? 'end' : 'start';
+      seconds = Math.round(s.minutes * 60);
+    }
+    rows.push({ label: s.label.trim(), color: s.color, mode, seconds });
+  }
+
+  const { error } = compileRows(rows);
+  if (error) return { error };
+  return { name: data.name.trim(), scopeNames: [...new Set(periods)], chime: data.chime !== false, rows };
+};
+
+/*
  * Total seconds of the fixed (non-elastic) segments — what the period must be
  * at least as long as for the plan to fit.
  */
@@ -203,6 +267,7 @@ export {
   chunkSeconds,
   toEditorRows,
   compileRows,
+  parseRoutineJson,
   fixedSeconds,
   formatSeconds,
   describeRoutine,

@@ -844,6 +844,30 @@ span.togo {
   font-size: 16px;
 }
 
+.routine-json {
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.routine-json summary {
+  cursor: pointer;
+  color: rgba(64, 64, 128, 1);
+}
+
+.routine-json textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 6px 0;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.routine-json-error {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #a00000;
+}
+
 .routine-segments-title {
   font-size: 14px;
   color: rgba(64, 64, 128, 1);
