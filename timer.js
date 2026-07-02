@@ -20,8 +20,8 @@ import {
 /*
  * The class-timer feature: a mode of the app (toggled by the header timer
  * icon) with its own full-screen display, plus the routines popup/editor.
- * While the mode is on the page heading reads "Period timer" (see
- * updateTitle in bells.js), which is what makes the mode visually obvious.
+ * The idle display's big heading — the next queued routine, or "Period
+ * timer" when there is none — is what makes the mode visually obvious.
  * Follows the alarms.js integration contract: setupTimer() at startup,
  * tickTimer(instant) every tick for chunk-transition chimes regardless of
  * mode, and renderTimer() when the mode is on.
@@ -384,7 +384,6 @@ const renderIdle = (instant, interval, bellSchedule) => {
   // A null interval means no calendar covers this instant: summer (or we've
   // run out of calendar data entirely).
   const summer = !interval && bellSchedule.summerBounds(instant) !== null;
-  $('#chunk-label').innerText = interval ? interval.name : summer ? 'Summer vacation!' : 'No calendar data';
   setBar('chunkbar', 0, 1, 0);
   $('#container').style.background = summer ? 'rgba(255, 0, 128, 0.25)' : 'rgba(64, 0, 64, 0.25)';
   $('#container').classList.remove('chunk-flash');
@@ -392,18 +391,22 @@ const renderIdle = (instant, interval, bellSchedule) => {
   const occurrence = nextScopedOccurrence(bellSchedule, instant);
   if (occurrence) {
     const { routine, period } = occurrence;
-    $('#chunk-left').innerText = countdownText(instant.until(period.start)) + ` until ${period.name}`;
-    $('#chunk-next').innerText = `Next routine: ${routine.name}`;
+    $('#chunk-label').innerText = `${routine.name} — ${period.name}`;
+    $('#chunk-left').innerText = `starts in ${countdownText(instant.until(period.start))}`;
+    $('#chunk-next').innerText = '';
     renderChunkList(resolveChunks(routine, period), null, tz);
   } else {
+    $('#chunk-label').innerText = 'Period timer';
     $('#chunk-left').innerText = '';
     $('#chunk-next').innerText =
       routines.length === 0 ? 'No routines yet. Tap Routines… to create one.' : 'No upcoming scoped period found.';
     $('#timer-chunks').replaceChildren();
   }
   $('#timer-period-line').innerText = interval
-    ? `${timestring(interval.start, tz)}–${timestring(interval.end, tz)}`
-    : '';
+    ? `${interval.name} · ${timestring(interval.start, tz)}–${timestring(interval.end, tz)}`
+    : summer
+      ? 'Summer vacation!'
+      : 'No calendar data';
 };
 
 /*
