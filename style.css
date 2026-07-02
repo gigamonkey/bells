@@ -673,6 +673,45 @@ span.togo {
   margin-top: 10px;
 }
 
+/* Advanced (debugging) section of the config popup */
+
+#advanced-config {
+  margin-top: 16px;
+  padding: 0 20px;
+  font-size: 14px;
+  color: rgba(64, 64, 128, 1);
+}
+
+#advanced-config summary {
+  cursor: pointer;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+#time-travel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 8px;
+}
+
+#time-travel-row input {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 13px;
+}
+
+#time-travel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+#time-travel-status {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #a00000;
+}
+
 /* Class timer */
 
 #timer-icon {

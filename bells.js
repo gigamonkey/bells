@@ -21,12 +21,19 @@ import { $, $$, text } from './dom.js';
 import { setupAlarms, tickAlarms, updateTeacherModeVisibility } from './alarms.js';
 import { setupTimer, tickTimer, renderTimer, isTimerMode } from './timer.js';
 
-// This variable and the next function can be used in testing but aren't
-// otherwise used.
+// Time-travel offset for debugging, settable from the console or from the
+// Advanced section of the config popup. Resetting reloadAt keeps the 24-hour
+// auto-reload from firing immediately when we pretend to be in the future.
 let offset = 0;
 
 const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
   offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
+  reloadAt = toInstant(now()).add({ hours: 24 });
+};
+
+const clearOffset = () => {
+  offset = 0;
+  reloadAt = toInstant(now()).add({ hours: 24 });
 };
 
 // setOffset(2026, 2, 5, 8, 15, 55);
@@ -108,6 +115,7 @@ const setupConfigPanel = () => {
   $('#sched').onclick = togglePeriods;
   $('#reload-app').onclick = forceReload;
   updateSwVersionDisplay();
+  setupTimeTravel();
 
   $('#apple').innerText = isTeacher() ? '🍎' : '✏️';
 
@@ -228,6 +236,47 @@ const toggleConfig = () => {
   togglePopup('popup-config');
   $('#reload-app-container').classList.toggle('visible', isStandalone());
   updateSwVersionDisplay();
+  updateTimeTravelStatus();
+};
+
+/*
+ * Debugging aid in the Advanced section of the config popup: pick a pretend
+ * "now" and the whole app (period display, timer mode, alarms) runs at that
+ * moment via the setOffset machinery.
+ */
+const setupTimeTravel = () => {
+  const input = $('#time-travel');
+
+  $('#time-travel-set').onclick = () => {
+    if (!input.value) return;
+    const [datePart, timePart] = input.value.split('T');
+    const [y, m, d] = datePart.split('-').map(Number);
+    const [hh, mm] = timePart.split(':').map(Number);
+    setOffset(y, m, d, hh, mm, 0);
+    updateTimeTravelStatus();
+    update();
+  };
+
+  $('#time-travel-clear').onclick = () => {
+    clearOffset();
+    input.value = '';
+    updateTimeTravelStatus();
+    update();
+  };
+};
+
+const updateTimeTravelStatus = () => {
+  const status = $('#time-travel-status');
+  if (offset === 0) {
+    status.innerText = '';
+    return;
+  }
+  const t = now();
+  const xx = (n) => String(n).padStart(2, '0');
+  status.innerText =
+    `Time travel active — pretending it is ` +
+    `${t.getFullYear()}-${xx(t.getMonth() + 1)}-${xx(t.getDate())} ${xx(t.getHours())}:${xx(t.getMinutes())}. ` +
+    `(Cleared by any reload.)`;
 };
 
 let scheduleDate = null;
@@ -795,7 +844,7 @@ registerServiceWorker();
 addProgressBars();
 
 // Auto-refresh if the page has been open for more than 24 hours.
-const reloadAt = toInstant(now()).add({ hours: 24 });
+let reloadAt = toInstant(now()).add({ hours: 24 });
 
 update();
 
