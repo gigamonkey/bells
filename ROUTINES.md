@@ -6,9 +6,15 @@ periods by name. When a scoped period is in progress, timer mode shows the
 current segment, its countdown, and a chime at each segment change.
 
 Besides configuring a routine in the editor UI, you can paste a JSON blob:
-in timer mode tap **Routines… → Add routine → Paste JSON…**, paste, and tap
-**Load**. The parsed routine fills the editor fields so you can review or
-tweak it before hitting **Save**.
+in timer mode tap **Routines… → Add routine → Paste JSON or URL…**, paste,
+and tap **Load**. The parsed routine fills the editor fields so you can
+review or tweak it before hitting **Save**.
+
+Instead of the JSON itself you can paste an `http(s)://` URL; **Load**
+fetches it and parses the response body as the routine JSON. The URL must
+be reachable from the browser, and if it's on a different host that host
+must allow cross-origin requests (CORS) — a raw file on GitHub or a Gist
+works, for example.
 
 ## Example
 

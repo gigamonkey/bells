@@ -562,29 +562,49 @@ const openRoutineEditor = (existing, preset) => {
   editor.replaceChildren();
   editor.appendChild($('<h3>', isNew ? 'New routine' : 'Edit routine'));
 
-  // Alternative to configuring by hand: paste the JSON form (ROUTINES.md)
-  // and load it into the editor fields for review before saving.
+  // Alternative to configuring by hand: paste the JSON form (ROUTINES.md),
+  // or a URL to fetch it from, and load it into the editor fields for review
+  // before saving.
   if (isNew) {
     const details = $('<details>');
     details.className = 'routine-json';
     const ta = $('<textarea>');
     ta.rows = 8;
-    ta.placeholder = '{"name": "Block lesson", "periods": ["Period 1"], "segments": […]} — see ROUTINES.md';
+    ta.placeholder =
+      '{"name": "Block lesson", "periods": ["Period 1"], "segments": […]} or https://… — see ROUTINES.md';
     ta.value = preset?.jsonText ?? '';
     details.open = ta.value !== '';
     const loadBtn = $('<button>', 'Load');
     loadBtn.className = 'alarm-btn';
     const jsonError = $('<div>');
     jsonError.className = 'routine-json-error';
-    loadBtn.onclick = () => {
-      const parsed = parseRoutineJson(ta.value);
+    loadBtn.onclick = async () => {
+      jsonError.innerText = '';
+      let text = ta.value.trim();
+      if (/^https?:\/\//i.test(text)) {
+        loadBtn.disabled = true;
+        try {
+          const res = await fetch(text);
+          if (!res.ok) {
+            jsonError.innerText = `Fetch failed: ${res.status} ${res.statusText}`;
+            return;
+          }
+          text = await res.text();
+        } catch (e) {
+          jsonError.innerText = `Fetch failed: ${e.message}`;
+          return;
+        } finally {
+          loadBtn.disabled = false;
+        }
+      }
+      const parsed = parseRoutineJson(text);
       if (parsed.error) {
         jsonError.innerText = parsed.error;
         return;
       }
       openRoutineEditor(null, { ...parsed, jsonText: ta.value });
     };
-    details.append($('<summary>', 'Paste JSON…'), ta, loadBtn, jsonError);
+    details.append($('<summary>', 'Paste JSON or URL…'), ta, loadBtn, jsonError);
     editor.appendChild(details);
   }
 
