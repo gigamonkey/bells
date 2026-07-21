@@ -4,6 +4,7 @@
  */
 
 import { BellSchedule } from './bell-schedule.js';
+import { today as clockToday } from './clock.js';
 import type { BellScheduleOptions, YearData } from './types.js';
 
 class Calendars {
@@ -60,7 +61,7 @@ class Calendars {
    * elsewhere — e.g. a server in UTC.
    */
   async current(options: BellScheduleOptions = {}, timeZone?: string): Promise<BellSchedule> {
-    const today = Temporal.Now.plainDateISO(timeZone);
+    const today = clockToday(timeZone);
     const year = this.#academicYearFor(today);
 
     const primaryArr = await this.#load(year);

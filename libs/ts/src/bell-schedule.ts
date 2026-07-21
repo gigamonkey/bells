@@ -10,6 +10,7 @@ import {
   type TimeAnchor,
 } from './abstract-time.js';
 import { Calendar, normalizeIncludeTags, type Interval } from './calendar.js';
+import { now, today } from './clock.js';
 import type {
   ActiveAnnotation,
   Annotations,
@@ -79,12 +80,12 @@ class BellSchedule {
     }, null);
   }
 
-  currentInterval(instant: Temporal.Instant = Temporal.Now.instant()): Interval | null {
+  currentInterval(instant: Temporal.Instant = now()): Interval | null {
     const cal = this.#calendarAt(instant);
     return cal ? cal.currentInterval(instant) : null;
   }
 
-  periodAt(instant: Temporal.Instant = Temporal.Now.instant()): Interval | null {
+  periodAt(instant: Temporal.Instant = now()): Interval | null {
     const interval = this.currentInterval(instant);
     return interval && interval.type === 'period' ? interval : null;
   }
@@ -95,12 +96,12 @@ class BellSchedule {
    * school's) when running elsewhere.
    */
   isSchoolDay(date?: Temporal.PlainDate, timeZone?: string): boolean {
-    const d = date ?? Temporal.Now.plainDateISO(timeZone);
+    const d = date ?? today(timeZone);
     const cal = this.#calendarForDate(d);
     return cal ? cal.isSchoolDay(d) : false;
   }
 
-  currentDayBounds(instant: Temporal.Instant = Temporal.Now.instant()): DayBounds | null {
+  currentDayBounds(instant: Temporal.Instant = now()): DayBounds | null {
     const cal = this.#calendarAt(instant);
     if (!cal) return null;
     const date = instant.toZonedDateTimeISO(cal.timezone).toPlainDate();
@@ -112,7 +113,7 @@ class BellSchedule {
     };
   }
 
-  nextSchoolDayStart(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant {
+  nextSchoolDayStart(instant: Temporal.Instant = now()): Temporal.Instant {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.nextSchoolDayStart(instant);
 
@@ -121,7 +122,7 @@ class BellSchedule {
     throw new Error('No calendar data available for next school day');
   }
 
-  previousSchoolDayEnd(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant {
+  previousSchoolDayEnd(instant: Temporal.Instant = now()): Temporal.Instant {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.previousSchoolDayEnd(instant);
 
@@ -130,25 +131,25 @@ class BellSchedule {
     throw new Error('No calendar data available for previous school day');
   }
 
-  schoolTimeLeft(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
+  schoolTimeLeft(instant: Temporal.Instant = now()): Temporal.Duration {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.schoolTimeLeft(instant);
     return Temporal.Duration.from({ seconds: 0 });
   }
 
-  schoolTimeDone(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
+  schoolTimeDone(instant: Temporal.Instant = now()): Temporal.Duration {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.schoolTimeDone(instant);
     return Temporal.Duration.from({ seconds: 0 });
   }
 
-  totalSchoolTime(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
+  totalSchoolTime(instant: Temporal.Instant = now()): Temporal.Duration {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.totalSchoolTime();
     return Temporal.Duration.from({ seconds: 0 });
   }
 
-  nextYearStart(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant {
+  nextYearStart(instant: Temporal.Instant = now()): Temporal.Instant {
     const next = this.#nextCalendar(instant);
     if (!next) throw new Error('No next year calendar data available');
     return next.startOfYear();
@@ -158,7 +159,7 @@ class BellSchedule {
    * Start of the school year containing `instant`, or null if `instant`
    * isn't within any school year (e.g. during summer).
    */
-  currentYearStart(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant | null {
+  currentYearStart(instant: Temporal.Instant = now()): Temporal.Instant | null {
     const cal = this.#calendarAt(instant);
     return cal ? cal.startOfYear() : null;
   }
@@ -167,7 +168,7 @@ class BellSchedule {
    * End of the school year containing `instant`, or null if `instant`
    * isn't within any school year (e.g. during summer).
    */
-  currentYearEnd(instant: Temporal.Instant = Temporal.Now.instant()): Temporal.Instant | null {
+  currentYearEnd(instant: Temporal.Instant = now()): Temporal.Instant | null {
     const cal = this.#calendarAt(instant);
     return cal ? cal.endOfYear() : null;
   }
@@ -199,20 +200,20 @@ class BellSchedule {
     return count;
   }
 
-  schoolDaysLeft(instant: Temporal.Instant = Temporal.Now.instant()): number {
+  schoolDaysLeft(instant: Temporal.Instant = now()): number {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.schoolDaysLeft(instant);
     return 0;
   }
 
-  calendarDaysLeft(instant: Temporal.Instant = Temporal.Now.instant()): number {
+  calendarDaysLeft(instant: Temporal.Instant = now()): number {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.calendarDaysLeft(instant);
     return 0;
   }
 
   /** Non-class days from `instant` through end of the active calendar's year. */
-  nonClassDaysLeft(instant: Temporal.Instant = Temporal.Now.instant()): NonClassDay[] {
+  nonClassDaysLeft(instant: Temporal.Instant = now()): NonClassDay[] {
     const cal = this.#calendarAt(instant);
     if (cal) return cal.nonClassDaysLeft(instant);
     return [];
@@ -224,7 +225,7 @@ class BellSchedule {
     return cal ? cal.nonClassLabel(date) : null;
   }
 
-  summerBounds(instant: Temporal.Instant = Temporal.Now.instant()): SummerBounds | null {
+  summerBounds(instant: Temporal.Instant = now()): SummerBounds | null {
     if (this.#calendarAt(instant)) return null;
 
     const prev = this.#prevCalendar(instant);
@@ -290,7 +291,7 @@ class BellSchedule {
   }
 
   /** Returns the active periods for the current or next school day. */
-  periodsForDate(instant: Temporal.Instant = Temporal.Now.instant()): ScheduledPeriod[] {
+  periodsForDate(instant: Temporal.Instant = now()): ScheduledPeriod[] {
     const cal = this.#calendarAt(instant) || this.#nextCalendar(instant);
     if (!cal) return [];
 
@@ -558,7 +559,7 @@ class BellSchedule {
    * The number of the period containing `instant`, or the next numbered
    * period later the same day, or null if neither exists.
    */
-  currentOrNextPeriodNumber(instant: Temporal.Instant = Temporal.Now.instant()): number | null {
+  currentOrNextPeriodNumber(instant: Temporal.Instant = now()): number | null {
     const date = instant.toZonedDateTimeISO(this.timezone).toPlainDate();
     for (const p of this.scheduleFor(date)) {
       const n = this.#periodNumber(p);

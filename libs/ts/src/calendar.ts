@@ -4,6 +4,7 @@
  */
 
 import { parsePlainDate, resolveScheduleTimes, daysBetween, noon, includesWeekend } from './datetime.js';
+import { now as clockNow } from './clock.js';
 import type {
   ActiveAnnotation,
   Annotation,
@@ -740,11 +741,11 @@ class Interval {
     this.tags = tags;
   }
 
-  left(now: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
+  left(now: Temporal.Instant = clockNow()): Temporal.Duration {
     return now.until(this.end);
   }
 
-  done(now: Temporal.Instant = Temporal.Now.instant()): Temporal.Duration {
+  done(now: Temporal.Instant = clockNow()): Temporal.Duration {
     return this.start.until(now);
   }
 }

@@ -189,6 +189,33 @@ bells.schoolTimeBetween(a, b)     // Temporal.Duration
 bells.summerBounds()              // { start, end } | null
 ```
 
+### Debugging with a simulated time
+
+Every method that defaults to "now" (`currentInterval()`, `periodAt()`,
+`schoolDaysLeft()`, `Calendars.current()`, `Interval.left()`, …) reads the
+library's clock. You can point that clock at a simulated moment so you can
+debug your app as if it were another time, without threading an instant into
+every call:
+
+```js
+import { setDebugTime, setDebugOffset, clearDebugTime, getDebugOffset } from '@peterseibel/bells';
+
+// Pretend it's 8:45am on a school morning. Time keeps ticking forward from here.
+setDebugTime(Temporal.ZonedDateTime.from('2025-08-19T08:45[America/Los_Angeles]').toInstant());
+bells.currentInterval();          // resolves as if now were that instant → "Period 1"
+
+// Or shift by a fixed delta instead of an absolute time:
+setDebugOffset(Temporal.Duration.from({ hours: -3 }));
+
+getDebugOffset();                 // Temporal.Duration | null (null = real clock)
+clearDebugTime();                 // back to the real system clock
+```
+
+The offset is **process-global** — it affects every time-defaulting method in
+the library — and passing an explicit instant to a method still overrides it.
+It's a debugging affordance, not something to rely on in a concurrent
+multi-tenant server.
+
 ### School weeks & annotations
 
 ```js
