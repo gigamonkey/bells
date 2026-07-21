@@ -70,7 +70,7 @@ public final class Interval {
    * @return duration from now until {@link #end()}
    */
   public Duration left() {
-    return left(Instant.now());
+    return left(DateTimes.now());
   }
 
   /**
@@ -89,7 +89,7 @@ public final class Interval {
    * @return duration from {@link #start()} until now
    */
   public Duration done() {
-    return done(Instant.now());
+    return done(DateTimes.now());
   }
 
   /**

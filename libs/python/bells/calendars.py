@@ -13,7 +13,7 @@ from typing import Optional
 from urllib.request import urlopen
 
 from .bell_schedule import BellSchedule
-from .datetimeutil import _instant_to_date, _now_instant
+from .datetimeutil import _today
 
 
 class Calendars:
@@ -56,7 +56,7 @@ class Calendars:
         anchor the academic-year rollover to a specific zone (e.g. the school's)
         when running elsewhere — e.g. a server in UTC.
         """
-        today = _instant_to_date(_now_instant(), tz) if tz else date.today()
+        today = _today(tz)
         year = self._academic_year_for(today)
 
         primary_arr = self._load(year)

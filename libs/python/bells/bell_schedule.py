@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 
 from .abstract_time import parse_offset_minutes
 from .calendar import Calendar, Interval, normalize_include_tags
-from .datetimeutil import _instant_to_date, _now_instant
+from .datetimeutil import _instant_to_date, _now_instant, _today
 
 _PERIOD_NUMBER_RE = re.compile(r"^Period (\d+)\b")
 
@@ -101,7 +101,7 @@ class BellSchedule:
         when the process runs elsewhere — e.g. a server in UTC.
         """
         if d is None:
-            d = _instant_to_date(_now_instant(), tz) if tz else date.today()
+            d = _today(tz)
         cal = self._calendar_for_date(d)
         return cal.is_school_day(d) if cal else False
 

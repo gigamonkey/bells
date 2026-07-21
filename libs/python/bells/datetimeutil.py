@@ -130,9 +130,54 @@ def _instant_to_date(instant: datetime, tz: str) -> date:
     return instant.astimezone(ZoneInfo(tz)).date()
 
 
+# The library's notion of "now". By default this is the real system clock. For
+# debugging, consumers can set a simulated current time (or a raw offset) via
+# the public API below; the offset is a fixed delta added to the live clock, so
+# time keeps ticking forward from the simulated moment rather than freezing.
+#
+# The offset is process-global: it affects every time-defaulting method in the
+# library. That makes it a debugging affordance, not something to rely on in a
+# concurrent multi-tenant server.
+_debug_offset: Optional[timedelta] = None
+
+
 def _now_instant() -> datetime:
-    """The current moment as a UTC instant (counterpart of ``Temporal.Now.instant()``)."""
-    return datetime.now(timezone.utc)
+    """The current moment as a UTC instant, honoring any debug offset
+    (counterpart of ``Temporal.Now.instant()``)."""
+    now = datetime.now(timezone.utc)
+    return now + _debug_offset if _debug_offset is not None else now
+
+
+def _today(tz: Optional[str] = None) -> date:
+    """The current local date, honoring any debug offset. With ``tz`` given the
+    date is observed in that timezone; otherwise the system-local zone."""
+    now = _now_instant()
+    return now.astimezone(ZoneInfo(tz)).date() if tz else now.astimezone().date()
+
+
+def set_debug_time(instant: datetime) -> None:
+    """Debug: pretend "now" is ``instant`` (a timezone-aware ``datetime``). Time
+    keeps ticking forward from there. Equivalent to an offset of
+    ``instant - real_now``."""
+    global _debug_offset
+    _debug_offset = instant - datetime.now(timezone.utc)
+
+
+def set_debug_offset(offset: timedelta) -> None:
+    """Debug: set the offset added to the real clock directly."""
+    global _debug_offset
+    _debug_offset = offset
+
+
+def clear_debug_time() -> None:
+    """Debug: drop any simulated time and go back to the real clock."""
+    global _debug_offset
+    _debug_offset = None
+
+
+def get_debug_offset() -> Optional[timedelta]:
+    """The current debug offset, or ``None`` if using the real clock."""
+    return _debug_offset
 
 
 def noon(d: date) -> datetime:

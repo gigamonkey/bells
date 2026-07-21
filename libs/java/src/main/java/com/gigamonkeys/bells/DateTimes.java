@@ -24,6 +24,69 @@ public final class DateTimes {
 
   private DateTimes() {}
 
+  /**
+   * The library's notion of "now". By default this is the real system clock. For
+   * debugging, consumers can set a simulated current time (or a raw offset) via
+   * {@link #setDebugTime}, {@link #setDebugOffset} and {@link #clearDebugTime};
+   * the offset is a fixed delta added to the live clock, so time keeps ticking
+   * forward from the simulated moment rather than freezing.
+   *
+   * <p>The offset is process-global: it affects every time-defaulting method in
+   * the library. That makes it a debugging affordance, not something to rely on
+   * in a concurrent multi-tenant server.
+   */
+  private static volatile Duration debugOffset = null;
+
+  /** The current instant, offset-adjusted (counterpart of {@code Temporal.Now.instant()}). */
+  static Instant now() {
+    Instant real = Instant.now();
+    Duration offset = debugOffset;
+    return offset == null ? real : real.plus(offset);
+  }
+
+  /** The current local date in {@code zone}, offset-adjusted. */
+  static LocalDate today(ZoneId zone) {
+    return now().atZone(zone).toLocalDate();
+  }
+
+  /** The current local date in the system-default zone, offset-adjusted. */
+  static LocalDate today() {
+    return today(ZoneId.systemDefault());
+  }
+
+  /**
+   * Debug: pretend "now" is {@code instant}. Time keeps ticking forward from there.
+   * Equivalent to setting the offset to {@code instant - realNow}.
+   *
+   * @param instant the simulated current instant
+   */
+  public static void setDebugTime(Instant instant) {
+    debugOffset = Duration.between(Instant.now(), instant);
+  }
+
+  /**
+   * Debug: set the offset added to the real clock directly.
+   *
+   * @param offset the delta to add to the real clock
+   */
+  public static void setDebugOffset(Duration offset) {
+    debugOffset = offset;
+  }
+
+  /** Debug: drop any simulated time and go back to the real clock. */
+  public static void clearDebugTime() {
+    debugOffset = null;
+  }
+
+  /**
+   * The current debug offset, or {@code null} if using the real clock.
+   *
+   * @return the offset added to the real clock, or {@code null}
+   */
+  public static Duration getDebugOffset() {
+    return debugOffset;
+  }
+
   /** Result of parsing a possibly-ambiguous time string. */
   public record ParsedTime(LocalTime time, boolean ambiguous) {}
 

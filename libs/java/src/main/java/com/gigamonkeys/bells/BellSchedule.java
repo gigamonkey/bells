@@ -17,8 +17,9 @@ import java.util.function.Consumer;
  * relevant moment.
  *
  * <p>Methods that accept an {@link Instant} have a no-argument overload that uses
- * {@link Instant#now()}; methods that accept a {@link LocalDate} have a no-argument overload
- * that uses today's date in the schedule's timezone.
+ * {@link DateTimes#now()}; methods that accept a {@link LocalDate} have a no-argument overload
+ * that uses today's date. Both read the library's clock, so a debug offset set via
+ * {@link DateTimes#setDebugTime} affects every no-argument query.
  */
 public final class BellSchedule {
 
@@ -118,7 +119,7 @@ public final class BellSchedule {
    * @return the interval covering now, or {@code null}
    */
   public Interval currentInterval() {
-    return currentInterval(Instant.now());
+    return currentInterval(DateTimes.now());
   }
 
   /**
@@ -134,7 +135,7 @@ public final class BellSchedule {
    * @return the named period at now, or {@code null} if not in a period
    */
   public Interval periodAt() {
-    return periodAt(Instant.now());
+    return periodAt(DateTimes.now());
   }
 
   /**
@@ -154,7 +155,7 @@ public final class BellSchedule {
    *     elsewhere.
    */
   public boolean isSchoolDay() {
-    return isSchoolDay(LocalDate.now());
+    return isSchoolDay(DateTimes.today());
   }
 
   /**
@@ -162,7 +163,7 @@ public final class BellSchedule {
    * @return whether today (in {@code zone}) is a school day
    */
   public boolean isSchoolDay(ZoneId zone) {
-    return isSchoolDay(LocalDate.now(zone));
+    return isSchoolDay(DateTimes.today(zone));
   }
 
   /**
@@ -180,7 +181,7 @@ public final class BellSchedule {
    * @return start/end of the current school day, or {@code null} if not a school day
    */
   public DayBounds currentDayBounds() {
-    return currentDayBounds(Instant.now());
+    return currentDayBounds(DateTimes.now());
   }
 
   /**
@@ -205,7 +206,7 @@ public final class BellSchedule {
    * @return the instant the next school day starts
    */
   public Instant nextSchoolDayStart() {
-    return nextSchoolDayStart(Instant.now());
+    return nextSchoolDayStart(DateTimes.now());
   }
 
   /**
@@ -229,7 +230,7 @@ public final class BellSchedule {
    * @return the instant the previous school day ended
    */
   public Instant previousSchoolDayEnd() {
-    return previousSchoolDayEnd(Instant.now());
+    return previousSchoolDayEnd(DateTimes.now());
   }
 
   /**
@@ -255,7 +256,7 @@ public final class BellSchedule {
    * @return school time remaining in the current year
    */
   public Duration schoolTimeLeft() {
-    return schoolTimeLeft(Instant.now());
+    return schoolTimeLeft(DateTimes.now());
   }
 
   /**
@@ -271,7 +272,7 @@ public final class BellSchedule {
    * @return school time elapsed since the start of the current year
    */
   public Duration schoolTimeDone() {
-    return schoolTimeDone(Instant.now());
+    return schoolTimeDone(DateTimes.now());
   }
 
   /**
@@ -287,7 +288,7 @@ public final class BellSchedule {
    * @return total school time in the current year
    */
   public Duration totalSchoolTime() {
-    return totalSchoolTime(Instant.now());
+    return totalSchoolTime(DateTimes.now());
   }
 
   /**
@@ -305,7 +306,7 @@ public final class BellSchedule {
    * @return the start of the next academic year
    */
   public Instant nextYearStart() {
-    return nextYearStart(Instant.now());
+    return nextYearStart(DateTimes.now());
   }
 
   /**
@@ -325,7 +326,7 @@ public final class BellSchedule {
    * @return the start of the school year containing now, or {@code null} if in summer
    */
   public Instant currentYearStart() {
-    return currentYearStart(Instant.now());
+    return currentYearStart(DateTimes.now());
   }
 
   /**
@@ -341,7 +342,7 @@ public final class BellSchedule {
    * @return the end of the school year containing now, or {@code null} if in summer
    */
   public Instant currentYearEnd() {
-    return currentYearEnd(Instant.now());
+    return currentYearEnd(DateTimes.now());
   }
 
   /**
@@ -399,7 +400,7 @@ public final class BellSchedule {
    * @return school days remaining (including today if still in progress)
    */
   public int schoolDaysLeft() {
-    return schoolDaysLeft(Instant.now());
+    return schoolDaysLeft(DateTimes.now());
   }
 
   /**
@@ -415,7 +416,7 @@ public final class BellSchedule {
    * @return calendar days until the end of the school year
    */
   public int calendarDaysLeft() {
-    return calendarDaysLeft(Instant.now());
+    return calendarDaysLeft(DateTimes.now());
   }
 
   /**
@@ -433,7 +434,7 @@ public final class BellSchedule {
    * @return non-class days from now through the end of the active year
    */
   public List<NonClassDay> nonClassDaysLeft() {
-    return nonClassDaysLeft(Instant.now());
+    return nonClassDaysLeft(DateTimes.now());
   }
 
   /**
@@ -460,7 +461,7 @@ public final class BellSchedule {
    * @return start/end of summer, or {@code null} if now is within a school year
    */
   public SummerBounds summerBounds() {
-    return summerBounds(Instant.now());
+    return summerBounds(DateTimes.now());
   }
 
   /**
@@ -548,7 +549,7 @@ public final class BellSchedule {
    * @return the active periods for the current or next school day
    */
   public List<PeriodInstant> periodsForDate() {
-    return periodsForDate(Instant.now());
+    return periodsForDate(DateTimes.now());
   }
 
   /**
@@ -945,7 +946,7 @@ public final class BellSchedule {
    *     {@code null}
    */
   public Integer currentOrNextPeriodNumber() {
-    return currentOrNextPeriodNumber(Instant.now());
+    return currentOrNextPeriodNumber(DateTimes.now());
   }
 
   /**

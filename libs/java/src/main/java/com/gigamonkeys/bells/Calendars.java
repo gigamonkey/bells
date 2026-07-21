@@ -112,7 +112,7 @@ public final class Calendars {
    * @return the bell schedule
    */
   public BellSchedule current(ZoneId zone, Options options) {
-    LocalDate today = LocalDate.now(zone);
+    LocalDate today = DateTimes.today(zone);
     String year = academicYearFor(today);
 
     List<CalendarData> primary = load(year);

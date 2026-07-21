@@ -95,6 +95,37 @@ bells.school_time_between(a, b)   # timedelta
 bells.summer_bounds()             # {"start": ..., "end": ...} | None
 ```
 
+### Debugging with a simulated time
+
+Every method that defaults to "now" (`current_interval()`, `period_at()`,
+`school_days_left()`, `Calendars.current()`, `Interval.left()`, …) reads the
+library's clock. You can point that clock at a simulated moment so you can
+debug your app as if it were another time, without threading an instant into
+every call:
+
+```python
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+from bells import set_debug_time, set_debug_offset, clear_debug_time, get_debug_offset
+
+# Pretend it's 8:45am on a school morning. Time keeps ticking forward from here.
+# set_debug_time takes a timezone-aware datetime.
+set_debug_time(datetime(2025, 8, 19, 8, 45, tzinfo=ZoneInfo("America/Los_Angeles")))
+bells.current_interval()          # resolves as if now were that instant → "Period 1"
+
+# Or shift by a fixed delta instead of an absolute time:
+set_debug_offset(timedelta(hours=-3))
+
+get_debug_offset()                # timedelta | None (None = real clock)
+clear_debug_time()                # back to the real system clock
+```
+
+The offset is **process-global** — it affects every time-defaulting method in
+the library — and passing an explicit instant to a method still overrides it.
+It's a debugging affordance, not something to rely on in a concurrent
+multi-tenant server.
+
 ### School weeks & annotations
 
 A calendar year may carry an optional `annotations` field — generic extra

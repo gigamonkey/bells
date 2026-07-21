@@ -102,7 +102,7 @@ if (interval != null) {
   System.out.println(interval.left());        // Duration until end of interval
 }
 
-// Other queries (Instant overloads default to Instant.now()):
+// Other queries (Instant overloads default to the library clock, DateTimes.now()):
 bells.periodAt();              // Interval | null (null if passing/break)
 bells.isSchoolDay(LocalDate.now());
 bells.currentDayBounds();      // Bounds | null
@@ -122,6 +122,37 @@ bells.periodsForDate();        // List<PeriodInstant>
 
 You can also build from a Jackson `JsonNode` via `BellSchedule.fromJson(node, options)`,
 or from already-parsed data via `new BellSchedule(List<CalendarData>, options)`.
+
+### Debugging with a simulated time
+
+Every method that defaults to "now" (`currentInterval()`, `periodAt()`,
+`schoolDaysLeft()`, `Calendars.current()`, `Interval.left()`, …) reads the
+library's clock. Point that clock at a simulated moment via the static methods
+on `DateTimes` to debug as if it were another time, without threading an
+`Instant` into every call:
+
+```java
+import com.gigamonkeys.bells.DateTimes;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
+// Pretend it's 8:45am on a school morning. Time keeps ticking forward from here.
+DateTimes.setDebugTime(
+    ZonedDateTime.of(2025, 8, 19, 8, 45, 0, 0, ZoneId.of("America/Los_Angeles")).toInstant());
+bells.currentInterval();          // resolves as if now were that instant → "Period 1"
+
+// Or shift by a fixed delta instead of an absolute time:
+DateTimes.setDebugOffset(Duration.ofHours(-3));
+
+DateTimes.getDebugOffset();       // Duration | null (null = real clock)
+DateTimes.clearDebugTime();       // back to the real system clock
+```
+
+The offset is **process-global** — it affects every time-defaulting method in
+the library — and passing an explicit `Instant` still overrides it. It's a
+debugging affordance, not something to rely on in a concurrent multi-tenant
+server.
 
 ### Abstract times
 
