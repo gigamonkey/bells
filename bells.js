@@ -16,23 +16,25 @@ import {
   toggleTeacher,
   isTeacher,
 } from './calendar.js';
+import { setDebugTime, clearDebugTime, getDebugOffset } from '@peterseibel/bells';
 import { timestring, hhmmss, timeCountdown } from './datetime.js';
 import { $, $$, text } from './dom.js';
 import { setupAlarms, tickAlarms, updateTeacherModeVisibility } from './alarms.js';
 import { setupTimer, tickTimer, renderTimer, isTimerMode, updateTimerTeacherVisibility } from './timer.js';
 
 // Time-travel offset for debugging, settable from the console or from the
-// Advanced section of the config popup. Resetting reloadAt keeps the 24-hour
+// Advanced section of the config popup. The offset lives in the @peterseibel/bells
+// library (setDebugTime / clearDebugTime / getDebugOffset) so it's the single
+// source of truth; now() below applies it. Resetting reloadAt keeps the 24-hour
 // auto-reload from firing immediately when we pretend to be in the future.
-let offset = 0;
-
 const setOffset = (year, month, date, hour = 12, min = 0, second = 0) => {
-  offset = new Date(year, month - 1, date, hour, min, second).getTime() - new Date().getTime();
+  const target = new Date(year, month - 1, date, hour, min, second).getTime();
+  setDebugTime(Temporal.Instant.fromEpochMilliseconds(target));
   reloadAt = toInstant(now()).add({ hours: 24 });
 };
 
 const clearOffset = () => {
-  offset = 0;
+  clearDebugTime();
   reloadAt = toInstant(now()).add({ hours: 24 });
 };
 
@@ -49,6 +51,8 @@ const now = () => {
   const localTime = Temporal.Now.plainDateTimeISO();
   const otherTime = localTime.toZonedDateTime(getBellSchedule().timezone);
   const delta = Math.abs(Temporal.Instant.from(otherTime).epochMilliseconds - instant);
+  const debugOffset = getDebugOffset();
+  const offset = debugOffset ? debugOffset.total({ unit: 'milliseconds' }) : 0;
   return new Date(instant - delta + offset);
 };
 
@@ -268,7 +272,7 @@ const setupTimeTravel = () => {
 
 const updateTimeTravelStatus = () => {
   const status = $('#time-travel-status');
-  if (offset === 0) {
+  if (!getDebugOffset()) {
     status.innerText = '';
     return;
   }
