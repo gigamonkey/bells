@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bell-schedule"
-version = "0.8.1"
+version = "0.9.0"
 description = "A framework-agnostic library for querying school bell schedules (Python port)"
 readme = "README.md"
 requires-python = ">=3.9"
