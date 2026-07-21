@@ -42,7 +42,7 @@
   "devDependencies": {
     "@js-temporal/polyfill": "^0.5.1",
     "@types/node": "^25.9.2",
-    "temporal-polyfill": "^0.3.2",
+    "temporal-polyfill": "^1.0.1",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   }
