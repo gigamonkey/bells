@@ -5,6 +5,19 @@ native support lands. Written 2026-07-21; the external facts move fast, so the
 "landscape" section is dated and should be re-checked before acting on the later
 phases.
 
+**Status (2026-08-04): Phases 1 and 2 are implemented; only Phase 3 (gated on
+a Node ≥ 26 floor and Safari adoption) remains.** Phase 1: everything now uses
+`temporal-polyfill@^1.0.1` and `@js-temporal/polyfill` is gone (app, server,
+library CLI, ambient types, peer dep). Phase 2: app modules import a
+`temporal-setup.js` bootstrap that feature-detects `globalThis.Temporal` and
+dynamically imports `temporal-polyfill/global` only when absent; esbuild code
+splitting emits it as a fixed-name `temporal.js` chunk (precached by the
+service worker, published by the Makefile). `out.js` went 476 kB → 421 kB
+(Phase 1) → 240 kB (Phase 2), with the 188 kB chunk downloaded only by
+browsers without native Temporal. Note: the published `@peterseibel/bells`
+still declares the old peer dep until its next release, and the "stale server
+deps" refresh noted below is still outstanding.
+
 ## The question
 
 Do we still need a Temporal polyfill, and if so which one? The project currently
