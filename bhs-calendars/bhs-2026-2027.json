@@ -329,6 +329,14 @@
         "teachers": true
       }
     ],
+    "2026-08-11": [
+      {
+        "name": "Classroom setup",
+        "start": "8:30",
+        "end": "15:33",
+        "teachers": true
+      }
+    ],
     "2026-12-16": "EXAMS 1",
     "2026-12-17": "EXAMS 2",
     "2026-12-18": "EXAMS 3",
