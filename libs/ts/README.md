@@ -5,7 +5,7 @@ A framework-agnostic JavaScript library for querying school bell schedules. Buil
 ## Installation
 
 ```sh
-npm install @peterseibel/bells @js-temporal/polyfill
+npm install @peterseibel/bells temporal-polyfill
 ```
 
 The library is built on the [Temporal API](https://tc39.es/proposal-temporal/),
@@ -13,15 +13,15 @@ which it expects as a global (`globalThis.Temporal`) rather than importing it.
 Supply it once, at startup, before using the library:
 
 ```js
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 globalThis.Temporal = Temporal;
 ```
 
-`@js-temporal/polyfill` is a peer dependency. On a runtime that already provides
+`temporal-polyfill` is a peer dependency. On a runtime that already provides
 a native `Temporal` global, you can skip both the install and the assignment.
 
 The library ships TypeScript declarations. Because it types `Temporal` against
-`@js-temporal/polyfill`, having that peer dependency installed is enough for the
+`temporal-polyfill`, having that peer dependency installed is enough for the
 types to resolve — no `tsconfig` changes needed. (This handles typechecking; you
 still need the runtime assignment above unless `Temporal` is already global.)
 

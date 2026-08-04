@@ -4,7 +4,7 @@
  * Usage: bells-validate <file.json> [file2.json ...]
  */
 
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 globalThis.Temporal = Temporal;
 import { readFile } from 'node:fs/promises';
 import { validateCalendarData } from '../validate.js';

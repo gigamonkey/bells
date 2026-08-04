@@ -6,6 +6,9 @@ module.exports = {
     "extends": [
         "eslint:recommended",
     ],
+    "globals": {
+        "Temporal": "readonly"
+    },
     "parserOptions": {
         "ecmaFeatures": {
             "jsx": true

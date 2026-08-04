@@ -8,6 +8,8 @@ files += out.js.map
 files += sample-routines.json
 files += style.css
 files += sw.js
+files += temporal.js
+files += temporal.js.map
 
 # Bump level passed to `npm version` by the release-* targets. Defaults to a
 # patch bump; override on the command line, e.g.:

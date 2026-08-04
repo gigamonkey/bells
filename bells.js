@@ -1,4 +1,4 @@
-import { Temporal } from '@js-temporal/polyfill';
+import './temporal-setup.js';
 import { version } from './version.js';
 import {
   getBellSchedule,
