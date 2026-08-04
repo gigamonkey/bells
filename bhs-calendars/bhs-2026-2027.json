@@ -279,6 +279,56 @@
     "monday": "LATE START"
   },
   "dates": {
+    "2026-08-10": [
+      {
+        "name": "All Staff Arrives at BHS Library",
+        "start": "8:03",
+        "end": "8:20",
+        "teachers": true
+      },
+      {
+        "name": "Welcome Back in the Library",
+        "start": "8:20",
+        "end": "8:50",
+        "teachers": true
+      },
+      {
+        "name": "Rotation Block #1",
+        "start": "9:00",
+        "end": "10:00",
+        "teachers": true
+      },
+      {
+        "name": "Rotation Block #2",
+        "start": "10:10",
+        "end": "11:10",
+        "teachers": true
+      },
+      {
+        "name": "Rotation Block #3",
+        "start": "11:20",
+        "end": "12:20",
+        "teachers": true
+      },
+      {
+        "name": "Lunch (on your own)",
+        "start": "12:20",
+        "end": "13:20",
+        "teachers": true
+      },
+      {
+        "name": "Department Time",
+        "start": "13:20",
+        "end": "14:20",
+        "teachers": true
+      },
+      {
+        "name": "ASCIP Training / Safety Backpack Check",
+        "start": "14:20",
+        "end": "15:33",
+        "teachers": true
+      }
+    ],
     "2026-12-16": "EXAMS 1",
     "2026-12-17": "EXAMS 2",
     "2026-12-18": "EXAMS 3",
