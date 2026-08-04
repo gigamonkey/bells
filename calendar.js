@@ -1,12 +1,6 @@
-import { Temporal } from 'temporal-polyfill';
+import './temporal-setup.js';
 import { BellSchedule } from '@peterseibel/bells';
 import allCalendars from '@peterseibel/bhs-calendars';
-
-// Make Temporal available as a global so the lib (which uses it as a global
-// rather than importing it explicitly) works correctly when bundled.
-if (!globalThis.Temporal) {
-  globalThis.Temporal = Temporal;
-}
 
 const DEFAULT_CALENDAR_ID = 'bhs';
 

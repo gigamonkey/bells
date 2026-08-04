@@ -1,5 +1,6 @@
 // Build script shared by `make build` and `make watch` (and the npm `dev`
-// script). Bundles bells.js → out.js and stamps sw.js from sw.js.template
+// script). Bundles bells.js → out.js (plus the temporal.js polyfill chunk)
+// and stamps sw.js from sw.js.template
 // with a content-derived cache name, so the two can never drift: every
 // rebuild — one-shot or watch — regenerates both.
 //
@@ -14,7 +15,7 @@ const watch = process.argv.includes('--watch');
 // Files whose bytes determine the service-worker cache name. Must match what
 // the deployed app serves; hashed in this order (same as the old Makefile
 // `cat ... | shasum` step, so the cache name is stable across the migration).
-const HASHED_FILES = ['out.js', 'style.css', 'index.html', 'manifest.json'];
+const HASHED_FILES = ['out.js', 'temporal.js', 'style.css', 'index.html', 'manifest.json'];
 
 function stampServiceWorker() {
   const hash = createHash('sha1');
@@ -35,11 +36,19 @@ const stampPlugin = {
 };
 
 const ctx = await esbuild.context({
-  entryPoints: ['bells.js'],
+  entryPoints: [{ in: 'bells.js', out: 'out' }],
   bundle: true,
   sourcemap: true,
   format: 'esm',
-  outfile: 'out.js',
+  // Code splitting so the conditional `await import('temporal-polyfill/global')`
+  // in temporal-setup.js lands in its own chunk, downloaded only by browsers
+  // without native Temporal. The fixed chunk name keeps sw.js.template and the
+  // Makefile's publish list stable; the app's only dynamic import is the
+  // polyfill, so exactly one chunk exists (a second would collide and fail the
+  // build, which is the alarm we want).
+  splitting: true,
+  chunkNames: 'temporal',
+  outdir: '.',
   plugins: [stampPlugin],
 });
 

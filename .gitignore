@@ -2,6 +2,8 @@
 node_modules
 out.js
 out.js.map
+temporal.js
+temporal.js.map
 sw.js
 version.js
 .venv

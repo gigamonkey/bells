@@ -8,6 +8,7 @@ const files = [
   './index.html',
   './style.css',
   './out.js',
+  './temporal.js',
   './manifest.json',
   './images/bells-qr.png',
   './images/GitHub-Mark-32px.png',
