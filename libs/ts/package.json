@@ -40,9 +40,9 @@
     "temporal-polyfill": ">=1"
   },
   "devDependencies": {
-    "@types/node": "^25.9.2",
-    "temporal-polyfill": "^1.0.1",
-    "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "@types/node": "^26.1.2",
+    "temporal-polyfill": "^1.0.3",
+    "tsx": "^4.23.5",
+    "typescript": "^7.0.2"
   }
 }
