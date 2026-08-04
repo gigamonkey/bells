@@ -10,6 +10,7 @@
  *   GET /api/status             — full status: interval + day bounds + year counters
  *
  * Query parameters (all endpoints):
+ *   calendar=<id>           school calendar id (e.g. bhs, king-6); default: bhs
  *   role=student|teacher    default: student
  *   includeTags=zero,seventh,ext   optional periods to include (comma-separated)
  *   time=<ISO 8601 instant> instant to query (e.g. 2026-01-15T10:30:00-08:00); defaults to now
@@ -17,40 +18,103 @@
  *
  * Environment:
  *   PORT            default: 3000
- *   CALENDARS_PATH  path to calendars/ directory, default: <script dir>/calendars/
- *                   (falls back to ../calendars/ relative to this file for dev)
+ *   CALENDARS_PATH  directory of yearly calendar JSON files (any file layout;
+ *                   every *.json in it is loaded and non-calendar files are
+ *                   ignored). Default: <script dir>/calendars/ if present,
+ *                   else the installed @peterseibel/bhs-calendars package,
+ *                   else ../bhs-calendars/ relative to this file for dev.
  */
 
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { existsSync } from 'node:fs';
+import { readdir, readFile } from 'node:fs/promises';
 import express from 'express';
 import cors from 'cors';
 import { Temporal } from 'temporal-polyfill';
-import { Calendars } from '@peterseibel/bells/calendars';
 
-globalThis.Temporal = Temporal;
+if (!globalThis.Temporal) {
+  globalThis.Temporal = Temporal;
+}
+
+const { BellSchedule } = await import('@peterseibel/bells');
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
+const DEFAULT_CALENDAR_ID = 'bhs';
 
 const defaultCalendarsPath = () => {
   const local = join(__dirname, 'calendars');
-  if (existsSync(local)) return local + '/';
+  if (existsSync(local)) return local;
   const pkg = join(__dirname, 'node_modules', '@peterseibel', 'bhs-calendars');
-  if (existsSync(pkg)) return pkg + '/';
-  return join(__dirname, '..', 'bhs-calendars') + '/';
+  if (existsSync(pkg)) return pkg;
+  return join(__dirname, '..', 'bhs-calendars');
 };
 
 const CALENDARS_PATH = process.env.CALENDARS_PATH ?? defaultCalendarsPath();
 
-const calendars = new Calendars(CALENDARS_PATH);
+/**
+ * Load every yearly calendar object from *.json files in the directory.
+ * Files may hold a single year object or an array of them; anything without
+ * the calendar shape (e.g. a stray package.json) is skipped.
+ */
+const loadCalendars = async (dir) => {
+  const files = (await readdir(dir)).filter((f) => f.endsWith('.json'));
+  const parsed = await Promise.all(
+    files.map(async (f) => JSON.parse(await readFile(join(dir, f), 'utf8'))),
+  );
+  return parsed.flat().filter((y) => y && y.id && y.year && y.firstDay);
+};
+
+/** Group yearly calendars by school id, years sorted chronologically. */
+const buildRegistry = (years) => {
+  const map = new Map();
+  for (const y of years) {
+    const entry = map.get(y.id) ?? [];
+    entry.push(y);
+    map.set(y.id, entry);
+  }
+  for (const entry of map.values()) {
+    entry.sort((a, b) => (a.firstDay < b.firstDay ? -1 : a.firstDay > b.firstDay ? 1 : 0));
+  }
+  return map;
+};
+
+const registry = buildRegistry(await loadCalendars(CALENDARS_PATH));
+if (!registry.size) {
+  console.error(`No calendars found in ${CALENDARS_PATH}`);
+  process.exit(1);
+}
 
 const parseOptions = (query) => {
   const role = query.role || 'student';
   const raw = query.includeTags;
   const includeTags = raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [];
   return { role, includeTags };
+};
+
+// BellSchedules are immutable per (calendar, options), so memoize them.
+const scheduleCache = new Map();
+
+/**
+ * BellSchedule for the request's calendar/role/includeTags, or null (with a
+ * 400 already sent) if the calendar id is unknown.
+ */
+const scheduleOr400 = (req, res) => {
+  const id = req.query.calendar || DEFAULT_CALENDAR_ID;
+  const years = registry.get(id);
+  if (!years) {
+    res.status(400).json({ error: `Unknown calendar '${id}'`, calendars: [...registry.keys()] });
+    return null;
+  }
+  const { role, includeTags } = parseOptions(req.query);
+  const key = `${id}|${role}|${includeTags.join(',')}`;
+  let schedule = scheduleCache.get(key);
+  if (!schedule) {
+    schedule = new BellSchedule(years, { role, includeTags });
+    scheduleCache.set(key, schedule);
+  }
+  return schedule;
 };
 
 const TZ = 'America/Los_Angeles';
@@ -89,25 +153,25 @@ const serializeInterval = (interval, now) => {
   };
 };
 
-const handleCurrent = async (req, res) => {
-  const options = parseOptions(req.query);
+const handleCurrent = (req, res) => {
+  const schedule = scheduleOr400(req, res);
+  if (!schedule) return;
   const instant = parseInstant(req.query);
-  const schedule = await calendars.current(options);
   res.json({ interval: serializeInterval(schedule.currentInterval(instant), instant) });
 };
 
-const handleSchedule = async (req, res) => {
-  const options = parseOptions(req.query);
+const handleSchedule = (req, res) => {
+  const schedule = scheduleOr400(req, res);
+  if (!schedule) return;
   const instant = parseInstant(req.query);
-  const schedule = await calendars.current(options);
   const periods = schedule.periodsForDate(instant);
   res.json({ periods: serializePeriods(periods) });
 };
 
-const handleStatus = async (req, res) => {
-  const options = parseOptions(req.query);
+const handleStatus = (req, res) => {
+  const schedule = scheduleOr400(req, res);
+  if (!schedule) return;
   const instant = parseInstant(req.query);
-  const schedule = await calendars.current(options);
   const dayBounds = schedule.currentDayBounds(instant);
   res.json({
     interval: serializeInterval(schedule.currentInterval(instant), instant),
@@ -130,10 +194,10 @@ const serializePeriods = (periods) =>
     tags: p.tags,
   }));
 
-const handleScheduleFor = async (req, res) => {
-  const options = parseOptions(req.query);
+const handleScheduleFor = (req, res) => {
+  const schedule = scheduleOr400(req, res);
+  if (!schedule) return;
   const date = parseDate(req.query);
-  const schedule = await calendars.current(options);
   res.json({
     date: date.toString(),
     isSchoolDay: schedule.isSchoolDay(date),
@@ -141,10 +205,10 @@ const handleScheduleFor = async (req, res) => {
   });
 };
 
-const handleNextSchoolDay = async (req, res) => {
-  const options = parseOptions(req.query);
+const handleNextSchoolDay = (req, res) => {
+  const schedule = scheduleOr400(req, res);
+  if (!schedule) return;
   const date = parseDate(req.query);
-  const schedule = await calendars.current(options);
   const next = schedule.nextSchoolDay(date);
   res.json({
     date: next.toString(),
@@ -152,10 +216,10 @@ const handleNextSchoolDay = async (req, res) => {
   });
 };
 
-const handlePreviousSchoolDay = async (req, res) => {
-  const options = parseOptions(req.query);
+const handlePreviousSchoolDay = (req, res) => {
+  const schedule = scheduleOr400(req, res);
+  if (!schedule) return;
   const date = parseDate(req.query);
-  const schedule = await calendars.current(options);
   const prev = schedule.previousSchoolDay(date);
   res.json({
     date: prev.toString(),
@@ -175,5 +239,5 @@ app.get('/api/status', handleStatus);
 
 app.listen(PORT, () => {
   console.log(`Bells API server on http://localhost:${PORT}`);
-  console.log(`Calendars: ${CALENDARS_PATH}`);
+  console.log(`Calendars: ${CALENDARS_PATH} (${[...registry.keys()].sort().join(', ')})`);
 });

@@ -30,7 +30,7 @@ ES modules bundled by esbuild. The entry point is `bells.js`; `out.js` is the co
 - `datetime.js` — Lightweight display utilities only (formatting, countdown strings); date/time logic lives in the library
 - `dom.js` — Thin DOM helpers (`$`, `$$`, element creation)
 - `bhs-calendars/` — Per-year JSON files (`2022-2023.json` … `2025-2026.json`) published as `@peterseibel/bhs-calendars` on npm; imported individually by `calendar.js`
-- `server/` — Express REST API server (`server/index.js`) wrapping `@peterseibel/bells` for HTTP access; has its own `package.json`. Endpoints: `GET /api/current`, `/api/schedule`, `/api/status`. All endpoints accept `role`, `includeTags`, `time`, and `date` query params. `PORT` and `CALENDARS_PATH` env vars configure the server.
+- `server/` — Express REST API server (`server/index.js`) wrapping `@peterseibel/bells` for HTTP access; has its own `package.json`. Endpoints: `GET /api/current`, `/api/schedule`, `/api/status`. All endpoints accept `calendar` (school id, default `bhs`), `role`, `includeTags`, `time`, and `date` query params. `PORT` and `CALENDARS_PATH` env vars configure the server.
 
 **`@peterseibel/bells` library (`libs/ts/`):** Published to npm. Handles all schedule logic: time parsing, schedule selection, overlap validation. Key exports:
 - `BellSchedule` — main class; `periodsForDate(instant)` returns periods for a given moment

@@ -15,8 +15,9 @@ splitting emits it as a fixed-name `temporal.js` chunk (precached by the
 service worker, published by the Makefile). `out.js` went 476 kB → 421 kB
 (Phase 1) → 240 kB (Phase 2), with the 188 kB chunk downloaded only by
 browsers without native Temporal. Note: the published `@peterseibel/bells`
-still declares the old peer dep until its next release, and the "stale server
-deps" refresh noted below is still outstanding.
+still declares the old peer dep until its next release. The "stale server
+deps" refresh noted below is done too (server now on bells ^0.9.0 /
+bhs-calendars ^2.12.0).
 
 ## The question
 
