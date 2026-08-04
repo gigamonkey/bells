@@ -26,7 +26,7 @@ import { dirname, join } from 'node:path';
 import { existsSync } from 'node:fs';
 import express from 'express';
 import cors from 'cors';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { Calendars } from '@peterseibel/bells/calendars';
 
 globalThis.Temporal = Temporal;

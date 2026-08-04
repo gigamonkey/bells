@@ -1,4 +1,4 @@
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { $ } from './dom.js';
 import { isTeacher } from './calendar.js';
 import { timestring, hhmmss } from './datetime.js';

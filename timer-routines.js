@@ -1,4 +1,4 @@
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 
 /*
  * Pure model for class-timer routines. A routine is an ordered list of labeled

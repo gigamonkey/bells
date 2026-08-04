@@ -5,11 +5,10 @@
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
-    "@js-temporal/polyfill": "^0.5.1",
     "@peterseibel/bells": "^0.9.0",
     "@peterseibel/bhs-calendars": "^2.11.1",
     "cors": "^2.8.6",
     "esbuild": "0.28.1",
-    "temporal-polyfill": "^0.3.2"
+    "temporal-polyfill": "^1.0.1"
   }
 }

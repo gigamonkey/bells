@@ -37,10 +37,9 @@
     "README.md"
   ],
   "peerDependencies": {
-    "@js-temporal/polyfill": ">=0.4"
+    "temporal-polyfill": ">=1"
   },
   "devDependencies": {
-    "@js-temporal/polyfill": "^0.5.1",
     "@types/node": "^25.9.2",
     "temporal-polyfill": "^1.0.1",
     "tsx": "^4.22.4",

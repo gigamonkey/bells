@@ -4,10 +4,10 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@js-temporal/polyfill": "^0.5.1",
     "@peterseibel/bells": "^0.2.0",
     "@peterseibel/bhs-calendars": "^2.0.0",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "temporal-polyfill": "^1.0.1"
   }
 }
