@@ -485,6 +485,7 @@ const update = () => {
   // scoped period (across the break) and is how you reach the routine editor.
   const summerInfo = bellSchedule.summerBounds(instant);
   if (isTimerMode()) {
+    $('#stop-sign').classList.remove('visible');
     renderTimer(t, instant, bellSchedule);
     if (summerInfo !== null) {
       updateYearProgress(summerInfo.start ? 1 : 0, 1);
@@ -494,6 +495,7 @@ const update = () => {
   } else if (summerInfo !== null) {
     $('#timer-main').style.display = 'none';
     $('#container').classList.remove('chunk-flash');
+    $('#stop-sign').classList.remove('visible');
     summerCountdown(instant, bellSchedule, summerInfo);
   } else {
     $('#timer-main').style.display = 'none';
@@ -578,16 +580,14 @@ const updateProgress = (t, instant, bellSchedule) => {
   const left = endMillis - tMillis;
   const inFirstTen = done < tenMinutes;
   const inLastTen = left < tenMinutes;
+  const stop = !isPassingPeriod && (inFirstTen || inLastTen);
 
   if (!isPassingPeriod) {
-    if (inFirstTen || inLastTen) {
-      color = 'rgba(255, 0, 0, 0.5)';
-    } else {
-      color = 'rgba(64, 0, 255, 0.25)';
-    }
+    color = stop ? 'rgba(255, 0, 0, 0.5)' : 'rgba(64, 0, 255, 0.25)';
   }
 
   $('#container').style.background = color;
+  $('#stop-sign').classList.toggle('visible', stop);
 
   $('#period').replaceChildren(periodName(interval), periodTimes(interval, bellSchedule.timezone));
 

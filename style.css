@@ -393,6 +393,26 @@ span.togo {
   }
 }
 
+/* Big watermark stop sign shown during the first/last ten minutes of a
+   period (whenever the background goes red). Fixed and centered so it sits
+   behind-ish the countdown text as a translucent overlay; pointer-events
+   none so it never intercepts clicks. */
+#stop-sign {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60vmin;
+  height: 60vmin;
+  color: rgba(255, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+#stop-sign.visible {
+  display: block;
+}
+
 #start-at-passing-row {
   padding: 0 20px 10px 20px;
 }
