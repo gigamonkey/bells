@@ -15,6 +15,8 @@ import {
   setExt,
   getStartAtFirstPassing,
   setStartAtFirstPassing,
+  getShowStopSign,
+  setShowStopSign,
   toggleTeacher,
   isTeacher,
 } from './calendar.js';
@@ -241,6 +243,13 @@ const setupConfigPanel = () => {
   startAtPassing.checked = getStartAtFirstPassing();
   startAtPassing.onchange = () => {
     setStartAtFirstPassing(startAtPassing.checked);
+    update();
+  };
+
+  const showStopSign = $('#show-stop-sign');
+  showStopSign.checked = getShowStopSign();
+  showStopSign.onchange = () => {
+    setShowStopSign(showStopSign.checked);
     update();
   };
 
@@ -587,7 +596,7 @@ const updateProgress = (t, instant, bellSchedule) => {
   }
 
   $('#container').style.background = color;
-  $('#stop-sign').classList.toggle('visible', stop);
+  $('#stop-sign').classList.toggle('visible', stop && getShowStopSign());
 
   $('#period').replaceChildren(periodName(interval), periodTimes(interval, bellSchedule.timezone));
 

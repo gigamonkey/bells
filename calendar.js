@@ -69,6 +69,14 @@ const setStartAtFirstPassing = (value) => {
   saveConfiguration();
 };
 
+// On by default: only an explicit false turns it off.
+const getShowStopSign = () => otherData?.showStopSign !== false;
+
+const setShowStopSign = (value) => {
+  otherData.showStopSign = value;
+  saveConfiguration();
+};
+
 const setZero = (day, value) => {
   extraPeriods[day].zero = value;
   saveConfiguration();
@@ -189,6 +197,8 @@ export {
   setExt,
   getStartAtFirstPassing,
   setStartAtFirstPassing,
+  getShowStopSign,
+  setShowStopSign,
   toggleTeacher,
   isTeacher,
 };

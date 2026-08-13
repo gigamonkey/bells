@@ -413,11 +413,11 @@ span.togo {
   display: block;
 }
 
-#start-at-passing-row {
+.config-option-row {
   padding: 0 20px 10px 20px;
 }
 
-#start-at-passing-row label {
+.config-option-row label {
   display: flex;
   align-items: center;
   gap: 8px;
