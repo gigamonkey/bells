@@ -69,8 +69,7 @@ const setStartAtFirstPassing = (value) => {
   saveConfiguration();
 };
 
-// On by default: only an explicit false turns it off.
-const getShowStopSign = () => otherData?.showStopSign !== false;
+const getShowStopSign = () => !!otherData?.showStopSign;
 
 const setShowStopSign = (value) => {
   otherData.showStopSign = value;
