@@ -13,6 +13,8 @@ import {
   setZero,
   setSeventh,
   setExt,
+  getStartAtFirstPassing,
+  setStartAtFirstPassing,
   toggleTeacher,
   isTeacher,
 } from './calendar.js';
@@ -99,6 +101,71 @@ const periodTimeLeftInYear = (instant, interval, bellSchedule) => {
 let togo = true;
 
 /**
+ * The passing period that would precede the first period of `date`'s
+ * schedule if there were a period before it. The schedule data doesn't
+ * define one, so we synthesize it: its length is the smallest non-zero gap
+ * between consecutive periods in the day's schedule (6 minutes on a normal
+ * day, 10 on finals days; the smallest so that larger gaps like the one
+ * after a late-start staff meeting don't win) and it ends where the first
+ * period starts. Null if the date has no schedule or the schedule has no
+ * gaps to infer from.
+ */
+const firstPassingBefore = (bellSchedule, date) => {
+  const periods = bellSchedule.scheduleFor(date);
+  if (periods.length === 0) return null;
+  let gap = 0;
+  for (let i = 1; i < periods.length; i++) {
+    const g = periods[i].start.epochMilliseconds - periods[i - 1].end.epochMilliseconds;
+    if (g > 0 && (gap === 0 || g < gap)) gap = g;
+  }
+  if (gap === 0) return null;
+  const first = periods[0];
+  return {
+    name: `Passing to ${first.name}`,
+    start: first.start.subtract({ milliseconds: gap }),
+    end: first.start,
+  };
+};
+
+/**
+ * A plain object that quacks like the library's Interval class.
+ */
+const makeInterval = (name, start, end, duringSchool, type) => ({
+  name,
+  start,
+  end,
+  duringSchool,
+  type,
+  tags: [],
+  left: (now) => now.until(end),
+  done: (now) => start.until(now),
+});
+
+/**
+ * The interval to display: the library's current interval, except that with
+ * "Start day at first passing period" enabled, the last few minutes before
+ * the first period of a school day become a passing period (so teachers can
+ * be ready to greet students when it starts) and any out-of-school interval
+ * leading up to it counts down to the passing period's start instead of the
+ * first period's.
+ */
+const effectiveInterval = (instant, bellSchedule) => {
+  const interval = bellSchedule.currentInterval(instant);
+  if (!interval || interval.duringSchool || !getStartAtFirstPassing()) return interval;
+
+  // Out-of-school intervals (before-school, after-school, break) all end at
+  // the start of the next school day's first period.
+  const date = interval.end.toZonedDateTimeISO(bellSchedule.timezone).toPlainDate();
+  const passing = firstPassingBefore(bellSchedule, date);
+  if (!passing || passing.end.epochMilliseconds !== interval.end.epochMilliseconds) return interval;
+
+  if (Temporal.Instant.compare(instant, passing.start) >= 0) {
+    return makeInterval(passing.name, passing.start, passing.end, true, 'passing');
+  }
+  return makeInterval(interval.name, interval.start, passing.start, false, interval.type);
+};
+
+/**
  * To handle local PWA install state
  */
 let installPrompt = null;
@@ -169,6 +236,13 @@ const setupConfigPanel = () => {
 
     day++;
   }
+
+  const startAtPassing = $('#start-at-passing');
+  startAtPassing.checked = getStartAtFirstPassing();
+  startAtPassing.onchange = () => {
+    setStartAtFirstPassing(startAtPassing.checked);
+    update();
+  };
 
   updateOptionalPeriodVisibility();
 };
@@ -483,7 +557,7 @@ const updateProgress = (t, instant, bellSchedule) => {
   $('#noCalendar').style.display = 'none';
   $('#summer').style.display = 'none';
   $('#main').style.display = 'block';
-  const interval = bellSchedule.currentInterval(instant);
+  const interval = effectiveInterval(instant, bellSchedule);
 
   if (!interval) {
     // Shouldn't happen during normal school year, but handle gracefully.
@@ -533,11 +607,19 @@ const updateProgress = (t, instant, bellSchedule) => {
 const updateTodayProgress = (t, instant, bellSchedule) => {
   const bounds = bellSchedule.currentDayBounds(instant);
   if (!bounds) return;
-  const startMillis = toMillis(bounds.start);
+  let start = bounds.start;
+  if (getStartAtFirstPassing()) {
+    const date = instant.toZonedDateTimeISO(bellSchedule.timezone).toPlainDate();
+    const passing = firstPassingBefore(bellSchedule, date);
+    if (passing && passing.end.epochMilliseconds === start.epochMilliseconds) {
+      start = passing.start;
+    }
+  }
+  const startMillis = toMillis(start);
   const endMillis = toMillis(bounds.end);
   const tMillis = t.getTime();
   $('#today').innerHTML =
-    hhmmss(togo ? instant.until(bounds.end) : bounds.start.until(instant)) + ' ' + (togo ? 'to go' : 'done');
+    hhmmss(togo ? instant.until(bounds.end) : start.until(instant)) + ' ' + (togo ? 'to go' : 'done');
   updateProgressBar('todaybar', startMillis, endMillis, tMillis);
 };
 
@@ -585,7 +667,7 @@ const updateYearProgressFromSchedule = (instant, bellSchedule) => {
 };
 
 const updateCountdown = (t, instant, bellSchedule) => {
-  const interval = bellSchedule.currentInterval(instant);
+  const interval = effectiveInterval(instant, bellSchedule);
   const inSchool = interval ? interval.duringSchool : false;
   const left = bellSchedule.schoolDaysLeft(instant);
   const schoolTimeLeft = bellSchedule.schoolTimeLeft(instant);

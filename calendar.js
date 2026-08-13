@@ -62,6 +62,13 @@ const getExt = (day) => extraPeriods[day].ext;
 
 const isTeacher = () => otherData?.isTeacher;
 
+const getStartAtFirstPassing = () => !!otherData?.startAtFirstPassing;
+
+const setStartAtFirstPassing = (value) => {
+  otherData.startAtFirstPassing = value;
+  saveConfiguration();
+};
+
 const setZero = (day, value) => {
   extraPeriods[day].zero = value;
   saveConfiguration();
@@ -180,6 +187,8 @@ export {
   setZero,
   setSeventh,
   setExt,
+  getStartAtFirstPassing,
+  setStartAtFirstPassing,
   toggleTeacher,
   isTeacher,
 };

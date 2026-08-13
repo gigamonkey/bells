@@ -393,6 +393,17 @@ span.togo {
   }
 }
 
+#start-at-passing-row {
+  padding: 0 20px 10px 20px;
+}
+
+#start-at-passing-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
 #reload-app-container {
   display: none;
   text-align: center;
