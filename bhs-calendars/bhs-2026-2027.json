@@ -337,6 +337,66 @@
         "teachers": true
       }
     ],
+    "2026-08-26": [
+      {
+        "name": "Period 0",
+        "start": "7:26",
+        "end": "8:24",
+        "tags": [
+          "optional",
+          "zero"
+        ]
+      },
+      {
+        "name": "Period 1",
+        "start": "8:30",
+        "end": "9:12"
+      },
+      {
+        "name": "Period 2A",
+        "start": "9:18",
+        "end": "10:26"
+      },
+      {
+        "name": "Period 2B",
+        "start": "10:32",
+        "end": "11:40"
+      },
+      {
+        "name": "Period 3",
+        "start": "11:46",
+        "end": "12:28"
+      },
+      {
+        "name": "Lunch",
+        "start": "12:28",
+        "end": "1:08"
+      },
+      {
+        "name": "Period 4",
+        "start": "1:14",
+        "end": "1:56"
+      },
+      {
+        "name": "Period 5",
+        "start": "2:02",
+        "end": "2:44"
+      },
+      {
+        "name": "Period 6",
+        "start": "2:50",
+        "end": "3:33"
+      },
+      {
+        "name": "Period 7",
+        "start": "3:39",
+        "end": "4:37",
+        "tags": [
+          "optional",
+          "seventh"
+        ]
+      }
+    ],
     "2026-12-16": "EXAMS 1",
     "2026-12-17": "EXAMS 2",
     "2026-12-18": "EXAMS 3",
