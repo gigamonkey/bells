@@ -1,0 +1,22 @@
+{
+  "named-midweek-interval": {
+    "name": "Veterans Day!",
+    "type": "break",
+    "start": "2025-11-10T19:37:00Z",
+    "end": "2025-11-12T16:30:00Z",
+    "duringSchool": false,
+    "tags": []
+  },
+  "named-midweek-period": null,
+  "named-midweek-schedule": [],
+  "named-midweek-day-bounds": null,
+  "unnamed-midweek-interval": {
+    "name": "Mid-week vacation?!",
+    "type": "break",
+    "start": "2026-01-13T18:37:00Z",
+    "end": "2026-01-15T16:30:00Z",
+    "duringSchool": false,
+    "tags": []
+  },
+  "unnamed-midweek-period": null
+}

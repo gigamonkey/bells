@@ -164,7 +164,10 @@ class Schedule:
         elif includes_weekend(start, end, tz):
             return "Long weekend" if days > 3 else "Weekend"
         else:
-            return "Mid-week vacation?"
+            # No weekend in the span, so the days off are all holidays and the
+            # first one after ``start`` is inside the break.
+            next_holiday = self.calendar.next_holiday(start)
+            return self.calendar.break_names.get(next_holiday.isoformat()) or "Mid-week vacation?"
 
     def has_period(self, p: Period) -> bool:
         """Whether a period should be included given the current date/config."""

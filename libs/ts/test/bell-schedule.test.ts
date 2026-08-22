@@ -313,3 +313,46 @@ describe('currentInterval and periodAt on weekends', () => {
     assert.strictEqual(makeLateBellSchedule().periodAt(laInstant('2025-08-17T12:00:00')), null);
   });
 });
+
+// ─── mid-week holidays ────────────────────────────────────────────────────────
+
+describe('mid-week holidays', () => {
+  const laInstant = (isoLocal) =>
+    Temporal.PlainDateTime.from(isoLocal).toZonedDateTime('America/Los_Angeles').toInstant();
+
+  const MIDWEEK_CALENDAR_DATA = {
+    ...CALENDAR_DATA,
+    holidays: [...CALENDAR_DATA.holidays, '2025-11-11'], // a Tuesday
+    breakNames: { '2025-11-11': 'Veterans Day' },
+  };
+
+  const makeMidweekBellSchedule = () =>
+    new BellSchedule([MIDWEEK_CALENDAR_DATA], { role: 'student', includeTags: {} });
+
+  it('currentInterval → the named break', () => {
+    const interval = makeMidweekBellSchedule().currentInterval(laInstant('2025-11-11T12:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Veterans Day!');
+  });
+
+  it('periodAt → null', () => {
+    assert.strictEqual(makeMidweekBellSchedule().periodAt(laInstant('2025-11-11T12:00:00')), null);
+  });
+
+  it('scheduleFor → no periods', () => {
+    assert.deepStrictEqual(makeMidweekBellSchedule().scheduleFor(pd('2025-11-11')), []);
+  });
+
+  it('currentDayBounds → null', () => {
+    assert.strictEqual(
+      makeMidweekBellSchedule().currentDayBounds(laInstant('2025-11-11T12:00:00')),
+      null,
+    );
+  });
+
+  it("periodsForDate rolls to the next school day's periods", () => {
+    const periods = makeMidweekBellSchedule().periodsForDate(laInstant('2025-11-11T12:00:00'));
+    const startDate = periods[0].start.toZonedDateTimeISO('America/Los_Angeles').toPlainDate();
+    assert.strictEqual(startDate.toString(), '2025-11-12');
+  });
+});

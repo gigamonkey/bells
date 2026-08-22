@@ -446,9 +446,12 @@ describe('Schedule.currentInterval on non-school days', () => {
     holidays: [
       '2025-09-01', // Labor Day (Monday)
       '2025-10-31', // a Friday holiday → long weekend
+      '2025-11-11', // a Tuesday holiday → named mid-week break
       '2025-11-24', '2025-11-25', '2025-11-26', '2025-11-27', '2025-11-28', // Thanksgiving week
+      '2026-01-14', // a Wednesday holiday with no breakNames entry
     ],
     breakNames: {
+      '2025-11-11': 'Veterans Day',
       '2025-11-24': 'Thanksgiving Break',
     },
   };
@@ -503,6 +506,21 @@ describe('Schedule.currentInterval on non-school days', () => {
     // Thu 10-30 ends with Period Ext 17:09; Mon 11-03 is LATE_START, starts 10:00.
     assert.strictEqual(interval.start.toString(), laInstant('2025-10-30T17:09:00').toString());
     assert.strictEqual(interval.end.toString(), laInstant('2025-11-03T10:00:00').toString());
+  });
+
+  it('a mid-week holiday with a breakNames entry → named break', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-11-11T12:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Veterans Day!');
+    // Mon 11-10 is LATE_START, ends 15:33; Wed 11-12 is NORMAL, starts 08:30.
+    assert.strictEqual(interval.start.toString(), laInstant('2025-11-10T15:33:00').toString());
+    assert.strictEqual(interval.end.toString(), laInstant('2025-11-12T08:30:00').toString());
+  });
+
+  it('a mid-week holiday with no breakNames entry → Mid-week vacation?', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2026-01-14T12:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Mid-week vacation?!');
   });
 
   it('regression: mid-Thanksgiving-week Thursday still gets the named break', () => {

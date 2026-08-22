@@ -544,7 +544,10 @@ class Schedule {
     } else if (includesWeekend(start, end, tz)) {
       return days > 3 ? 'Long weekend' : 'Weekend';
     } else {
-      return 'Mid-week vacation?';
+      // No weekend in the span, so the days off are all holidays and the
+      // first one after `start` is inside the break.
+      const nextHoliday = this.calendar.nextHoliday(start);
+      return this.calendar.breakNames[nextHoliday.toString()] || 'Mid-week vacation?';
     }
   }
 

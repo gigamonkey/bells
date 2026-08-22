@@ -251,7 +251,11 @@ public final class Schedule {
     } else if (DateTimes.includesWeekend(start, end, tz)) {
       return days > 3 ? "Long weekend" : "Weekend";
     } else {
-      return "Mid-week vacation?";
+      // No weekend in the span, so the days off are all holidays and the
+      // first one after `start` is inside the break.
+      LocalDate nextHoliday = calendar.nextHoliday(start);
+      String name = calendar.breakNames().get(nextHoliday.toString());
+      return (name == null || name.isEmpty()) ? "Mid-week vacation?" : name;
     }
   }
 }

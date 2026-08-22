@@ -1,0 +1,19 @@
+{
+  "description": "Single mid-week holidays: the break interval is named from breakNames when the holiday has an entry (Veterans Day, Tue 2025-11-11), falls back to 'Mid-week vacation?' when it doesn't (Wed 2026-01-14), and the day reports no periods.",
+  "calendars": ["synthetic-midweek.json"],
+  "options": {},
+  "queries": [
+    { "id": "named-midweek-interval", "method": "currentInterval",
+      "args": { "instant": "2025-11-11T20:00:00Z" } },
+    { "id": "named-midweek-period", "method": "periodAt",
+      "args": { "instant": "2025-11-11T20:00:00Z" } },
+    { "id": "named-midweek-schedule", "method": "scheduleFor",
+      "args": { "date": "2025-11-11" } },
+    { "id": "named-midweek-day-bounds", "method": "currentDayBounds",
+      "args": { "instant": "2025-11-11T20:00:00Z" } },
+    { "id": "unnamed-midweek-interval", "method": "currentInterval",
+      "args": { "instant": "2026-01-14T20:00:00Z" } },
+    { "id": "unnamed-midweek-period", "method": "periodAt",
+      "args": { "instant": "2026-01-14T20:00:00Z" } }
+  ]
+}
