@@ -185,14 +185,15 @@ def noon(d: date) -> datetime:
     return datetime.combine(d, time(hour=12, minute=0, second=0))
 
 
-def days_between(a: datetime, b: datetime) -> int:
+def days_between(a: datetime, b: datetime, tz: Optional[str] = None) -> int:
     """Number of calendar days between two instants.
 
-    Compares the two instants as dates in UTC to avoid DST edge cases, mirroring
+    Compares the two instants as dates in ``tz`` (UTC when omitted), mirroring
     the JS implementation.
     """
-    date_a = a.astimezone(timezone.utc).date()
-    date_b = b.astimezone(timezone.utc).date()
+    zone = ZoneInfo(tz) if tz else timezone.utc
+    date_a = a.astimezone(zone).date()
+    date_b = b.astimezone(zone).date()
     return (date_b - date_a).days
 
 

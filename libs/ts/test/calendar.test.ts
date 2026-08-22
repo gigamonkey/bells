@@ -435,6 +435,97 @@ describe('Schedule.currentInterval', () => {
   });
 });
 
+// ─── Schedule.currentInterval on non-school days ──────────────────────────────
+
+// A schedule whose day can end after 17:00 PDT (Period Ext ends 17:09, which is
+// past midnight UTC) exposed a bug where the weekend-gap computation, done in
+// UTC, came up short and weekends fell through to phantom weekday periods.
+describe('Schedule.currentInterval on non-school days', () => {
+  const BREAKS_CALENDAR_DATA = {
+    ...CALENDAR_DATA,
+    holidays: [
+      '2025-09-01', // Labor Day (Monday)
+      '2025-10-31', // a Friday holiday → long weekend
+      '2025-11-24', '2025-11-25', '2025-11-26', '2025-11-27', '2025-11-28', // Thanksgiving week
+    ],
+    breakNames: {
+      '2025-11-24': 'Thanksgiving Break',
+    },
+  };
+
+  // Student with the Ext period enabled: Friday's day ends 17:09 PDT (00:09 UTC).
+  const makeExtCalendar = () =>
+    new Calendar(BREAKS_CALENDAR_DATA, { role: 'student', includeTags: ['ext'] });
+
+  // 2025-08-16/17 are a plain Saturday/Sunday; Fri 08-15 and Mon 08-18 are school days.
+
+  it('Saturday morning (09:00) → Weekend break, not a phantom period', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-08-16T09:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Weekend!');
+  });
+
+  it('Saturday noon (12:00) → Weekend break, not phantom Lunch', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-08-16T12:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Weekend!');
+  });
+
+  it('Saturday evening (20:00) → Weekend break, not after-school', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-08-16T20:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Weekend!');
+  });
+
+  it('Sunday morning (09:00) → Weekend break', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-08-17T09:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Weekend!');
+  });
+
+  it('Weekend break spans previous school day end → next school day start', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-08-16T09:00:00'));
+    // Friday ends with Period Ext at 17:09; Monday is LATE_START, first period 10:00.
+    assert.strictEqual(interval.start.toString(), laInstant('2025-08-15T17:09:00').toString());
+    assert.strictEqual(interval.end.toString(), laInstant('2025-08-18T10:00:00').toString());
+  });
+
+  it('a Friday holiday (2025-10-31) at noon → Long weekend break', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-10-31T12:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Long weekend!');
+  });
+
+  it('the Saturday of a Friday-holiday weekend → one merged Long weekend break', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-11-01T12:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Long weekend!');
+    // Thu 10-30 ends with Period Ext 17:09; Mon 11-03 is LATE_START, starts 10:00.
+    assert.strictEqual(interval.start.toString(), laInstant('2025-10-30T17:09:00').toString());
+    assert.strictEqual(interval.end.toString(), laInstant('2025-11-03T10:00:00').toString());
+  });
+
+  it('regression: mid-Thanksgiving-week Thursday still gets the named break', () => {
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-11-27T12:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Thanksgiving Break!');
+  });
+
+  it('regression: weekends still work with no optional periods enabled', () => {
+    const cal = new Calendar(BREAKS_CALENDAR_DATA, { role: 'student', includeTags: {} });
+    const interval = cal.currentInterval(laInstant('2025-08-16T09:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Weekend!');
+  });
+
+  it('after school on a plain Thursday still runs to Friday morning', () => {
+    // 2025-08-21 is a Thursday; not a long gap, so no break interval.
+    const interval = makeExtCalendar().currentInterval(laInstant('2025-08-21T20:00:00'));
+    assert.strictEqual(interval.type, 'after-school');
+    assert.strictEqual(interval.end.toString(), laInstant('2025-08-22T08:30:00').toString());
+  });
+});
+
 // ─── Interval.left / Interval.done ───────────────────────────────────────────
 
 describe('Interval.left and Interval.done', () => {

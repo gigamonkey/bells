@@ -143,8 +143,14 @@ class Schedule:
         if self.not_in_school(instant):
             prev = self.calendar.previous_school_day_end(instant)
             nxt = self.calendar.next_school_day_start(instant)
-            days = days_between(prev, nxt)
-            if days >= 3:
+            # Gap measured in the school's timezone: a day ending after
+            # midnight UTC must not shrink the gap below the long-gap threshold.
+            days = days_between(prev, nxt, self.calendar.timezone)
+            # A non-school day is always a break (this date's schedule is just
+            # the weekday fallback); a school day outside school hours is a
+            # break only when the gap to the next school day is long (e.g.
+            # Friday evening).
+            if not self.calendar.is_school_day(self.date) or days >= 3:
                 name = self._break_name(days, prev, nxt)
                 return Interval(f"{name}!", prev, nxt, False, "break", [])
         return None

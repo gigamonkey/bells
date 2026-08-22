@@ -227,8 +227,13 @@ public final class Schedule {
     if (notInSchool(instant)) {
       Instant prev = calendar.previousSchoolDayEnd(instant);
       Instant next = calendar.nextSchoolDayStart(instant);
-      int days = DateTimes.daysBetween(prev, next);
-      if (days >= 3) {
+      // Gap measured in the school's timezone: a day ending after midnight UTC
+      // must not shrink the gap below the long-gap threshold.
+      int days = DateTimes.daysBetween(prev, next, calendar.timezone());
+      // A non-school day is always a break (this date's schedule is just the
+      // weekday fallback); a school day outside school hours is a break only
+      // when the gap to the next school day is long (e.g. Friday evening).
+      if (!calendar.isSchoolDay(date) || days >= 3) {
         String breakName = breakName(days, prev, next);
         return new Interval(breakName + "!", prev, next, false, IntervalType.BREAK, List.of());
       }

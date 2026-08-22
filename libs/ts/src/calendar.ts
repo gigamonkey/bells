@@ -522,8 +522,13 @@ class Schedule {
     if (this.notInSchool(instant)) {
       const prev = this.calendar.previousSchoolDayEnd(instant);
       const next = this.calendar.nextSchoolDayStart(instant);
-      const days = daysBetween(prev, next);
-      if (days >= 3) {
+      // Gap measured in the school's timezone: a day ending after midnight UTC
+      // must not shrink the gap below the long-gap threshold.
+      const days = daysBetween(prev, next, this.calendar.timezone);
+      // A non-school day is always a break (this date's schedule is just the
+      // weekday fallback); a school day outside school hours is a break only
+      // when the gap to the next school day is long (e.g. Friday evening).
+      if (!this.calendar.isSchoolDay(this.date) || days >= 3) {
         const name = this.#breakName(days, prev, next);
         return new Interval(`${name}!`, prev, next, false, 'break', []);
       }

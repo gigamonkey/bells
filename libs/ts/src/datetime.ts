@@ -117,13 +117,16 @@ export const resolveScheduleTimes = (periods: PeriodData[]): ResolvedPeriod[] =>
 };
 
 /**
- * Number of calendar days between two Temporal.Instants.
- * Uses noon to avoid DST edge cases.
+ * Number of calendar days between two Temporal.Instants, comparing them as
+ * dates in the given timezone (UTC by default).
  */
-export const daysBetween = (a: Temporal.Instant, b: Temporal.Instant): number => {
-  // Compare as PlainDate in UTC to avoid DST issues.
-  const dateA = a.toZonedDateTimeISO('UTC').toPlainDate();
-  const dateB = b.toZonedDateTimeISO('UTC').toPlainDate();
+export const daysBetween = (
+  a: Temporal.Instant,
+  b: Temporal.Instant,
+  timezone: string = 'UTC',
+): number => {
+  const dateA = a.toZonedDateTimeISO(timezone).toPlainDate();
+  const dateB = b.toZonedDateTimeISO(timezone).toPlainDate();
   return dateA.until(dateB).days;
 };
 

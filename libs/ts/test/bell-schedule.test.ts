@@ -276,3 +276,40 @@ describe('periodsForDate', () => {
     assert.strictEqual(startDate.toString(), '2025-08-20');
   });
 });
+
+// ─── currentInterval / periodAt on weekends ───────────────────────────────────
+
+describe('currentInterval and periodAt on weekends', () => {
+  const laInstant = (isoLocal) =>
+    Temporal.PlainDateTime.from(isoLocal).toZonedDateTime('America/Los_Angeles').toInstant();
+
+  // A school day ending after 17:00 PDT crosses midnight UTC, which used to
+  // defeat the weekend-gap check and surface phantom weekday periods.
+  const LATE_DAY_CALENDAR_DATA = {
+    ...CALENDAR_DATA,
+    schedules: {
+      NORMAL: [
+        { name: 'Period 1', start: '8:30', end: '9:28' },
+        { name: 'Period 2', start: '9:34', end: '17:30' },
+      ],
+      LATE_START: CALENDAR_DATA.schedules.LATE_START,
+    },
+  };
+
+  const makeLateBellSchedule = () =>
+    new BellSchedule([LATE_DAY_CALENDAR_DATA], { role: 'student', includeTags: {} });
+
+  it('currentInterval on Saturday morning → Weekend break', () => {
+    const interval = makeLateBellSchedule().currentInterval(laInstant('2025-08-16T09:00:00'));
+    assert.strictEqual(interval.type, 'break');
+    assert.strictEqual(interval.name, 'Weekend!');
+  });
+
+  it('periodAt on Saturday morning → null', () => {
+    assert.strictEqual(makeLateBellSchedule().periodAt(laInstant('2025-08-16T09:00:00')), null);
+  });
+
+  it('periodAt on Sunday noon → null', () => {
+    assert.strictEqual(makeLateBellSchedule().periodAt(laInstant('2025-08-17T12:00:00')), null);
+  });
+});

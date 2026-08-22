@@ -216,8 +216,21 @@ public final class DateTimes {
    * @return whole days from {@code a} to {@code b} (negative if {@code b} precedes {@code a})
    */
   public static int daysBetween(Instant a, Instant b) {
-    LocalDate dateA = a.atZone(ZoneOffset.UTC).toLocalDate();
-    LocalDate dateB = b.atZone(ZoneOffset.UTC).toLocalDate();
+    return daysBetween(a, b, ZoneOffset.UTC);
+  }
+
+  /**
+   * Number of calendar days between two instants, comparing them as dates in the given
+   * timezone (matching the JS implementation).
+   *
+   * @param a first instant
+   * @param b second instant
+   * @param timezone the timezone whose calendar dates to compare
+   * @return whole days from {@code a} to {@code b} (negative if {@code b} precedes {@code a})
+   */
+  public static int daysBetween(Instant a, Instant b, ZoneId timezone) {
+    LocalDate dateA = a.atZone(timezone).toLocalDate();
+    LocalDate dateB = b.atZone(timezone).toLocalDate();
     return (int) ChronoUnit.DAYS.between(dateA, dateB);
   }
 
