@@ -21,6 +21,11 @@ VERSION := patch
 
 all: pretty lint
 
+# Always regenerate: version.sh reflects HEAD plus dirty/untracked working-tree
+# state, which can't be expressed as Make prerequisites. Without .PHONY, Make
+# only creates version.js once and then treats it as permanently up-to-date,
+# freezing the sha shown in the bottom-left corner.
+.PHONY: version.js
 version.js:
 	echo "export const version = \"$$(./version.sh)\";" > version.js
 
