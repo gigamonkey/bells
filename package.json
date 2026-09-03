@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "@peterseibel/bells": "^0.11.0",
-    "@peterseibel/bhs-calendars": "^2.14.0",
+    "@peterseibel/bhs-calendars": "^2.15.0",
     "cors": "^2.8.6",
     "esbuild": "0.28.2",
     "temporal-polyfill": "^1.0.4"
