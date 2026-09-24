@@ -178,10 +178,14 @@ span.togo {
   /* max-width: 90vw;/ */
   width: 40dvw;
   min-width: 320px;
+  /* Fit within the visible viewport (dvh) so tall content scrolls instead of
+     being clipped by the phone browser's toolbar; vh values are fallbacks. */
   max-height: 80vh;
+  max-height: calc(85dvh - 16px);
   overflow: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   margin-top: 15vh;
+  margin-top: 15dvh;
 }
 
 .popup-close {
