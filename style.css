@@ -163,7 +163,11 @@ span.togo {
   background: rgba(0, 0, 0, 0.4);
   z-index: 100;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
+  /* Breathing room the popup can never grow into; with max-height: 100% on
+     the popup this is what keeps a tall popup scrolling inside the screen. */
+  padding: 24px 16px;
+  box-sizing: border-box;
 }
 
 .popup-overlay.active {
@@ -178,14 +182,12 @@ span.togo {
   /* max-width: 90vw;/ */
   width: 40dvw;
   min-width: 320px;
-  /* Fit within the visible viewport (dvh) so tall content scrolls instead of
-     being clipped by the phone browser's toolbar; vh values are fallbacks. */
-  max-height: 80vh;
-  max-height: calc(85dvh - 16px);
+  /* The overlay (fixed, padded) defines the available space, so 100% here
+     means "the visible viewport minus the overlay's padding". */
+  max-height: 100%;
+  box-sizing: border-box;
   overflow: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  margin-top: 15vh;
-  margin-top: 15dvh;
 }
 
 .popup-close {
