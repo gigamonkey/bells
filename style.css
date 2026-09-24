@@ -181,7 +181,11 @@ span.togo {
   position: relative;
   /* max-width: 90vw;/ */
   width: 40dvw;
-  min-width: 320px;
+  /* 100% caps keep the popup inside the overlay's padding on narrow
+     screens; the 360px floor is the old 320px content-box width plus the
+     padding that border-box sizing now counts inside it. */
+  min-width: min(360px, 100%);
+  max-width: 100%;
   /* The overlay (fixed, padded) defines the available space, so 100% here
      means "the visible viewport minus the overlay's padding". */
   max-height: 100%;
@@ -224,6 +228,10 @@ span.togo {
 
 #calendar-select-row select {
   flex: 1;
+  /* Flex items refuse to shrink below their content width by default
+     (min-width: auto); without this the select overflows the popup when
+     its widest option is wider than the available space. */
+  min-width: 0;
   padding: 6px 8px;
   font-size: 14px;
 }
@@ -284,7 +292,7 @@ span.togo {
 #popup-qr .popup {
   padding: 10px;
   aspect-ratio: 1;
-  min-width: 320px;
+  min-width: min(320px, 100%);
 }
 
 #qr-code {
