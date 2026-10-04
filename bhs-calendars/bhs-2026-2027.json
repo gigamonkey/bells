@@ -592,6 +592,44 @@
       }
     ],
     "2026-09-24": "BACK TO SCHOOL",
+    "2026-10-05": [
+      {
+        "name": "Rotation Block #1",
+        "start": "8:15",
+        "end": "9:30",
+        "teachers": true
+      },
+      {
+        "name": "Rotation Block #2",
+        "start": "9:40",
+        "end": "10:55",
+        "teachers": true
+      },
+      {
+        "name": "Department Meeting",
+        "start": "11:05",
+        "end": "12:20",
+        "teachers": true
+      },
+      {
+        "name": "Lunch (on your own)",
+        "start": "12:20",
+        "end": "1:20",
+        "teachers": true
+      },
+      {
+        "name": "Classroom Environments and Controversial Issues",
+        "start": "1:25",
+        "end": "2:30",
+        "teachers": true
+      },
+      {
+        "name": "ASCIP Online Trainings",
+        "start": "2:40",
+        "end": "3:33",
+        "teachers": true
+      }
+    ],
     "2026-12-16": "EXAMS 1",
     "2026-12-17": "EXAMS 2",
     "2026-12-18": "EXAMS 3",
